@@ -1,5 +1,3 @@
----
-title: "Exploring Copilot Configuration"
 lab_number: 1
 pace:
   presenter_minutes: 4
@@ -18,6 +16,7 @@ References:
 - [Agent skills](https://docs.github.com/en/copilot/concepts/agents/about-agent-skills)
 - [Custom instructions](https://docs.github.com/en/copilot/how-tos/copilot-on-github/customize-copilot/add-custom-instructions/add-repository-instructions)
 - [Prompt files](https://docs.github.com/en/copilot/tutorials/customization-library/prompt-files)
+- [Creating extensions for GitHub Copilot CLI](https://docs.github.com/en/copilot/tutorials/create-an-extension)
 
 ## 1.0a Copilot CLI currency (2026 refresh)
 
@@ -32,10 +31,48 @@ References:
 | **Parallel subagents** | `/fleet` | Running independent research or implementation threads in one session. |
 | **Plan mode vs autopilot mode** | `Shift+Tab` (plan mode) (review each step) vs autopilot mode (batch execute) | Plan mode for exploratory/risky work; autopilot mode for scripted, well-understood tasks. |
 | **Mid-session model switch** | `/model <tier-or-id>` | Downshift to `models.cheap` in the registry for routine edits; upshift to `models.premium` for deep reasoning. |
-| **Local tool discovery** | `extensions_manage` MCP tool — operation one of `list` \| `inspect` \| `scaffold` \| `guide` (model-side tool call, **not** a slash command) | Inspecting which extensions are loaded — the in-repo analogue of a marketplace. Ask Copilot e.g. *"run `extensions_manage` with operation `list`"*. |
+| **Local tool discovery (experimental)** | Start with `copilot --experimental`, then ask the model to call `extensions_manage` with operation `list` \| `inspect` \| `scaffold` \| `guide`. This is a model-side tool call, **not** a slash command. | Inspecting which extensions are loaded — the in-repo analogue of a marketplace. |
+| **Local discovery (user-facing alternative)** | `/skills`, `/plugin`, and `/mcp` | Browse and manage the skills, plugins, and MCP servers available to you without using the experimental `extensions_manage` tool. |
 
 *Lab 11 builds an enterprise plugin that publishes to a private
 `COPILOT_PLUGIN_REGISTRIES` registry using exactly this surface.*
+
+### Enable local extension discovery
+
+Copilot CLI extensions are experimental. A normal `copilot` session may report
+that `extensions_manage` is unavailable. Start a new session with experimental
+features enabled:
+
+🖥️ **At the PowerShell prompt (outside Copilot CLI):**
+
+```powershell
+cd C:\Kanan\workshop\brother_oct\day-in-the-life-copilot-lab
+copilot --experimental
+```
+
+Then ask Copilot in natural language:
+
+```text
+Use the extensions_manage tool with operation "list" and show me the results.
+```
+
+Do **not** enter `/extensions_manage`; there is no slash command with that name.
+If you started the CLI before enabling experimental features, exit with
+`/exit`, restart it with `copilot --experimental`, and retry. You can also run
+`/clear` in the experimental session to reload extensions from disk.
+
+If the tool is still unavailable, verify at the PowerShell prompt that your
+installation supports the flag:
+
+```powershell
+copilot --help | Select-String experimental
+```
+
+An organization policy or a particular CLI distribution may prevent the
+experimental tool from loading. In that case, use `/skills`, `/plugin`, and
+`/mcp` for user-facing discovery, and follow the
+[official extension tutorial](https://docs.github.com/en/copilot/tutorials/create-an-extension)
+to create an extension manually.
 
 ## 1.0 Discover Agents from the Marketplace
 
