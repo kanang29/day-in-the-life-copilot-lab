@@ -65,6 +65,12 @@ Prompts are reusable templates invoked with `@prompt-name`. The track-specific t
 
 After running the appendix-provided heredoc, verify with `head -7 .github/prompts/create-<track>-test.prompt.md`.
 
+Use the PowerShell equivalent:
+
+```powershell
+Get-Content .github\prompts\create-<track>-test.prompt.md -TotalCount 7
+```
+
 > 💡 **Skills vs Prompts**: Skills activate automatically based on topic. Prompts are invoked explicitly with `@name`. Use skills for knowledge (patterns, conventions) and prompts for actions (generate code, run workflows).
 
 ## 4.4 Test Skill Auto-Activation
@@ -89,6 +95,7 @@ How should I write unit tests for the StudentsController in ContosoUniversity?
    - Arrange-Act-Assert pattern
 
 > 💡 **What you should see:** The response should reference patterns from your skill — look for mentions of `MethodName_Condition_ExpectedResult()` naming, Moq for mocking, or WebApplicationFactory. If none appear, the skill may not have auto-activated — try mentioning "testing" or "xUnit" explicitly.
+Example: "I need to write xUnit and Moq tests for the ASP.NET Core StudentsController in ContosoUniversity. What testing patterns and naming conventions should I follow?"
 
 4. Now try the prompt:
 ```

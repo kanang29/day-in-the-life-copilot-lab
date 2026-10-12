@@ -136,6 +136,51 @@ Use `MethodName_Condition_ExpectedResult`:
 PROMPT
 ```
 
+**Powershell:**
+
+```powershell
+New-Item -ItemType Directory -Force -Path ".github\prompts" | Out-Null
+
+@'
+---
+description: "Generate xUnit tests for a ContosoUniversity class. Creates unit tests with Moq mocks following MethodName_Condition_ExpectedResult naming."
+mode: "agent"
+tools: ["read", "edit", "execute", "search"]
+---
+
+# Create .NET Test
+
+Generate comprehensive xUnit tests for a ContosoUniversity class.
+
+## Instructions
+
+1. **Read the source file** specified by the user (or the currently open file)
+2. **Identify all public methods** that need testing
+3. **Check existing test patterns** in `dotnet/ContosoUniversity.Tests/`
+4. **Generate a test class** with these sections:
+   - Mock setup in constructor
+   - Happy path tests
+   - Null/missing input tests
+   - Not found tests
+   - Validation failure tests
+   - Error handling tests
+
+## Naming Convention
+
+Use `MethodName_Condition_ExpectedResult`:
+
+- `Index_WithStudents_ReturnsViewWithStudentList`
+- `Details_NullId_ReturnsNotFound`
+- `Create_ValidModel_RedirectsToIndex`
+
+## After Generating
+
+1. Build: `dotnet build dotnet/ContosoUniversity.Tests/`
+2. Run: `dotnet test dotnet/ContosoUniversity.Tests/ --filter "{ClassName}"`
+3. Report results
+'@ | Set-Content -Path ".github\prompts\create-dotnet-test.prompt.md" -Encoding utf8
+```
+
 ## Try it
 
 ```

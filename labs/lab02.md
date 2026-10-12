@@ -166,7 +166,7 @@ What pattern should I use for form validation summaries in this view?
 
 A correctly loaded instruction will surface `asp-validation-summary="ModelOnly"` and Tag Helpers (`asp-for`, `asp-action`) — verbatim from your new file. If Copilot answers generically (or recommends `@Html.` helpers), the instruction did not load: re-check the filename ends in `.instructions.md`, the `applyTo` glob matches, and that you fully restarted the session.
 
-> 💡 **Optional CLI sanity check:** `extensions_manage operation: list` shows installed CLI extensions (a different subsystem). Instructions files don't appear there — the functional probe above is the authoritative test for instruction loading.
+> 💡 **Optional CLI sanity check:** Start with copilot --experimental, then ask the model to call extensions_manage.`extensions_manage operation: list` shows installed CLI extensions (a different subsystem). Instructions files don't appear there — the functional probe above is the authoritative test for instruction loading.
 
 ## 2.3 Edit AGENTS.md
 
