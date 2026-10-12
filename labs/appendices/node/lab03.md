@@ -71,7 +71,40 @@ pnpm -C node dev                 # Run Fastify dev server
 AGENT
 ````
 
-**PowerShell:** wrap the heredoc body in `@'...'@ | Out-File -FilePath .github/agents/node-dev.agent.md -Encoding utf8`.
+## PowerShell
+
+```powershell
+
+New-Item -ItemType Directory -Path ".github\agents" -Force | Out-Null
+
+@'
+---
+name: "Node Developer"
+description: "Use when implementing, debugging, testing, or reviewing Node.js and JavaScript applications."
+tools: [read, edit, search, execute]
+user-invocable: true
+---
+
+You are a Node.js development specialist.
+
+## Approach
+
+1. Inspect the relevant code and configuration.
+2. Follow existing project conventions.
+3. Make focused and type-safe changes.
+4. Run the relevant tests, lint checks, and build commands.
+5. Summarize the changes and validation results.
+
+## Constraints
+
+- Do not expose secrets.
+- Do not suppress errors.
+- Do not modify unrelated code.
+- Do not introduce unnecessary dependencies.
+'@ | Set-Content -Path ".github\agents\node-dev.agent.md" -Encoding utf8
+
+Get-Content ".github\agents\node-dev.agent.md"
+```
 
 ## B. Verify
 

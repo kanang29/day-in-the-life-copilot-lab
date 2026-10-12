@@ -112,14 +112,16 @@ Get-Content ~/.copilot/mcp-config.json
 ---
 name: "dotnet-dev"
 description: "..."
-tools: ["read", "edit", "execute", "search"]
+tools: ["read", "edit", "execute", "search","context7/*"]
 mcp-servers: ["context7"]
 ---
 ```
 
+
+
 3. The `mcp-servers` field references servers defined in `~/.copilot/mcp-config.json`. The agent can then use tools from those servers (e.g., `resolve-library-id` and `query-docs` from Context7).
 
-> 💡 **Note**: MCP server access is optional. The base tools (`read`, `edit`, `execute`, `search`) are sufficient for most development tasks. Add MCP servers when the agent needs specific capabilities like documentation lookup or knowledge persistence.
+> 💡 **Note**: MCP server access is optional. The base tools (`read`, `edit`, `execute`, `search`) are sufficient for most development tasks. Add MCP servers when the agent needs specific capabilities like documentation lookup or knowledge persistence.Cross check if the MCP server Context7 is running.
 
 ## 3.4 Test the Agent
 
