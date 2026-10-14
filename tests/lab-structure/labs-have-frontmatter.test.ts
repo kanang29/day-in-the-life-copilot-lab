@@ -85,9 +85,9 @@ describe("lab-structure: labs have required frontmatter", () => {
       // Non-numbered labs (setup, hardening, gh-extensions, cli-extensions)
       // use a slug lab_number instead of an integer.
       expect(
-        typeof parsed.data.lab_number,
+        parsed.data.lab_number,
         `${lab} lab_number should be a non-empty slug string`,
-      ).toBe("string");
+      ).toMatch(/^[a-z0-9]+(?:-[a-z0-9]+)*$/);
     }
   });
 
