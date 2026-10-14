@@ -159,7 +159,7 @@ Copilot doesn't just do keyword text search — it uses multiple layers of code 
 |------------|-------------------|----------|
 | **Browse a plugin marketplace** | `copilot plugin marketplace list` / `browse awesome-copilot` | Finding community agents for a stack (e.g. .NET, testing) before writing your own. Lab 11 publishes a plugin using this same surface. |
 | **Install a plugin** | `copilot plugin install OWNER/REPO` (or `PLUGIN-NAME@marketplace`) | Pulling a marketplace or private-registry plugin, e.g. `copilot plugin install github/awesome-copilot`. |
-| **Use an installed plugin** | `copilot`, then `/plugin-name help me with my task` (interactive) or `copilot --prompt "/plugin-name ..." --allow-all-tools` (scripted) | Once installed, plugins behave like slash commands in a CLI session. |
+| **Use an installed plugin** | Start `copilot`, then use `/plugin` to inspect the installation and invoke the agents, skills, or commands it contributes by their own names | A plugin is a bundle of capabilities; installation does not create a `/plugin-name` command. |
 | **Parallel subagents** | `/fleet` | Running independent research or implementation threads in one session. |
 | **Plan mode vs autopilot mode** | `Shift+Tab` (plan mode, review each step) vs autopilot mode (batch execute) | Plan mode for exploratory/risky work; autopilot mode for scripted, well-understood tasks. |
 | **Mid-session model switch** | `/model <tier-or-id>` | Downshift to `models.cheap` in the registry for routine edits; upshift to `models.premium` for deep reasoning. |
