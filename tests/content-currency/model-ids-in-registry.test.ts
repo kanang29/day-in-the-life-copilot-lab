@@ -36,34 +36,7 @@ interface KnownDrift {
   fixedInPhase: string;
 }
 
-const KNOWN_MODEL_DRIFT: KnownDrift[] = [
-  {
-    file: "lab13.md",
-    modelId: "claude-opus-4.6",
-    reason:
-      "Stale AGENTS.md sub-agent-dispatch pin, repeated in this lab's model-tier discussion.",
-    fixedInPhase: "Phase 6 (advanced CLI cluster)",
-  },
-  {
-    file: "lab13.md",
-    modelId: "claude-opus-4.7",
-    reason: "Pre-refresh model name in this lab's model-tier discussion.",
-    fixedInPhase: "Phase 6 (advanced CLI cluster)",
-  },
-  {
-    file: "lab14.md",
-    modelId: "claude-opus-4.6",
-    reason:
-      "Stale AGENTS.md sub-agent-dispatch pin, repeated in this lab's model-tier discussion.",
-    fixedInPhase: "Phase 6 (advanced CLI cluster)",
-  },
-  {
-    file: "lab14.md",
-    modelId: "claude-opus-4.7",
-    reason: "Pre-refresh model name in this lab's model-tier discussion.",
-    fixedInPhase: "Phase 6 (advanced CLI cluster)",
-  },
-];
+const KNOWN_MODEL_DRIFT: KnownDrift[] = [];
 
 function listLabFiles(): string[] {
   if (!existsSync(LABS_DIR)) return [];

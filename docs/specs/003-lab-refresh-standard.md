@@ -397,7 +397,8 @@ deferred here.
    list. `docs/_meta/registry.yaml`'s `labs.lab09.title` synced to match.
    `docs/specs/001-research-sota.md` (a dated research record of the drift
    itself) and the deeper narrative prose in `docs/workshop/presenter-script.md`
-   are intentionally left for Phase 6 (workshop asset reconciliation) — the
+   are intentionally left for the later workshop-asset-reconciliation phase
+   (item 6 of the epic's Approach list) — the
    latter already uses correct "(formerly Copilot coding agent)"
    historical framing in most places, so it isn't actively wrong, just
    out of this phase's narrow title-sync scope.
@@ -591,10 +592,219 @@ Phases 0/2/4 (`tests/workflows/weekly-audit-dry-run.test.ts`,
 `gh aw` CLI extension) reproduce, unrelated to this phase's content.
 `runtime-tools-secret_scanning` clean on all 5 changed files.
 
+## Phase 6 — Advanced CLI cluster (06, 12, 13, 14, 15, `lab-hardening`)
+
+Per the Phase 1 merge map, this cluster is **keep-all** — no lab merges. This
+phase (a) fixes a hook-semantics factual reversal carried over from an
+interrupted prior work-in-progress, (b) fixes two confirmed-nonexistent
+model IDs, (c) corrects a significant terminology/mechanism error in Lab 13's
+A2A/ACP framing, (d) fixes a false-negative CLI-surface claim in the shared
+currency partial (11 labs), and (e) fixes several smaller factual/path bugs
+found during a full-file read of the cluster.
+
+### Decisions
+
+1. **Hook `permissionDecision` three-way-switch correction (inherited,
+   verified).** An interrupted prior session left an uncommitted change
+   (later committed as `5c7e686`) reversing a factual error: `preToolUse`'s
+   `permissionDecision` is a genuine three-way switch (`allow`/`deny`/`ask`),
+   not deny-only — only this repo's own hardening posture chooses to emit
+   `deny`-or-silent by convention. Verified directly against
+   `https://docs.github.com/en/copilot/reference/hooks-reference` before
+   building on it. Touched `docs/copilot-config-reference.md`,
+   `labs/lab06.md`, `labs/lab03.md`, `labs/lab-hardening.md`,
+   `labs/lab-copilot-cli-extensions.md`, and their paired solutions/workshop
+   files. Also fixed one remaining stale hooks-reference URL in
+   `solutions/lab-copilot-cli-extensions/.github/hooks/userpromptsubmitted-auto-summarize.json`
+   found while verifying the carried-over change.
+2. **`claude-opus-4.6` / `claude-opus-4.7` — confirmed-nonexistent model
+   IDs, fixed (4 + N occurrences).** Neither ID appears in
+   `docs/_meta/registry.yaml`'s `models` block. Replaced with
+   `claude-opus-5` (registry `models.premium`) in `labs/lab13.md` and
+   `labs/lab14.md`, and removed the now-stale `KNOWN_MODEL_DRIFT` allow-list
+   entries from `tests/content-currency/model-ids-in-registry.test.ts`
+   (now empty — the test's own doc-comment requires entries to name the
+   phase that fixes them, and this is that phase).
+3. **`claude-sonnet-4.5` — confirmed-nonexistent model ID, fixed in a
+   solution file the content-currency test doesn't scan.** The model-ID
+   test only walks `labs/`; `solutions/lab-hardening/tight-reviewer.agent.md`
+   pinned `model: claude-sonnet-4.5` (2 occurrences, frontmatter + prose)
+   un-caught by that test. `docs/token-and-model-guide.md` independently
+   documents `claude-sonnet-4.5` as "previous Sonnet generation; pin to it
+   if a workflow regressed on 4.6" — not a registry-tier model and not an
+   appropriate default for a new reference solution. Replaced with
+   `claude-sonnet-4.6` (registry `models.standard`, "current Sonnet
+   default" per the same guide), matching the guide's own "normal coding,
+   you want predictability" recommendation that fits this read-only
+   reviewer's reproducibility requirement.
+4. **Lab 13's core ACP premise was wrong — rewritten.** The lab defined
+   "ACP (Agent Communication Protocol)" as the wire-level contract that
+   Copilot CLI's `task`/`write_agent`/`read_agent` map onto, and its "live"
+   path told readers to spawn a peer with `COPILOT_AGENT_NAME=critic copilot
+   --agent rubber-duck --available-tools='...' --acp` then "register peer...
+   exchange ACP commands." Fetched
+   `https://docs.github.com/en/copilot/reference/copilot-cli-reference/acp-server`
+   directly: **ACP = "Agent Client Protocol"**, a real `--acp` flag (public
+   preview) that turns one `copilot` process into a server an *external
+   programmatic client* (IDE, custom frontend via the ACP TypeScript SDK)
+   drives over stdio/TCP — a client↔agent protocol, not a peer↔peer one
+   between two interactive `copilot` sessions. There is no CLI subcommand
+   for "registering a peer" or exchanging "ACP commands." Cross-checked
+   against Lab 14's real tmux + hand-off-file mechanism (confirmed via grep,
+   no `--acp` dependency) to confirm what the corrected "live path" should
+   describe instead. Rewrote, in `labs/lab13.md`: the intro paragraph; the
+   §13.0 concept table (ACP row now states the real client↔agent mechanism
+   and explicitly disclaims the peer↔peer framing); the "Trust boundaries,
+   restated" callout ("spawn a peer over ACP" → "spawn a peer as its own
+   process"); the Prerequisites `--acp`-flag quick-check (→ `--agent`-flag
+   check, with the CLI-version-floor requirement reframed as general
+   currency hygiene, not an ACP gate); §A.3 (renamed "Drive the flow on the
+   live ACP path" → "...live multi-process path"; replaced the fictional
+   flags/subcommands with real `--agent`/`--available-tools` plus manual
+   relay through the §B.2 hand-off file, foreshadowing Lab 14's tmux
+   automation of the same mechanism); and §A.4 (transcript inspection now
+   splits concept-path `list_agents()`/`read_agent()` from live-path
+   `/share file` per-pane export). Also fixed a second, smaller error in the
+   same area: a callout claimed "the orchestrator agent in `AGENTS.md`
+   already enforces this gate when you use the `/orchestrate` command" —
+   confirmed via direct fetch of
+   `https://docs.github.com/en/copilot/reference/github-copilot-app-reference/slash-commands`
+   that `/orchestrate` is a GitHub Copilot **app** (desktop) slash command,
+   not a CLI command, and confirmed no `.github/agents/orchestrator.agent.md`
+   exists in this repo; reworded the callout to state plainly that nothing
+   in the repo enforces this automatically.
+5. **`docs/_partials/currency.md`'s `/extensions manage` claim was
+   backwards — fixed and re-synced to 11 labs.** The partial said
+   `/extensions manage` / `/extensions mode` "are **not** [real]." Extensive
+   direct-fetch verification of
+   `https://docs.github.com/en/copilot/reference/copilot-cli-reference/cli-command-reference`
+   (paginated, ~10 chunks) confirmed `/extensions [manage|mode]` **is**
+   real, gated behind `/experimental on`. Fixed the partial's text, then
+   synced the corrected wording into all 11 including labs (`lab06`,
+   `lab08`, `lab09`, `lab10`, `lab11`, `lab12`, `lab13`, `lab15`,
+   `lab-copilot-cli-extensions`, `lab-gh-extensions`, `lab-hardening`) —
+   manually restoring `lab15.md`'s deliberate self-link-avoidance wording in
+   the LSP row afterward, since a blind sync would have clobbered it.
+6. **Lab 14 path/count bugs, found during a full-file read.** (a) The
+   "meta callout" claimed hand-off contracts live at
+   `.orchestrator/session.md`; `scripts/orchestrator/handoff.sh`'s actual
+   default output directory is `.copilot/orchestrator-handoffs/` (verified
+   by reading the script) — fixed. (b) "Save the plan to
+   `.copilot/session-state/<id>/plan.md`" was missing the `~/` prefix;
+   cross-checked against `labs/lab10.md`, `docs/memory-decision-tree.md`,
+   and `labs/lab-copilot-cli-extensions.md`, all of which confirm this is a
+   **per-user home-directory** path (`~/.copilot/session-state/<id>/...`),
+   not repo-relative — fixed, with a cross-link to Lab 10 §10.1a added. (c)
+   The wrap-up checklist said "recognise the **four** stop-and-ask
+   triggers" — §14.6 lists **five** — fixed.
+7. **Lab 06 hook-inventory bugs, found during a full-file read.** The lab
+   twice (§6.1 intro, Key Takeaways table) stated "the configuration
+   defines hooks for" a 5-event list including `sessionStart` — read
+   `.github/hooks/default.json` directly: it configures exactly 4 event
+   types (`userPromptSubmitted`, `preToolUse`, `postToolUse`,
+   `errorOccurred`); `sessionStart` is not configured anywhere in this
+   repo's hook files. Reworded both to describe what's actually registered,
+   pointing to the lab's own §6.2.1 (and the hooks-reference docs) for the
+   complete event-type taxonomy rather than re-asserting a specific count —
+   the real taxonomy is 8 events (confirmed via the same direct fetch:
+   `sessionStart`, `sessionEnd`, `userPromptSubmitted`, `preToolUse`,
+   `postToolUse`, `agentStop`, `subagentStop`, `errorOccurred`), which the
+   lab's own §6.2.1 already enumerates correctly — only the §6.1/Key-Takeaways
+   framing was wrong. Also found the "Hooks in this repository" table
+   listed a `typecheck` postToolUse hook as if active; its script exists at
+   `scripts/hooks/post-tool-use-typecheck.{sh,ps1}` but is **not** wired
+   into `default.json` — added a "Registered in `default.json`?" column
+   disclosing this instead of silently implying it runs.
+8. **Spec self-consistency: a stale forward phase-reference.** Phase 4's
+   Decision 1 (written before this phase was scoped) deferred some
+   workshop-prose cleanup to "Phase 6 (workshop asset reconciliation)" —
+   but this document's own "Status and next step" section (written earlier
+   still) already reserves Phase 6 for this advanced-CLI cluster. Reworded
+   Phase 4's cross-reference to name the deferred target descriptively
+   ("the later workshop-asset-reconciliation phase, item 6 of the epic's
+   Approach list") instead of committing to a specific phase number that
+   this phase would then contradict.
+9. **Known-drift items scanned, clean; cross-link gap confirmed already
+   closed.** Grepped the full cluster for `infer:` (one correctly-labeled
+   "retired" mention, not a bug), MCP `"sse"` config (none), stale
+   `githubnext/gh-aw` org (none), and stale "coding agent" naming (none).
+   The `03 ↔ 06 ↔ lab-hardening` triangular cross-link gap Phase 5 deferred
+   here was already fully satisfied in both directions on all three edges
+   (via the Phase-5-era / carried-over hook-semantics commit) — no action
+   needed.
+10. **Out of scope, confirmed.** Stale `claude-opus-4.7` mentions in
+    `workshop/slides/30-module-3.md` and
+    `workshop/speaker-scripts/module-06-a2a-tmux.md` were found during the
+    solutions/workshop model-ID sweep (item 2 above), but both files anchor
+    to Lab 07 / the tmux-pattern narrative generally, not this cluster, and
+    the model-ID content-currency test only scans `labs/` by design —
+    workshop-asset model-ID drift is explicitly the later
+    workshop-asset-reconciliation phase's job (see Decision 8). Left
+    unchanged here to avoid scope creep into another phase's cluster.
+
+### Verification ledger
+
+| Claim | Primary source fetched | Status |
+|---|---|---|
+| `preToolUse`'s `permissionDecision` is a real three-way switch (`allow`/`deny`/`ask`) | `https://docs.github.com/en/copilot/reference/hooks-reference` (fetched directly, prior session) | VERIFIED |
+| ACP = "Agent Client Protocol"; `--acp` is a client↔agent server flag, not a peer↔peer mechanism | `https://docs.github.com/en/copilot/reference/copilot-cli-reference/acp-server` (fetched directly, this phase) | VERIFIED |
+| `/orchestrate` is a GitHub Copilot app (desktop) slash command, absent from the CLI | `https://docs.github.com/en/copilot/reference/github-copilot-app-reference/slash-commands` (fetched directly) | VERIFIED |
+| No `.github/agents/orchestrator.agent.md` exists in this repo | direct repo read: only `agentic-workflows.agent.md`, `code-reviewer.agent.md`, `planner.agent.md` exist under `.github/agents/` | VERIFIED |
+| `/extensions [manage\|mode]` is real, gated behind `/experimental on` | `https://docs.github.com/en/copilot/reference/copilot-cli-reference/cli-command-reference` (fetched directly, ~10 paginated chunks) | VERIFIED |
+| `claude-opus-4.6`, `claude-opus-4.7`, `claude-sonnet-4.5` are not in `docs/_meta/registry.yaml`'s `models` block | direct read of `docs/_meta/registry.yaml` | VERIFIED |
+| `claude-sonnet-4.5` is "previous Sonnet generation," not a current default | direct read of `docs/token-and-model-guide.md` | VERIFIED |
+| `scripts/orchestrator/handoff.sh`'s default hand-off directory is `.copilot/orchestrator-handoffs/`, not `.orchestrator/session.md` | direct read of `scripts/orchestrator/handoff.sh` | VERIFIED |
+| Copilot CLI session-state is per-user (`~/.copilot/session-state/<id>/`), not repo-relative | direct read of `labs/lab10.md`, `docs/memory-decision-tree.md`, `labs/lab-copilot-cli-extensions.md` (concordant) | VERIFIED |
+| `.github/hooks/default.json` configures exactly 4 event types; `sessionStart` and `typecheck` are not wired in | direct read of `.github/hooks/default.json` and `scripts/hooks/` directory listing | VERIFIED |
+| Full hook event taxonomy is 8 types (`sessionStart`, `sessionEnd`, `userPromptSubmitted`, `preToolUse`, `postToolUse`, `agentStop`, `subagentStop`, `errorOccurred`) | `https://docs.github.com/en/copilot/concepts/agents/hooks` (fetched directly, 2 paginated chunks) | VERIFIED |
+| `docs.github.com/en/copilot/concepts/agents/copilot-cli/lsp-servers` content matches `labs/lab15.md` verbatim (table, benefits, framing) | fetched directly | VERIFIED |
+| `03 ↔ 06 ↔ lab-hardening` cross-links already exist in all 3×2 directions | grep of all three files | VERIFIED |
+
+### Test results
+
+Targeted: `tests/content-currency/*` — 62 tests pass (26 in
+`model-ids-in-registry.test.ts` alone, `KNOWN_MODEL_DRIFT` now empty).
+Full `npx vitest run` — 564 of 566 pass; the same 2 pre-existing
+sandbox-network failures from every prior phase
+(`tests/workflows/weekly-audit-dry-run.test.ts`,
+`tests/workflows/weekly-audit-schema.test.ts`, HTTP 403 installing the
+`gh aw` CLI extension) reproduce, unrelated to this phase's content.
+`runtime-tools-secret_scanning` clean on all 17 files changed in this
+phase's final commit (the hook-semantics carry-over was committed
+separately as `5c7e686` by the interrupted prior session).
+
 ## Status and next step
 
-`status: draft`. Phases 2 (beginner track), 3 (Lab 10 rebuild), 4 (GitHub
-platform cluster), and 5 (extensibility & enterprise cluster) are
-complete. Phase 6 (advanced CLI cluster: 06, 12, 13, 14, 15,
-`lab-hardening`) appends its own section below this one rather than
-replacing it.
+`status: draft`. Phases 1–6 are complete: 1 (standard and guardrails), 2
+(beginner track), 3 (Lab 10 rebuild), 4 (GitHub platform cluster), 5
+(extensibility & enterprise cluster), and 6 (advanced CLI cluster: 06, 12,
+13, 14, 15, `lab-hardening`). Every in-scope lab's known-drift items
+flagged in Phase 1's merge-map and tier/surface audit are now resolved.
+
+**The epic's "retire-and-merge execution" item (Approach list item 4) is a
+no-op.** Phase 1's merge map (§"Merge map" above) reviewed all seven overlap
+clusters the issue names and concluded **no lab needs to retire or merge** —
+every cluster keeps its members with explicit, now-cross-linked boundaries.
+The `merged_into: labNN` stub mechanism this spec's Constraints section
+defines is consequently unused; there is nothing to point it at. No further
+phase should revisit this unless a future spec amendment identifies a new
+overlap the original seven clusters didn't cover.
+
+Remaining work, not yet started:
+
+- **`AGENTS.md`'s own stale model pin** (known-drift item 16, logged in
+  Phase 1): `claude-opus-4.6` at `AGENTS.md:86` is not GA and its
+  "per `copilot-instructions.md`" cross-reference is dangling (that file
+  never mentions a model). Every lab citing the old pin is now fixed
+  (07 → Phase 2, 10 → Phase 3, 13/14 → Phase 6); only `AGENTS.md` itself
+  remains, deliberately held back since it's a repo-wide operational
+  policy file, not a lab.
+- **Appendix reconciliation** (epic Approach item 5) — the dotnet and node
+  appendices under `labs/appendices/` have not yet had a dedicated
+  currency/accuracy pass in this spec's phase sequence.
+- **Workshop asset reconciliation** (epic Approach item 6) — module map,
+  timing plan, facilitator guide, plus the specific deferred items already
+  logged against it: stale `claude-opus-4.7` in
+  `workshop/slides/30-module-3.md` and
+  `workshop/speaker-scripts/module-06-a2a-tmux.md` (Phase 6, Decision 10),
+  and the Phase 4-era workshop-prose cleanup (Phase 4, Decision 1).

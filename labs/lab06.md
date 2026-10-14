@@ -51,7 +51,7 @@ References:
 | **Plan mode vs autopilot mode** | `Shift+Tab` toggles plan mode; autopilot mode is the default | Plan-heavy work (design, decomposition) runs in plan mode; well-scoped execution runs in autopilot mode. |
 | **Mid-session model switch** | `/model <tier-or-id>` | Upshift to `models.premium` (per [`registry.yaml`](../docs/_meta/registry.yaml)) for hard reasoning; downshift to `models.cheap` for tool-heavy loops. Note: an enterprise's global model-default-availability policy (see [Lab 17](../labs/lab17.md)) may make additional models selectable here even if the registry's curated tiers don't list them. |
 | **Local tool discovery (model-side)** | `extensions_manage` MCP tool, `operation: "list"` / `"inspect"` / `"guide"` / `"scaffold"` | The agent enumerating which agents, skills, hooks, and extensions are contributing to the session before wiring a handoff. Invoke as a tool call (e.g. `extensions_manage({operation: "list"})`), **not** as `/extensions_manage` — there is no such slash command. |
-| **Local tool discovery (user-side)** | `/skills`, `/plugin`, `/mcp` | The human listing or managing skills, plugins, and MCP servers from the prompt via the in-terminal dashboard. These are real built-in slashes; `/extensions manage` and `/extensions mode` are **not** — use `Shift+Tab` to toggle plan/autopilot modes. |
+| **Local tool discovery (user-side)** | `/skills`, `/plugin`, `/mcp` | The human listing or managing skills, plugins, and MCP servers from the prompt via the in-terminal dashboard. `/extensions manage` / `/extensions mode` also exist, but cover CLI extensions specifically and require `/experimental on` first — the three dashboards above are the primary path for everyday skill/plugin/MCP discovery. |
 | **LSP-backed code intelligence** | Automatic — no slash command | Copilot CLI transparently prefers a configured language server over text search for go-to-definition, find references, rename, and call hierarchy. See [Lab 15 — LSP & Code Intelligence](../labs/lab15.md). |
 <!-- @end-include docs/_partials/currency.md -->
 
@@ -73,15 +73,19 @@ cat .github/hooks/default.json
 Get-Content .github/hooks/default.json
 ```
 
-2. The configuration defines hooks for these lifecycle events:
+2. This repo's `default.json` configures hooks for four of the available
+   lifecycle events. The hook system supports more than these (including
+   `sessionStart`, `sessionEnd`, `agentStop`, and `subagentStop` — see the
+   [hooks reference](https://docs.github.com/en/copilot/reference/hooks-reference)
+   for the complete, current list); the ones below are simply the ones
+   this repo currently wires up:
 
-| Event | When It Fires |
-|-------|--------------|
-| `sessionStart` | When a Copilot session begins |
-| `userPromptSubmitted` | After the user sends a message |
-| `preToolUse` | Before Copilot executes a tool (edit, execute, etc.) |
-| `postToolUse` | After Copilot executes a tool |
-| `errorOccurred` | When an error happens |
+| Event | When It Fires | In `default.json`? |
+|-------|--------------|---------------------|
+| `userPromptSubmitted` | After the user sends a message | Yes — 1 hook |
+| `preToolUse` | Before Copilot executes a tool (edit, execute, etc.) | Yes — 3 hooks |
+| `postToolUse` | After Copilot executes a tool | Yes — 2 hooks |
+| `errorOccurred` | When an error happens | Yes — 1 hook |
 
 3. Each hook entry has:
 ```json
@@ -406,21 +410,21 @@ echo '{"toolName":"Bash","toolArgs":{"command":"ls"},"cwd":"."}' \
 |---------|---------|
 | **Config file** | `.github/hooks/default.json` |
 | **Script location** | `scripts/hooks/` (bash + PowerShell) |
-| **Lifecycle events** | `sessionStart`, `userPromptSubmitted`, `preToolUse`, `postToolUse`, `errorOccurred` |
+| **Lifecycle events used here** | `userPromptSubmitted`, `preToolUse`, `postToolUse`, `errorOccurred` (the full event list is larger — see §6.2.1) |
 | **Blocking** | Pre-hooks block by `exit 0` + stdout JSON `{"permissionDecision":"deny",…}`. Non-zero exits are silently ignored. Post-hooks report only. |
 | **IPC** | Event payload arrives as **JSON on stdin**. Only `COPILOT_PROJECT_DIR` and `CLAUDE_PROJECT_DIR` env vars are set; `TOOL_NAME`/`FILE_PATH` are **not** exported. Parse stdin with `jq` (bash) or `ConvertFrom-Json` (PowerShell). |
 
 **Hooks in this repository:**
 
-| Hook | Type | Purpose |
-|------|------|---------|
-| secret-scan | preToolUse | Block commits with hardcoded secrets |
-| doc-blocker | preToolUse | Prevent unnecessary documentation files |
-| long-running | preToolUse | Warn about long-running commands |
-| format | postToolUse | Auto-format files after edit |
-| typecheck | postToolUse | TypeScript type check after edit |
-| console-warn | postToolUse | Warn about console.log statements |
-| dotnet-build | postToolUse | Verify .NET build after C# edit (you created this!) |
+| Hook | Type | Purpose | Registered in `default.json`? |
+|------|------|---------|--------------------------------|
+| secret-scan | preToolUse | Block commits with hardcoded secrets | Yes |
+| doc-blocker | preToolUse | Prevent unnecessary documentation files | Yes |
+| long-running | preToolUse | Warn about long-running commands | Yes |
+| format | postToolUse | Auto-format files after edit | Yes |
+| typecheck | postToolUse | TypeScript type check after edit | Script exists in `scripts/hooks/` but is not wired into `default.json` yet |
+| console-warn | postToolUse | Warn about console.log statements | Yes |
+| dotnet-build | postToolUse | Verify .NET build after C# edit (you created this!) | Yes, once you complete §6.3 |
 
 **Best practices:**
 - Always provide both bash and PowerShell scripts

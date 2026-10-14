@@ -11,12 +11,14 @@ registry: docs/_meta/registry.yaml
 
 # 13 — A2A Concepts with Copilot CLI ACP
 
-In this lab you'll learn what **agent-to-agent (A2A)** orchestration is,
-how the **Agent Communication Protocol (ACP)** maps onto Copilot CLI's
-local primitives (`task`, `write_agent`, `read_agent`), drive a concrete
-**two-agent task** (an *implementer* and a *critic* working on the same
-Node app), inspect the resulting transcript, and rehearse the three
-failure modes every A2A system runs into in production.
+In this lab you'll learn what **agent-to-agent (A2A)** orchestration is
+using Copilot CLI's local primitives (`task`, `write_agent`,
+`read_agent`), drive a concrete **two-agent task** (an *implementer*
+and a *critic* working on the same Node app), inspect the resulting
+transcript, and rehearse the three failure modes every A2A system runs
+into in production. Along the way you'll meet **ACP (Agent Client
+Protocol)** — a real Copilot CLI feature — and see exactly how it
+differs from the A2A pattern this lab teaches.
 
 > ⏱️ Presenter pace: 10 minutes | Self-paced: 35 minutes
 
@@ -27,8 +29,8 @@ failure modes every A2A system runs into in production.
 >   peer re-reads the shared workspace every turn.
 > - Cheaper alternative: keep the **critic** on `claude-haiku-4.5`
 >   (criticism is mostly pattern-matching against a rubric) and
->   reserve `claude-opus-4.6` for the **implementer** when the
->   task is non-trivial. For the warm-up two-agent task in
+>   reserve `claude-opus-5` (registry `models.premium`) for the
+>   **implementer** when the task is non-trivial. For the warm-up two-agent task in
 >   Part A, both peers can run on `gpt-5-mini` to learn the
 >   protocol without paying for premium reasoning.
 > - Compaction trigger: cap each peer at the turn limit you set
@@ -38,14 +40,15 @@ failure modes every A2A system runs into in production.
 
 > 🛤️ **Choose your path** before you start:
 >
-> - **Live ACP path** — your local Copilot CLI is at the floor pinned in
->   [`docs/_meta/registry.yaml`](../docs/_meta/registry.yaml)
->   (`copilot_cli_version_floor`). You'll spawn a real peer agent
->   subprocess and observe its turns.
-> - **Concept / simulated path** — older CLI, restricted environment, or
->   air-gapped review. You'll run the same two-agent flow using only the
->   in-process `task` tool to dispatch sub-agents. Same learning
->   outcomes, no separate process tree.
+> - **Live multi-process path** — you have a second terminal pane (or
+>   tmux split) available. You'll spawn the critic as its own
+>   `copilot` process and relay messages between the two over the
+>   shared hand-off file from §B.2 — the same mechanism
+>   [Lab 14](lab14.md) goes on to automate.
+> - **Concept / simulated path** — single terminal, restricted
+>   environment, or air-gapped review. You'll run the same two-agent
+>   flow using only the in-process `task` tool to dispatch sub-agents.
+>   Same learning outcomes, no separate process tree.
 >
 > Both paths use the **Phase 3 Node app** (`node/`) as the working
 > codebase so the lab series stays cumulative.
@@ -57,7 +60,8 @@ References:
 - [`.copilot/lessons/`](../.copilot/lessons/) — markdown wiki agents use to preserve decisions across phase boundaries (cited in §13.4)
 - [Lab 07 — Multi-Agent Orchestration](lab07.md) — the orchestrator → dev → QA → review flow you'll extend here
 - [Lab 10 — Agent Memory: Personalities, Lessons, and Consolidation](lab10.md) — the wiki + schema primitives Lab 13 builds on
-- [`docs/_meta/registry.yaml`](../docs/_meta/registry.yaml) — CLI version floor for the live ACP path
+- [`docs/_meta/registry.yaml`](../docs/_meta/registry.yaml) — CLI version floor (general currency baseline for this lab)
+- [Copilot CLI ACP server](https://docs.github.com/en/copilot/reference/copilot-cli-reference/acp-server) — the real `--acp` flag referenced in §13.0's aside; not the mechanism this lab's A2A pattern uses
 
 ---
 
@@ -85,7 +89,7 @@ References:
 | **Plan mode vs autopilot mode** | `Shift+Tab` toggles plan mode; autopilot mode is the default | Plan-heavy work (design, decomposition) runs in plan mode; well-scoped execution runs in autopilot mode. |
 | **Mid-session model switch** | `/model <tier-or-id>` | Upshift to `models.premium` (per [`registry.yaml`](../docs/_meta/registry.yaml)) for hard reasoning; downshift to `models.cheap` for tool-heavy loops. Note: an enterprise's global model-default-availability policy (see [Lab 17](../labs/lab17.md)) may make additional models selectable here even if the registry's curated tiers don't list them. |
 | **Local tool discovery (model-side)** | `extensions_manage` MCP tool, `operation: "list"` / `"inspect"` / `"guide"` / `"scaffold"` | The agent enumerating which agents, skills, hooks, and extensions are contributing to the session before wiring a handoff. Invoke as a tool call (e.g. `extensions_manage({operation: "list"})`), **not** as `/extensions_manage` — there is no such slash command. |
-| **Local tool discovery (user-side)** | `/skills`, `/plugin`, `/mcp` | The human listing or managing skills, plugins, and MCP servers from the prompt via the in-terminal dashboard. These are real built-in slashes; `/extensions manage` and `/extensions mode` are **not** — use `Shift+Tab` to toggle plan/autopilot modes. |
+| **Local tool discovery (user-side)** | `/skills`, `/plugin`, `/mcp` | The human listing or managing skills, plugins, and MCP servers from the prompt via the in-terminal dashboard. `/extensions manage` / `/extensions mode` also exist, but cover CLI extensions specifically and require `/experimental on` first — the three dashboards above are the primary path for everyday skill/plugin/MCP discovery. |
 | **LSP-backed code intelligence** | Automatic — no slash command | Copilot CLI transparently prefers a configured language server over text search for go-to-definition, find references, rename, and call hierarchy. See [Lab 15 — LSP & Code Intelligence](../labs/lab15.md). |
 <!-- @end-include docs/_partials/currency.md -->
 
@@ -93,8 +97,8 @@ References:
 
 | Term | What it means here |
 |------|--------------------|
-| **A2A (agent-to-agent)** | A pattern where two or more agents — each with its own context window, tool allowlist, and system prompt — collaborate on one task by exchanging messages. |
-| **ACP (Agent Communication Protocol)** | The wire-level contract that lets those agents speak to each other regardless of which model or runtime hosts them. Copilot CLI's `task` / `write_agent` / `read_agent` tools are the local in-process primitives that map onto ACP's peer-message shape. |
+| **A2A (agent-to-agent)** | A pattern where two or more agents — each with its own context window, tool allowlist, and system prompt — collaborate on one task by exchanging messages. This lab's `task` / `write_agent` / `read_agent` tools (concept path) and separate `copilot` processes (live path) are both local mechanisms for A2A; neither runs over ACP. |
+| **ACP (Agent Client Protocol)** | A *different*, real Copilot CLI feature (the `--acp` flag, public preview) that turns a single `copilot` process into a server an *external programmatic client* — an editor, IDE, or custom frontend — connects to as its agent backend. It's a client↔agent protocol, not a peer↔peer one, so it isn't the mechanism behind this lab's two-agent pattern. See the [Copilot CLI ACP server docs](https://docs.github.com/en/copilot/reference/copilot-cli-reference/acp-server). |
 | **Peer agent** | An agent reachable over A2A. It's a peer (not a child) because it owns its own context and can refuse, push back, or disconnect. |
 | **Sub-agent** | An agent dispatched *inside* the parent's context via the `task` tool. Cheaper than A2A, but the parent owns the transcript and the trust boundary is shared. |
 
@@ -120,9 +124,9 @@ This lab is about the cases the Lab 07 pattern can't cleanly cover.
 
 > 🪞 **Trust boundaries, restated.** When you call `task`, the sub-agent
 > inherits your environment (cwd, env vars, MCP allowlist). When you
-> spawn a peer over ACP, the peer is configured *separately* — it can be
-> read-only, can be on a different model, and can even live in a
-> different repo. That separation is the whole point.
+> spawn a peer as its own process, the peer is configured *separately*
+> — it can be read-only, can be on a different model, and can even
+> live in a different repo. That separation is the whole point.
 
 ---
 
@@ -138,7 +142,7 @@ This lab is about the cases the Lab 07 pattern can't cleanly cover.
 | Both | Copilot CLI installed and authenticated (Lab 01 setup) |
 | Both | The Phase 3 Node app builds locally: `make test-node` is green |
 | Both | Node dependencies installed: `pnpm -C node install` (first time only) |
-| Live | Copilot CLI version `>= copilot_cli_version_floor` from the registry (run `copilot --version` to check) |
+| Live | Copilot CLI version `>= copilot_cli_version_floor` from the registry (run `copilot --version` to check) — general currency baseline, not an ACP-specific gate |
 | Live | A second terminal pane (or tmux split) so you can watch the peer agent's pane |
 | Concept | No extra setup — uses only the in-process `task` tool |
 
@@ -147,7 +151,7 @@ Quick check:
 ```bash
 pnpm -C node install         # first time only — installs vitest, etc.
 copilot --version            # compare against docs/_meta/registry.yaml
-copilot --help | grep -q -- '--acp' && echo "ACP: yes" || echo "ACP: missing — bump CLI"
+copilot --help | grep -q -- '--agent' && echo "ok: --agent flag present" || echo "missing — bump CLI"
 make test-node               # confirm baseline
 ```
 
@@ -160,7 +164,7 @@ endpoint at `node/web/routes/students-api.ts`) using two agents:
 
 | Peer | Role | Tool allowlist | Model hint |
 |------|------|---------------|------------|
-| `implementer` | Reads the failing test, edits the route, runs `vitest`. Owns write access. | full file edit + `bash` (scoped to `npm`/`pnpm`/`vitest`) | a coding-strong model (e.g. `claude-opus-4.6`) |
+| `implementer` | Reads the failing test, edits the route, runs `vitest`. Owns write access. | full file edit + `bash` (scoped to `npm`/`pnpm`/`vitest`) | a coding-strong model (e.g. `claude-opus-5`, registry `models.premium`) |
 | `critic` | Reviews the diff, questions design choices, demands tests for edge cases. **Read-only**. | `view`, `grep`, `glob` only — no `edit` | a reasoning-strong model |
 
 ### A.1 Pick a target change
@@ -184,7 +188,7 @@ learners on locked-down environments can still complete the lab.
 
 ```text
 You (driver) → task(name="implementer", agent_type="general-purpose",
-                    mode="background", model="claude-opus-4.6",
+                    mode="background", model="claude-opus-5",
                     prompt="<contract from A.1 +
                     'edit code, run vitest, report when green'>")
             → task(name="critic", agent_type="rubber-duck",
@@ -198,7 +202,8 @@ You (driver) → task(name="implementer", agent_type="general-purpose",
 > of this lab only holds if you pin the cheap model on the critic and
 > the strong model on the implementer. The `task` tool defaults to
 > your **session** model, which silently routes everything through
-> whatever you have selected (often `claude-opus-4.7`) and blows the
+> whatever you have selected (often a `models.premium` pick like
+> `claude-opus-5`) and blows the
 > budget. The example above shows the canonical pinning.
 
 > 🚧 **Trust boundary on the concept path.** `agent_type="rubber-duck"`
@@ -224,46 +229,52 @@ write_agent(agent_id="<implementer-id>",
 Iterate until the critic returns *"no blocking issues"* or you hit your
 turn cap (see §13.3.1).
 
-### A.3 Drive the flow on the live ACP path
+### A.3 Drive the flow on the live multi-process path
 
-If your CLI is at the registry floor and exposes ACP-mode peer
-registration, you can spawn the **critic** as its own CLI process with
-its own configuration:
+Spawn the **critic** as its own CLI process in Pane 2, scoped
+read-only:
 
 ```bash
 # Pane 2 — start the critic peer with a strict, read-only config.
-COPILOT_AGENT_NAME=critic copilot \
-  --agent rubber-duck \
-  --available-tools='view,grep,glob,lsp' \
-  --acp
+copilot --agent rubber-duck --available-tools='view,grep,glob,lsp'
 ```
 
-> 🪪 **Flag verification.** Tool names follow the CLI's allowlist
-> syntax — see `copilot --help | grep allow-tool` for the canonical
-> list and `--allow-tool='shell(git:*)'` syntax for scoped shell
-> access. The exact ACP-mode subcommand names follow the version
-> pinned in [`docs/_meta/registry.yaml`](../docs/_meta/registry.yaml);
-> always cross-check `copilot --help` before assuming a flag exists.
+> 🪪 **Flag verification.** `--agent` picks a custom or built-in agent
+> type at startup; `--available-tools` takes a comma-separated tool
+> allowlist. Both are stable `copilot` startup flags — run
+> `copilot --help` if your version's output differs from this. For
+> scoped shell access instead of a blanket deny, see
+> `--allow-tool='shell(git:*)'` syntax via
+> `copilot --help | grep allow-tool`.
 
-In your **driver** pane (Pane 1), register the peer and exchange
-messages using your CLI's ACP commands (the exact CLI subcommand names
-follow the version pinned in
-[`docs/_meta/registry.yaml`](../docs/_meta/registry.yaml); check
-`copilot --help`). Conceptually the loop is identical to A.2:
+In your **driver** pane (Pane 1), drive the same loop as §A.2, but
+instead of `write_agent`/`read_agent` passing messages in-process, you
+relay them yourself between two real OS processes — using the shared
+hand-off file from §B.2 as the artifact each peer re-reads:
 
 ```text
-register peer "critic" → send "review this diff" → receive critique
-                       → forward to implementer → repeat
+(Pane 1) write node/.a2a/handoff.md with the implementer's diff
+       → (Pane 2) ask the critic to read the file and critique it
+       → (Pane 2) critic appends its findings to the file
+       → (Pane 1) read the findings, forward to the implementer → repeat
 ```
 
-> 🔌 **Why the registry pin matters.** ACP-mode subcommand names have
-> moved between CLI versions. The registry is the single source of
-> truth — if your CLI's `--help` doesn't match what's described here,
-> bump the floor (or stay on the concept path) rather than guessing.
+> 🔌 **This is what Lab 14 automates.** Here you relay messages
+> between panes by hand; [Lab 14](lab14.md) replaces the manual relay
+> with `tmux send-keys` so the hand-off file is written and read
+> without you copy-pasting between panes.
+>
+> 📎 **Not to be confused with ACP.** The real `--acp` flag (see
+> §13.0) turns a `copilot` process into a server for an *external
+> programmatic client* to drive — not for a second interactive
+> `copilot` session to peer with. Don't reach for `--acp` here; it
+> solves a different problem (IDE/editor integration), and driving it
+> requires writing a small client program, not typing into a pane.
 
 ### A.4 Inspect the transcript
 
-Both peers retain their full conversation history. From the driver:
+**Concept path** — both peers retain their full conversation history
+in-process. From the driver:
 
 ```text
 list_agents()                    # shows status: running | idle | completed
@@ -271,7 +282,13 @@ read_agent(agent_id="<id>",      # since_turn=0 returns the full transcript
            since_turn=0)
 ```
 
-Save the transcript to `node/.a2a-transcript-<date>.md` for later
+**Live multi-process path** — each pane is its own session, so export
+each one instead: run `/share file` in Pane 1 and again in Pane 2 to
+write each peer's transcript to a Markdown file. The hand-off file
+itself (`node/.a2a/handoff.md`) is also part of the record — it's the
+one artifact both peers agreed on.
+
+Save the transcript(s) to `node/.a2a-transcript-<date>.md` for later
 review. Treat it as a first-class artifact — you'll quote it in the PR
 body and again in §13.4 when you compare A2A patterns to single-agent
 patterns.
@@ -354,11 +371,12 @@ if a junior engineer reading only the `acceptance` section can't tell
 whether a PR meets the bar, the contract is too vague — fix that before
 spending another A2A token.
 
-> 💡 The orchestrator agent in [`AGENTS.md`](../AGENTS.md) already
-> enforces this gate when you use the `/orchestrate` command — it
-> refuses to spawn workers until the plan has acceptance criteria. Lab
-> 13 is teaching you the *why* behind that behaviour so you can apply
-> it without `/orchestrate`.
+> 💡 Nothing in this repo enforces this gate for you — there's no
+> `orchestrator` agent file and `/orchestrate` isn't a Copilot CLI
+> command (it belongs to the separate GitHub Copilot app). Lab 13 is
+> teaching you the *why* behind the gate so you apply it as discipline:
+> refuse to spawn peers yourself until the hand-off doc's `acceptance`
+> section is concrete.
 
 ---
 
