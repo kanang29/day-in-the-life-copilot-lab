@@ -1,3 +1,5 @@
+---
+title: "Exploring Copilot Configuration"
 lab_number: 1
 pace:
   presenter_minutes: 4

@@ -117,7 +117,7 @@ Key characteristics:
 
 🌐 **On GitHub:**
 
-1. Go to your repository → **Settings** → **Copilot** → **Coding agent**
+1. Go to your repository → **Settings** → **Copilot** → **Cloud agent**
 2. Ensure the coding agent is **enabled**
 3. If you're in an organization, the org owner may need to enable it from **Organization settings** → **Copilot** → **Policies**
 
