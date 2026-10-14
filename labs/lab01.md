@@ -1,6 +1,8 @@
 ---
 title: "Exploring Copilot Configuration"
 lab_number: 1
+tier: beginner
+surface: vscode
 pace:
   presenter_minutes: 4
   self_paced_minutes: 10

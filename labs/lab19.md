@@ -1,6 +1,8 @@
 ---
 title: "Self-Improving Agents & Skills (gh-aw Template)"
 lab_number: 19
+tier: advanced
+surface: github
 pace:
   presenter_minutes: 7
   self_paced_minutes: 25

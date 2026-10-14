@@ -1,6 +1,8 @@
 ---
 title: "Fabric MCP with Copilot CLI & VS Code"
 lab_number: 12
+tier: advanced
+surface: cli
 pace:
   presenter_minutes: 8
   self_paced_minutes: 30

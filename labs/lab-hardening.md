@@ -1,6 +1,8 @@
 ---
 title: "Hardening Skills, Agents, and MCP for Deterministic Production Use"
 lab_number: hardening
+tier: advanced
+surface: cli
 pace:
   presenter_minutes: 5
   self_paced_minutes: 20

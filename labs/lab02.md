@@ -1,6 +1,8 @@
 ---
 title: "Custom Instructions & AGENTS.md"
 lab_number: 2
+tier: beginner
+surface: vscode
 pace:
   presenter_minutes: 4
   self_paced_minutes: 15

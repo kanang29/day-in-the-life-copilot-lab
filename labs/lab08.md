@@ -1,6 +1,8 @@
 ---
 title: "GitHub Agentic Workflows: PRD Generation"
 lab_number: 8
+tier: advanced
+surface: github
 pace:
   presenter_minutes: 5
   self_paced_minutes: 15

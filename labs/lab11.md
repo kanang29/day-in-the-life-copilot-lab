@@ -1,6 +1,8 @@
 ---
 title: "Building & Distributing a Copilot Plugin (Enterprise Marketplace Pattern)"
 lab_number: 11
+tier: advanced
+surface: cli
 pace:
   presenter_minutes: 6
   self_paced_minutes: 25

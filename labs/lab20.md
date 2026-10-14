@@ -1,6 +1,8 @@
 ---
 title: "Enterprise Token Optimization & Reporting"
 lab_number: 20
+tier: advanced
+surface: github
 pace:
   presenter_minutes: 6
   self_paced_minutes: 25

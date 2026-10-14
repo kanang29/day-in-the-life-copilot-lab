@@ -1,6 +1,8 @@
 ---
 title: "A2A Concepts with Copilot CLI ACP"
 lab_number: 13
+tier: advanced
+surface: cli
 pace:
   presenter_minutes: 10
   self_paced_minutes: 35

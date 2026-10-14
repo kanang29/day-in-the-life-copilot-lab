@@ -7,6 +7,7 @@ updated: 2026-10-14
 depends_on: []
 blocks:
   - docs/specs/002-lab10-memory.md
+  - docs/specs/003-lab-refresh-standard.md
 related_issue: "kanang29/day-in-the-life-copilot-lab#3"
 ---
 

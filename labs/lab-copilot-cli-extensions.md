@@ -1,6 +1,8 @@
 ---
 title: "Authoring a Copilot CLI Extension and Triggering It from a Hook"
 lab_number: "cli-extensions"
+tier: advanced
+surface: cli
 pace:
   presenter_minutes: 12
   self_paced_minutes: 35

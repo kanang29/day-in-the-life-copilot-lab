@@ -1,6 +1,8 @@
 ---
 title: "Skills & Prompts"
 lab_number: 4
+tier: beginner
+surface: vscode
 pace:
   presenter_minutes: 4
   self_paced_minutes: 15

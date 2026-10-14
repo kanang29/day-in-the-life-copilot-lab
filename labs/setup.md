@@ -1,3 +1,14 @@
+---
+title: "Hands-on Lab Setup"
+lab_number: setup
+tier: beginner
+surface: vscode
+pace:
+  presenter_minutes: 2
+  self_paced_minutes: 5
+registry: docs/_meta/registry.yaml
+---
+
 # Hands-on Lab Setup
 
 > **Setup has moved!** All setup instructions are now in the [README](../README.md).

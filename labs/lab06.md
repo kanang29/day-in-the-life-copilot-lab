@@ -1,6 +1,8 @@
 ---
 title: "Hooks"
 lab_number: 6
+tier: advanced
+surface: cli
 pace:
   presenter_minutes: 3
   self_paced_minutes: 10

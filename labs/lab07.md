@@ -1,6 +1,8 @@
 ---
 title: "Multi-Agent Orchestration"
 lab_number: 7
+tier: beginner
+surface: vscode
 pace:
   presenter_minutes: 4
   self_paced_minutes: 20

@@ -1,6 +1,8 @@
 ---
 title: "Creating a .NET Development Agent"
 lab_number: 3
+tier: beginner
+surface: vscode
 pace:
   presenter_minutes: 4
   self_paced_minutes: 15

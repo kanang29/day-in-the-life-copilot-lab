@@ -1,6 +1,8 @@
 ---
 title: "GitHub Admin Controls for Copilot/AI"
 lab_number: 17
+tier: advanced
+surface: github
 pace:
   presenter_minutes: 6
   self_paced_minutes: 25

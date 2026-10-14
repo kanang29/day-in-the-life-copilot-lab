@@ -1,6 +1,8 @@
 ---
 title: "Copilot Coding Agent & Code Review"
 lab_number: 9
+tier: advanced
+surface: github
 pace:
   presenter_minutes: 5
   self_paced_minutes: 20

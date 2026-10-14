@@ -1,6 +1,8 @@
 ---
 title: "Agent Memory: Personalities, Lessons, and Consolidation"
 lab_number: 10
+tier: beginner
+surface: vscode
 pace:
   presenter_minutes: 5
   self_paced_minutes: 25

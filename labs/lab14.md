@@ -1,6 +1,8 @@
 ---
 title: "Orchestrator + tmux Pattern (Deep-Dive)"
 lab_number: 14
+tier: advanced
+surface: cli
 pace:
   presenter_minutes: 15
   self_paced_minutes: 45

@@ -1,6 +1,8 @@
 ---
 title: "MCP Server Configuration"
 lab_number: 5
+tier: beginner
+surface: vscode
 pace:
   presenter_minutes: 3
   self_paced_minutes: 15

@@ -1,6 +1,8 @@
 ---
 title: "Enterprise Marketplace & Plugin Governance"
 lab_number: 16
+tier: advanced
+surface: github
 pace:
   presenter_minutes: 6
   self_paced_minutes: 25

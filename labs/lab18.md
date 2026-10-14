@@ -1,6 +1,8 @@
 ---
 title: "Spec-Driven Design, Stacked PRs & Code Review in the Loop"
 lab_number: 18
+tier: advanced
+surface: github
 pace:
   presenter_minutes: 8
   self_paced_minutes: 30

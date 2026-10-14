@@ -1,6 +1,8 @@
 ---
 title: "Building a GitHub CLI Extension that Calls an LLM"
 lab_number: gh-extensions
+tier: advanced
+surface: cli
 pace:
   presenter_minutes: 12
   self_paced_minutes: 30

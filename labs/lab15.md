@@ -1,6 +1,8 @@
 ---
 title: "LSP & Code Intelligence in Copilot CLI"
 lab_number: 15
+tier: advanced
+surface: cli
 pace:
   presenter_minutes: 5
   self_paced_minutes: 20
