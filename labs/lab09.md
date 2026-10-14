@@ -140,7 +140,9 @@ Key characteristics:
 🌐 **On GitHub:**
 
 1. Go to your repository → **Settings** → **Copilot** → **Cloud agent**
-2. Ensure the cloud agent is **enabled**
+
+2. Ensure the coding agent is **enabled**
+
 3. If you're in an organization, the org owner may need to enable it from **Organization settings** → **Copilot** → **Policies**
 
 > 💡 **Firewall rules:** If your organization uses a GitHub App allowlist or IP restrictions, ensure the Copilot Cloud Agent's GitHub App is permitted. See [Managing access to GitHub Copilot cloud agent](https://docs.github.com/en/copilot/concepts/enterprise/cloud-agent-access) for details.
