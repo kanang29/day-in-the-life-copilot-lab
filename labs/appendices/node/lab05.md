@@ -31,4 +31,4 @@ A failing test surface gives Copilot more accurate context to ground its answers
 
 ## C. Suggested first prompt
 
-> `@context7 In the node/ workspace I have Fastify v4 and Drizzle ORM (better-sqlite3). Show me the idiomatic way to register a route plugin that depends on a Drizzle db instance via Fastify decorators.`
+> In the node/ workspace I have Fastify v4 and Drizzle ORM (better-sqlite3). Use context7 to show me the idiomatic way to register a route plugin that depends on a Drizzle db instance via Fastify decorators.

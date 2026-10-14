@@ -79,19 +79,14 @@ Get-Content .github\prompts\create-<track>-test.prompt.md -TotalCount 7
 
 Let's verify the skill activates when discussing .NET testing.
 
-🖥️ **In your terminal:**
+💬 **In VS Code's Copilot Chat (Agent mode):**
 
-1. Start Copilot CLI:
-```bash
-copilot
-```
-
-2. Ask a question that should trigger the `dotnet-testing` skill:
+1. Ask a question that should trigger the `dotnet-testing` skill:
 ```
 How should I write unit tests for the StudentsController in ContosoUniversity?
 ```
 
-3. Copilot should reference patterns from your skill:
+2. Copilot should reference patterns from your skill:
    - `MethodName_Condition_ExpectedResult` naming
    - Moq for mocking `IRepository<Student>`
    - Arrange-Act-Assert pattern
@@ -99,7 +94,7 @@ How should I write unit tests for the StudentsController in ContosoUniversity?
 > 💡 **What you should see:** The response should reference patterns from your skill — look for mentions of `MethodName_Condition_ExpectedResult()` naming, Moq for mocking, or WebApplicationFactory. If none appear, the skill may not have auto-activated — try mentioning "testing" or "xUnit" explicitly.
 Example: "I need to write xUnit and Moq tests for the ASP.NET Core StudentsController in ContosoUniversity. What testing patterns and naming conventions should I follow?"
 
-4. Now try the prompt:
+3. Now try the prompt:
 ```
 @create-dotnet-test for dotnet/ContosoUniversity.Web/Controllers/CoursesController.cs
 ```

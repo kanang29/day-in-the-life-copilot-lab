@@ -22,7 +22,8 @@ In this lab you will create an orchestrator agent that coordinates a development
 > - Cheaper alternative: keep the top-level chat on `auto`, but pin
 >   any `task` tool sub-agent dispatches in §7.4 to
 >   `claude-haiku-4.5` for the simple delegations and reserve
->   `claude-opus-4.6` (the repo default) only for the planner /
+>   `claude-opus-5` (registry `models.premium` — the registry's
+>   default is `auto`, not a hardcoded model) only for the planner /
 >   reviewer roles.
 > - Compaction trigger: after §7.3 (orchestrator built and tested),
 >   run `/clear` before §7.4's multi-agent rehearsal so you don't
@@ -33,18 +34,11 @@ References:
 - [Custom agents configuration](https://docs.github.com/en/copilot/reference/custom-agents-configuration)
 - [Agent handoffs](https://docs.github.com/en/copilot/reference/custom-agents-configuration#handoffs)
 
-## 7.0 Copilot CLI currency (2026 refresh)
-
-> 💡 Commands are current as of this refresh; versions, model tiers, and MCP
-> pins live in [`docs/_meta/registry.yaml`](../docs/_meta/registry.yaml).
-
-| Capability | Command / surface | Use when |
-|------------|-------------------|----------|
-| **Install a plugin** | `/plugin install owner/repo` | Pulling a packaged multi-agent plugin (e.g. dev + QA + reviewer bundle). |
-| **Parallel subagents** | `/fleet` | Running dev and QA agents in parallel when tasks are independent. |
-| **Plan mode vs autopilot mode** | `Shift+Tab` (plan mode) vs autopilot mode | The orchestrator runs in plan mode; worker agents often run in autopilot mode. |
-| **Mid-session model switch** | `/model <tier-or-id>` | Upshift the orchestrator to `models.premium`; keep workers on `models.cheap` to save tokens. |
-| **Local tool discovery** | `extensions_manage` operation `list` | Discovering which bundled agents are available before wiring a handoff. |
+> 🖥️ **Surface:** every required step below works entirely inside **VS
+> Code's Copilot Chat** (agent mode + the agent picker) — no standalone
+> Copilot CLI install needed. An **Advanced (optional)** section at the end
+> covers the CLI-only power features (plugin bundles, `/fleet`, slash
+> commands).
 
 ## 7.1 Design the Orchestration Flow
 
@@ -327,27 +321,23 @@ Delegate to @dotnet-qa with context about what was implemented.
 
 Let's test the orchestrator with a small feature request.
 
-🖥️ **In your terminal:**
+💬 **In VS Code's Copilot Chat:**
 
-1. Start Copilot CLI:
-```bash
-copilot
+1. Open the Chat view, pick `lab-orchestrator` from the agent picker at the
+   bottom of the Chat view, and send a feature request:
+```
+Add a "FullName" computed property to the Student model that returns "LastName, FirstMidName". Update the Students/Index view to use it.
 ```
 
-2. Invoke the orchestrator with a feature request:
-```
-@lab-orchestrator Add a "FullName" computed property to the Student model that returns "LastName, FirstMidName". Update the Students/Index view to use it.
-```
-
-3. Observe the orchestrator's behavior:
+2. Observe the orchestrator's behavior:
    - **Phase 1**: It should analyze the request and identify files to change
    - **Phase 2**: It should delegate to `@dotnet-dev` to add the property and update the view
    - **Phase 3**: It should delegate to `@dotnet-qa` to write tests for the new property
    - **Phase 4**: It should delegate to `@code-reviewer` to review the changes
 
-4. If time permits, try a more complex request:
+3. If time permits, keep the same agent selected and try a more complex request:
 ```
-@lab-orchestrator Add pagination to the Students/Index page. Support page size of 10 with next/previous navigation.
+Add pagination to the Students/Index page. Support page size of 10 with next/previous navigation.
 ```
 
 > 💡 **What you should see:** The orchestrator analyzes the task, then delegates to @dotnet-dev (you'll see its name appear). After implementation, it delegates to @code-reviewer for feedback. The full cycle may take 1-2 minutes.
@@ -434,5 +424,25 @@ if (Test-Path .github/agents/dotnet-qa.agent.md) { "Already exists" } else { "Ne
 See [`solutions/lab07-orchestrator/lab-orchestrator.agent.md`](../solutions/lab07-orchestrator/lab-orchestrator.agent.md) for the complete reference implementation.
 
 </details>
+
+## Advanced (optional): Copilot CLI orchestration power features
+
+> 🔧 This section is **not required** to complete the lab — everything above
+> runs entirely in VS Code. It documents the Copilot CLI-only verbs for
+> learners working the advanced/CLI track. Commands are current as of this
+> refresh; versions, model tiers, and MCP pins live in
+> [`docs/_meta/registry.yaml`](../docs/_meta/registry.yaml).
+
+| Capability | Command / surface | Use when |
+|------------|-------------------|----------|
+| **Install a plugin** | `/plugin install owner/repo` | Pulling a packaged multi-agent plugin (e.g. dev + QA + reviewer bundle). |
+| **Parallel subagents** | `/fleet` | Running dev and QA agents in parallel when tasks are independent. |
+| **Plan mode vs autopilot mode** | `Shift+Tab` (plan mode) vs autopilot mode | The orchestrator runs in plan mode; worker agents often run in autopilot mode. |
+| **Mid-session model switch** | `/model <tier-or-id>` | Upshift the orchestrator to `models.premium`; keep workers on `models.cheap` to save tokens. |
+| **Local tool discovery** | `extensions_manage` operation `list` | Discovering which bundled agents are available before wiring a handoff. |
+
+The same `@lab-orchestrator` delegation flow from §7.4 works unchanged in
+the CLI: start a session with `copilot`, then send
+`@lab-orchestrator <feature request>` at the prompt.
 
 **Next:** [Lab 08 — gh-aw: PRD Generation](lab08.md)

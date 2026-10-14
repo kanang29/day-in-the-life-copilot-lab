@@ -20,101 +20,14 @@ References:
 - [Agent skills](https://docs.github.com/en/copilot/concepts/agents/about-agent-skills)
 - [Custom instructions](https://docs.github.com/en/copilot/how-tos/copilot-on-github/customize-copilot/add-custom-instructions/add-repository-instructions)
 - [Prompt files](https://docs.github.com/en/copilot/tutorials/customization-library/prompt-files)
-- [Creating extensions for GitHub Copilot CLI](https://docs.github.com/en/copilot/tutorials/create-an-extension)
+- [Copilot customization cheat sheet](https://docs.github.com/en/copilot/reference/customization-cheat-sheet)
 
-## 1.0a Copilot CLI currency (2026 refresh)
-
-> 💡 The Copilot CLI surface evolves quickly. Commands are current as of this
-> refresh; versions, model tiers, and MCP pins live in
-> [`docs/_meta/registry.yaml`](../docs/_meta/registry.yaml) so labs stay
-> consistent.
-
-| Capability | Command / surface | Use when |
-|------------|-------------------|----------|
-| **Install a plugin** | `/plugin install owner/repo` (or `copilot plugin install owner/repo`) | Pulling a marketplace or private-registry plugin. Covered in depth below and in Lab 11. |
-| **Parallel subagents** | `/fleet` | Running independent research or implementation threads in one session. |
-| **Plan mode vs autopilot mode** | `Shift+Tab` (plan mode) (review each step) vs autopilot mode (batch execute) | Plan mode for exploratory/risky work; autopilot mode for scripted, well-understood tasks. |
-| **Mid-session model switch** | `/model <tier-or-id>` | Downshift to `models.cheap` in the registry for routine edits; upshift to `models.premium` for deep reasoning. |
-| **Local tool discovery (experimental)** | Start with `copilot --experimental`, then ask the model to call `extensions_manage` with operation `list` \| `inspect` \| `scaffold` \| `guide`. This is a model-side tool call, **not** a slash command. | Inspecting which extensions are loaded — the in-repo analogue of a marketplace. |
-| **Local discovery (user-facing alternative)** | `/skills`, `/plugin`, and `/mcp` | Browse and manage the skills, plugins, and MCP servers available to you without using the experimental `extensions_manage` tool. |
-
-*Lab 11 builds an enterprise plugin that publishes to a private
-`COPILOT_PLUGIN_REGISTRIES` registry using exactly this surface.*
-
-
-## 1.0 Discover Agents from the Marketplace
-
-The Copilot CLI plugin marketplace is a registry of community and first-party agents you can install directly from your terminal. Plugins extend Copilot with specialized capabilities — think of them as pre-built agents for common development tasks.
-
-### Browse available plugins
-
-🖥️ **In your terminal:**
-
-```bash
-# List registered marketplaces
-copilot plugin marketplace list
-
-# Browse available plugins in a marketplace
-copilot plugin marketplace browse awesome-copilot
-```
-
-Browse the available plugins and look for ones related to **.NET**, **testing**, or **database management** — these will be most useful for the ContosoUniversity project we'll work with throughout these labs.
-
-### Install a plugin
-
-You can install plugins by name from a marketplace or directly from a GitHub repository:
-
-```bash
-# Install from a GitHub repo (most reliable method)
-copilot plugin install OWNER/REPO
-
-# Concrete worked example used later in Lab 11 — safe to install now:
-copilot plugin install github/awesome-copilot
-
-# Or install from a marketplace by name
-copilot plugin install PLUGIN-NAME@awesome-copilot
-```
-
-> ⏭️ **Skip this step if** you're on a restricted network, you don't have a
-> GitHub auth token wired up yet, or this is a presenter-led run where the
-> instructor has already installed plugins for the class. Plugin install is
-> **not a prerequisite** for any later lab — Labs 02–10 work end-to-end without
-> a single plugin installed. Lab 11 walks you through publishing your *own*
-> plugin from scratch.
-
-### Verify the installation
-
-```bash
-# Confirm the plugin is installed and ready
-copilot plugin list
-```
-
-You should see your installed plugin listed with its name, version, and source.
-
-### Use the plugin
-
-Once installed, plugins are available in your Copilot conversations. Invoke them by name:
-
-```bash
-# Interactive: start a session, then reference the plugin
-copilot
-> /plugin-name help me with my task
-```
-
-```bash
-# Non-interactive (CI / scripted / headless): same call in one shot
-copilot --prompt "/plugin-name help me with my task" --allow-all-tools
-```
-
-> 💡 **Key insight:** Marketplace plugins give you a head start for common workflows — but they're just the beginning. In Lab 03, you'll learn to **create your own agents** tailored to your team's specific needs. Think of marketplace plugins as patterns you can study and customize.
-
-> ⚠️ **Offline or marketplace unavailable?** If you can't access the marketplace, skip ahead to [section 1.1](#11-the-configuration-ecosystem). The rest of this lab works entirely with local configuration files.
-
-References:
-- [Finding and installing plugins](https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/plugins-finding-installing)
-- [Creating custom agents](https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/create-custom-agents-for-cli)
-
----
+> 🖥️ **Surface:** every required step below works entirely inside **VS Code's
+> Copilot Chat** (agent mode) — no standalone Copilot CLI install needed. If
+> you also have the CLI set up, an **Advanced (optional)** section at the end
+> of this lab shows the CLI-only power features (plugin marketplace, `/fleet`,
+> slash commands) for later reference; none of them are required for Lab 01
+> or any lab through Lab 10.
 
 ## 1.1 The Configuration Ecosystem
 
@@ -132,7 +45,17 @@ This repository ships with a rich set of Copilot configurations. Here's the map 
 | `.copilot/mcp-config.json` | External tool integrations | 4 servers | Lab 05 |
 | `.github/workflows/*.md` | Cloud-side AI automation (gh-aw) | 3 | Labs 08-09 |
 
-🖥️ **Quick look — pick any one:**
+💬 **Quick look — ask Copilot Chat (Agent mode):**
+
+```text
+List the files in .github/agents/, then show me the contents of
+.github/agents/planner.agent.md so I can see the anatomy of an agent file.
+```
+
+Copilot reads both the directory and the file itself — no terminal needed.
+
+<details>
+<summary>Prefer the terminal?</summary>
 
 **WSL/Bash:**
 ```bash
@@ -151,6 +74,8 @@ Get-ChildItem .github/agents/
 # Read one to see the anatomy (YAML frontmatter + markdown body)
 Get-Content .github/agents/planner.agent.md
 ```
+
+</details>
 
 ## 1.2 The Instruction Hierarchy
 
@@ -174,7 +99,7 @@ Copilot doesn't just do keyword text search — it uses multiple layers of code 
 | Layer | How It Works | Scope |
 |-------|-------------|-------|
 | **Semantic indexing** | Builds a meaning-based index of your codebase. Near-instant (seconds). Understands intent, not just keywords. | Local repo |
-| **LSP integration (GA)** | When a language server is configured (project `.github/lsp.json` or personal `~/.copilot/lsp-config.json`), Copilot CLI automatically prefers it over text search for go-to-definition, find references, hover, rename, workspace symbol search, go-to-implementation, and call hierarchy — no slash command needed. See [Lab 15 — LSP & Code Intelligence](lab15.md). | Local repo |
+| **LSP integration (GA)** | When a language server is configured (project `.github/lsp.json` or personal `~/.copilot/lsp-config.json`), Copilot automatically prefers it over text search for go-to-definition, find references, hover, rename, workspace symbol search, go-to-implementation, and call hierarchy — no slash command needed. See [Lab 15 — LSP & Code Intelligence](lab15.md). | Local repo |
 | **ripgrep + glob** | Fast pattern-based search for exact matches across files — the fallback when no LSP server is configured for a language | Local repo |
 | **GitHub MCP** | Semantic code search across **any GitHub repo** you have access to — remotely. The agent can scan codebases it's never seen locally. | Remote (GitHub) |
 
@@ -182,36 +107,23 @@ Copilot doesn't just do keyword text search — it uses multiple layers of code 
 
 ## 1.4 Try It
 
-🖥️ **In your terminal:**
+💬 **In VS Code's Copilot Chat:**
 
-```bash
-# Interactive: start Copilot CLI, then invoke the planner agent
-copilot
-```
+1. Open the Chat view and switch to **Agent mode**.
+2. Open the **agent picker** (the agent dropdown at the bottom of the chat
+   view) and select **`planner`**.
+3. Ask:
 
-Then try:
-```
-@planner How should I add a student search feature to ContosoUniversity?
-```
-
-**Non-interactive equivalent** (handy for CI, smoke checks, or shared
-workstations where you'd rather not leave a TTY session open):
-
-```bash
-copilot --agent planner \
-  --prompt "How should I add a student search feature to ContosoUniversity?" \
-  --allow-all-tools
-```
-
-```powershell
-copilot --agent planner `
-  --prompt "How should I add a student search feature to ContosoUniversity?" `
-  --allow-all-tools
-```
+   ```text
+   How should I add a student search feature to ContosoUniversity?
+   ```
 
 > 💡 Notice how Copilot references the project's architecture, file structure, and conventions — all loaded from the configuration files we just explored. This is semantic search in action.
 
-> 💡 Copilot loads agents from `.github/agents/` in the current working directory. You can also place personal agents in `~/.copilot/agents/`.
+> 💡 Copilot loads workspace agents from `.github/agents/` in your open
+> folder. You can also create personal agents that follow you across
+> workspaces — pick **User profile** instead of **Workspace** when creating
+> one from the agent picker.
 
 ## 1.5 Final
 
@@ -227,8 +139,34 @@ copilot --agent planner `
 | **AGENTS.md** | `AGENTS.md` (repo root) | Non-obvious project context (keep minimal) |
 | **Prompts** | `.github/prompts/*.prompt.md` | Reusable prompt templates |
 | **Hooks** | `.github/hooks/default.json` | Lifecycle guardrails |
-| **MCP** | `.copilot/mcp-config.json` | External tool integrations |
+| **MCP** | `.vscode/mcp.json` (VS Code) / `.copilot/mcp-config.json` (CLI) | External tool integrations |
 
 </details>
+
+## Advanced (optional): Copilot CLI power features
+
+> 🔧 Everything below needs the standalone **Copilot CLI** installed — it's
+> not available from VS Code's Copilot Chat. Nothing here is required for
+> this lab or any lab through Lab 10; skip to [Lab 02](lab02.md) if you're
+> staying VS Code-only. Lab 11 is a full CLI-and-plugins lab.
+
+| Capability | Command / surface | Use when |
+|------------|-------------------|----------|
+| **Browse a plugin marketplace** | `copilot plugin marketplace list` / `browse awesome-copilot` | Finding community agents for a stack (e.g. .NET, testing) before writing your own. Lab 11 publishes a plugin using this same surface. |
+| **Install a plugin** | `copilot plugin install OWNER/REPO` (or `PLUGIN-NAME@marketplace`) | Pulling a marketplace or private-registry plugin, e.g. `copilot plugin install github/awesome-copilot`. |
+| **Use an installed plugin** | `copilot`, then `/plugin-name help me with my task` (interactive) or `copilot --prompt "/plugin-name ..." --allow-all-tools` (scripted) | Once installed, plugins behave like slash commands in a CLI session. |
+| **Parallel subagents** | `/fleet` | Running independent research or implementation threads in one session. |
+| **Plan mode vs autopilot mode** | `Shift+Tab` (plan mode, review each step) vs autopilot mode (batch execute) | Plan mode for exploratory/risky work; autopilot mode for scripted, well-understood tasks. |
+| **Mid-session model switch** | `/model <tier-or-id>` | Downshift to `models.cheap` in the registry for routine edits; upshift to `models.premium` for deep reasoning. |
+| **Local tool discovery** | `/skills`, `/plugin`, `/mcp` | Browse the skills, plugins, and MCP servers available to the CLI session. |
+
+> 💡 Commands are current as of this refresh; versions, model tiers, and MCP
+> pins live in [`docs/_meta/registry.yaml`](../docs/_meta/registry.yaml) so
+> labs stay consistent as the CLI evolves.
+
+References:
+- [Finding and installing plugins](https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/plugins-finding-installing)
+- [Creating custom agents for Copilot CLI](https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/create-custom-agents-for-cli)
+- [Creating extensions for GitHub Copilot CLI](https://docs.github.com/en/copilot/tutorials/create-an-extension)
 
 **Next:** [Lab 02 — Custom Instructions & AGENTS.md](lab02.md)

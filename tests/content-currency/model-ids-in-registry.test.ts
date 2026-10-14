@@ -38,13 +38,6 @@ interface KnownDrift {
 
 const KNOWN_MODEL_DRIFT: KnownDrift[] = [
   {
-    file: "lab07.md",
-    modelId: "claude-opus-4.6",
-    reason:
-      "Cites the repo's AGENTS.md sub-agent-dispatch pin, itself stale (claude-opus-4.6 is not on the current Supported AI models page).",
-    fixedInPhase: "Phase 2 (beginner track)",
-  },
-  {
     file: "lab10.md",
     modelId: "claude-opus-4.6",
     reason:

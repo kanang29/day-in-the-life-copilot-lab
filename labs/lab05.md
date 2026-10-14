@@ -23,10 +23,11 @@ References:
 > [`labs/appendices/dotnet/lab05.md`](appendices/dotnet/lab05.md) and
 > [`labs/appendices/node/lab05.md`](appendices/node/lab05.md).
 
-## 5.0 Copilot CLI currency (2026 refresh)
-
-> 💡 Commands are current as of this refresh; versions, model tiers, and MCP
-> pins live in [`docs/_meta/registry.yaml`](../docs/_meta/registry.yaml).
+> 🖥️ **Surface:** every required step below works entirely inside **VS
+> Code's Copilot Chat** — this lab reads and edits `.vscode/mcp.json`
+> rather than the Copilot CLI's `~/.copilot/mcp-config.json`. An
+> **Advanced (optional)** section at the end covers the CLI-only
+> equivalents.
 
 > 🆕 **MCP protocol revision (2026-07-28, confirmed breaking change):** the
 > servers below now speak the stateless MCP spec pinned at
@@ -34,39 +35,39 @@ References:
 > Protocol-level sessions and the `initialize` handshake are gone — every
 > request now carries its protocol version/capabilities inline, and a new
 > `server/discover` RPC replaces the old handshake for version negotiation.
-> This is transparent to you as a Copilot CLI user (the client handles it),
-> but if you ever read raw MCP traffic or write your own server, don't expect
+> This is transparent to you as a Copilot user (the client handles it), but
+> if you ever read raw MCP traffic or write your own server, don't expect
 > an `Mcp-Session-Id` header or a stateful `initialize` call — see
 > [the official changelog](https://modelcontextprotocol.io/specification/2026-07-28/changelog).
-
-| Capability | Command / surface | Use when |
-|------------|-------------------|----------|
-| **Install a plugin** | `/plugin install owner/repo` | Pulling an MCP-bundling plugin from a private or public registry. |
-| **Parallel subagents** | `/fleet` | Querying multiple MCP servers in parallel (e.g. `context7` + `microsoft-learn`). |
-| **Plan mode vs autopilot mode** | `Shift+Tab` (plan mode) vs autopilot mode | Plan mode when wiring a new MCP server; autopilot mode when re-running well-known MCP queries. |
-| **Mid-session model switch** | `/model <tier-or-id>` | Downshift to `models.cheap` in the registry when the answer is already in MCP-retrieved context. |
-| **Local tool discovery** | `extensions_manage` operation `list` | Seeing which MCP-backed tools are loaded right now. |
 
 ## 5.1 Examine Existing MCP Configuration
 
 MCP servers extend Copilot's capabilities with external tools — documentation lookup, knowledge persistence, structured reasoning, and more.
 
-🖥️ **In your terminal:**
+💬 **Ask Copilot Chat (Agent mode):**
 
-1. View the MCP configuration:
+```text
+Show me the contents of .vscode/mcp.json and list each configured server.
+```
+
+<details>
+<summary>Prefer the terminal?</summary>
 
 **WSL/Bash:**
 ```bash
-cat ~/.copilot/mcp-config.json
+cat .vscode/mcp.json
 ```
 
 **PowerShell:**
 ```powershell
-Get-Content ~/.copilot/mcp-config.json
+Get-Content .vscode/mcp.json
 ```
 
-2. This repository ships with 6 MCP servers (kept in sync with
-   [`docs/_meta/registry.yaml`](../docs/_meta/registry.yaml) `mcp_servers:`):
+</details>
+
+This repository's **VS Code** config (`.vscode/mcp.json`) ships with 5 MCP
+servers (kept in sync with [`docs/_meta/registry.yaml`](../docs/_meta/registry.yaml)
+`mcp_servers:`, minus `fabric`, which Lab 12 adds on top of this baseline):
 
 | Server | Type | Purpose |
 |--------|------|---------|
@@ -75,51 +76,55 @@ Get-Content ~/.copilot/mcp-config.json
 | `sequential-thinking` | local (stdio) | Structured chain-of-thought reasoning |
 | `workiq` | local (stdio) | Microsoft Work IQ for productivity |
 | `microsoft-learn` | http | Azure/Microsoft official documentation |
-| `fabric` | local (stdio) | Local/open-source Fabric MCP Server for OneLake/medallion patterns (see [Lab 12](lab12.md); a separate remote Fabric Core MCP Server also exists for live-tenant work) |
 
-3. Notice the two server types:
-   - **local** (`"type": "local"`): Runs as a subprocess via `npx`. Uses stdio for communication.
-   - **http** (`"type": "http"`): Connects to a remote URL. No local process needed.
+> ⚠️ **The Copilot CLI's config is a different file with one fewer server:**
+> `.copilot/mcp-config.json` has no `memory` entry — only `context7`,
+> `sequential-thinking`, `workiq`, `microsoft-learn`. If you're following
+> along in the CLI instead of VS Code, your server list is one shorter and
+> the top-level JSON key is `mcpServers` with `"type": "local"`, not
+> `.vscode/mcp.json`'s `servers` key with `"type": "stdio"` — same servers,
+> different schema per surface.
+
+Notice the two server types:
+- **stdio** (`"type": "stdio"`): Runs as a subprocess via `npx`. Communicates over standard input/output.
+- **http** (`"type": "http"`): Connects to a remote URL. No local process needed.
 
 ```json
 {
-  "context7": {
-    "type": "local",
-    "command": "npx",
-    "args": ["-y", "@upstash/context7-mcp"],
-    "tools": ["*"]
-  },
-  "microsoft-learn": {
-    "type": "http",
-    "url": "https://learn.microsoft.com/api/mcp",
-    "tools": ["*"]
+  "servers": {
+    "context7": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp"]
+    },
+    "microsoft-learn": {
+      "type": "http",
+      "url": "https://learn.microsoft.com/api/mcp"
+    }
   }
 }
 ```
 
-> 💡 **`tools: ["*"]`** means all tools from the server are available. You can restrict this to specific tools for security.
+> 💡 Omitting a `tools` filter (as `.vscode/mcp.json` does above) exposes
+> every tool the server offers. The Copilot CLI's schema supports an
+> explicit `"tools": ["*"]` (all) or a named allow-list for the same effect.
 
 ## 5.2 Use Context7 for Documentation Lookup
 
 Context7 provides up-to-date documentation for libraries and frameworks. Let's use it to look up .NET documentation.
 
-🖥️ **In your terminal:**
+💬 **In VS Code's Copilot Chat (Agent mode):**
 
-1. Start Copilot CLI:
-```bash
-copilot
-```
-
-2. Ask a question that requires library documentation:
+1. Ask a question that requires library documentation:
 ```
 Using Context7, look up how to configure WebApplicationFactory for integration testing in ASP.NET Core.
 ```
 
-3. Behind the scenes, Copilot calls two Context7 tools:
+2. Behind the scenes, Copilot calls two Context7 tools:
    - `resolve-library-id` — finds the Context7 library ID for "ASP.NET Core"
    - `query-docs` — queries documentation with the resolved ID
 
-4. Try another lookup:
+3. Try another lookup:
 ```
 Use Context7 to find Entity Framework Core migration best practices.
 ```
@@ -147,9 +152,17 @@ working alongside MCP.
 > (like this repo's `.copilot/lessons/` markdown wiki) even more clearly a
 > *client/application* concern, not something the protocol does for you.
 
-🖥️ **In your terminal:**
+💬 **In VS Code's Copilot Chat (Agent mode), unless noted:**
 
 1. Inspect the wiki that ships with the repo:
+
+```text
+List the files in .copilot/lessons/, then show me the first 20 lines of
+.copilot/lessons/index.md.
+```
+
+<details>
+<summary>Prefer the terminal?</summary>
 
 **WSL/Bash:**
 ```bash
@@ -163,7 +176,9 @@ Get-ChildItem .copilot/lessons
 Get-Content .copilot/lessons/index.md | Select-Object -First 20
 ```
 
-2. In Copilot CLI, ask the agent to record a project fact as a lesson:
+</details>
+
+2. Ask Copilot to record a project fact as a lesson:
 ```
 Append a lesson to .copilot/lessons/log.md: ContosoUniversity uses
 Entity Framework Core 8 with SQL Server and follows the repository
@@ -184,7 +199,8 @@ head -30 .copilot/lessons/log.md
 Get-Content .copilot/lessons/log.md | Select-Object -First 30
 ```
 
-4. Open a fresh session (`/exit`, then start Copilot again) and ask:
+4. Open a new chat session (the **+** / **New Chat** control at the top of
+   the Chat view) and ask:
 ```
 What does this repo use for data access? Check .copilot/lessons/
 before answering.
@@ -201,29 +217,26 @@ wrote to itself, committed alongside the code.
 
 ## 5.4 Add a New MCP Server
 
-Let's add a new MCP server to the configuration. We'll add a filesystem server for enhanced file operations.
+Let's add a new MCP server to the configuration. We'll add a fetch server for web content.
 
-🖥️ **In your terminal:**
+💬 **In VS Code:**
 
-1. Open the MCP configuration:
-```bash
-code ~/.copilot/mcp-config.json
-```
+1. Open `.vscode/mcp.json` in the editor.
 
-2. Add a new server entry. For example, to add a fetch server for web content:
+2. Add a new server entry under `servers`. For example, to add a fetch server for web content:
 
 ```json
 {
-  "mcpServers": {
-    "context7": { ... },
-    "sequential-thinking": { ... },
-    "workiq": { ... },
-    "microsoft-learn": { ... },
+  "servers": {
+    "context7": { "...": "..." },
+    "memory": { "...": "..." },
+    "sequential-thinking": { "...": "..." },
+    "workiq": { "...": "..." },
+    "microsoft-learn": { "...": "..." },
     "fetch": {
-      "type": "local",
+      "type": "stdio",
       "command": "npx",
-      "args": ["-y", "@kazuph/mcp-fetch"],
-      "tools": ["*"]
+      "args": ["-y", "@kazuph/mcp-fetch"]
     }
   }
 }
@@ -231,16 +244,16 @@ code ~/.copilot/mcp-config.json
 
 3. The fetch server provides a `fetch` tool that can retrieve web pages, API responses, and other HTTP content.
 
-4. After saving, restart your Copilot session for the new server to load.
+4. After saving, open the Command Palette (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd> / <kbd>Command</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd>) and run **MCP: List Servers** to confirm `fetch` shows up, starting it if prompted.
 
 5. Test the new server:
 ```
 Fetch the README from https://raw.githubusercontent.com/dotnet/aspnetcore/main/README.md
 ```
 
-> ⚠️ **Security note**: Be careful with MCP servers that have broad access. The `tools: ["*"]` setting exposes all tools. In production, restrict to only the tools you need.
+> ⚠️ **Security note**: Be careful with MCP servers that have broad access — by default a server's full tool set is available to Copilot. The Copilot CLI's schema lets you restrict this explicitly with `"tools": [...]`; in production, restrict to only the tools you need.
 
-> 💡 **Verify the server loaded:** After restarting your Copilot session, test with a query the new server should handle. If it responds with relevant data, the server is working.
+> 💡 **Verify the server loaded:** After **MCP: List Servers** shows it running, test with a query the new server should handle. If it responds with relevant data, the server is working.
 
 ## 5.5 Final
 
@@ -249,20 +262,21 @@ Fetch the README from https://raw.githubusercontent.com/dotnet/aspnetcore/main/R
 
 | Concept | Details |
 |---------|---------|
-| **Config location** | `~/.copilot/mcp-config.json` (user scope; workspace scope uses `<workspace>/.mcp.json`) |
-| **Server types** | `local` (stdio subprocess) or `http` (remote URL) |
-| **Tool filtering** | `"tools": ["*"]` for all, or list specific tool names |
+| **Config location** | `.vscode/mcp.json` (VS Code, this repo's workspace scope) — key `servers`, type `stdio`/`http`. Copilot CLI uses `~/.copilot/mcp-config.json` (user scope) — key `mcpServers`, type `local`/`http`. |
+| **Server types** | `stdio`/`local` (subprocess) or `http` (remote URL) — naming differs by surface, concept is the same |
+| **Tool filtering** | CLI schema: `"tools": ["*"]` for all, or list specific tool names |
 | **Agent access** | Use `mcp-servers` in agent frontmatter to grant server access |
 
-**Available MCP servers in this repo:**
+**Available MCP servers in this repo (`.vscode/mcp.json` baseline):**
 
 | Server | Tools | Use Case |
 |--------|-------|----------|
 | context7 | `resolve-library-id`, `query-docs` | Library documentation |
 | memory | knowledge-graph primitive | Available but not used for this repo's persistence story — see §5.3 |
 | sequential-thinking | `sequentialthinking` | Structured reasoning |
+| workiq | Microsoft Work IQ tools | Productivity |
 | microsoft-learn | `microsoft_docs_search`, `microsoft_docs_fetch` | Microsoft documentation |
-| fabric | Fabric/OneLake tools | Local Fabric MCP for Lab 12 (see registry `note` for remote-vs-local distinction) |
+| fabric *(added in Lab 12, not in the baseline above)* | Fabric/OneLake tools | Local Fabric MCP for Lab 12 (see registry `note` for remote-vs-local distinction) |
 
 **Best practices:**
 - Use `context7` for up-to-date library docs instead of guessing from training data
@@ -273,10 +287,27 @@ Fetch the README from https://raw.githubusercontent.com/dotnet/aspnetcore/main/R
 </details>
 
 <details>
-<summary>Solution: .mcp.json with fetch server</summary>
+<summary>Solution: mcp.json with fetch server</summary>
 
-See [`solutions/lab05-mcp-config/.mcp.json`](../solutions/lab05-mcp-config/.mcp.json)
+See [`solutions/lab05-mcp-config/mcp.json`](../solutions/lab05-mcp-config/mcp.json)
 
 </details>
+
+## Advanced (optional): Copilot CLI power features for MCP
+
+> 🔧 Everything below needs the standalone **Copilot CLI** installed. Nothing
+> here is required for this lab; skip to [Lab 06](lab06.md) if you're staying
+> VS Code-only.
+
+| Capability | Command / surface | Use when |
+|------------|-------------------|----------|
+| **Install a plugin** | `/plugin install owner/repo` | Pulling an MCP-bundling plugin from a private or public registry. |
+| **Parallel subagents** | `/fleet` | Querying multiple MCP servers in parallel (e.g. `context7` + `microsoft-learn`). |
+| **Plan mode vs autopilot mode** | `Shift+Tab` (plan mode) vs autopilot mode | Plan mode when wiring a new MCP server; autopilot mode when re-running well-known MCP queries. |
+| **Mid-session model switch** | `/model <tier-or-id>` | Downshift to `models.cheap` in the registry when the answer is already in MCP-retrieved context. |
+| **Local tool discovery** | `extensions_manage` operation `list` | Seeing which MCP-backed tools are loaded right now. |
+
+> 💡 Commands are current as of this refresh; versions, model tiers, and MCP
+> pins live in [`docs/_meta/registry.yaml`](../docs/_meta/registry.yaml).
 
 **Next:** [Lab 06 — Hooks](lab06.md)

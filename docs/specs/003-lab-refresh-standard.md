@@ -166,7 +166,106 @@ egress to `api.github.com`, so `gh extension install github/gh-aw` 403s):
 after the Phase 1 changes in this document — confirmed unrelated.
 `make test-dotnet` (60/60) and `make test-node` (36/36) passed clean.
 
+## Phase 2 — Beginner track
+
+### What "VS Code Copilot" actually covers (verified 2026-10-14)
+
+An explore-agent audit of `setup.md`, `lab01`–`lab05`, `lab07` and their
+dotnet/node appendices found the required path in all six numbered labs
+assumes the **standalone Copilot CLI** throughout (interactive `copilot`
+REPL, `copilot --agent ... --prompt ...`, `copilot plugin ...`), not VS
+Code. Before rewriting, verified primary sources on what VS Code's own
+Copilot agent mode actually supports, since "no terminal command" is not
+the bar — "no dependency on the separate CLI product" is:
+
+| Mechanism | VS Code support | Source |
+|---|---|---|
+| Custom agents (`.github/agents/*.agent.md`) | ✓ — same file format as CLI/github.com; invoked via an **agent dropdown** in the Chat view, not a `--agent` flag | `docs.github.com/en/copilot/reference/custom-agents-configuration` ("configure... in GitHub.com, the Copilot CLI, and supported IDEs"); `.../reference/customization-cheat-sheet` ("select from the agent dropdown in your IDE, on GitHub, or in Copilot CLI") |
+| Agent skills (`.github/skills/*/SKILL.md`) | ✓ — "work with ... agent mode in Visual Studio Code"; auto-activated, no CLI-specific invocation | `docs.github.com/en/copilot/concepts/agents/about-agent-skills` |
+| Subagents (delegating to a sub-agent mid-session) | ✓ | `.../reference/copilot-feature-matrix` IDE table: Subagents = ✓ for VS Code (✗ for GitHub.com, ✓ for CLI) |
+| MCP servers | ✓ — but a **different config path** than the CLI: project-level is `.vscode/mcp.json`, not `~/.copilot/mcp-config.json` / `.copilot/mcp-config.json` | `.../how-tos/copilot-in-your-ide/.../extend-copilot-chat-with-mcp` ("create a `.vscode/mcp.json` file in the root of your repository") |
+| Prompt files (`.github/prompts/*.prompt.md`) | ✓ VS Code only — **not** Copilot CLI (lab04 already states this correctly) | `.../reference/copilot-feature-matrix`; `.../tutorials/customization-library/prompt-files/your-first-prompt-file` |
+| Hooks | Unsupported-to-preview, not a solid beginner-tier foundation | `.../concepts/agents/about-hooks` lists only "Copilot cloud agent on GitHub" and "GitHub Copilot CLI" (no VS Code); `.../reference/customization-cheat-sheet`'s IDE table separately marks VS Code `P` (preview). Both sources agree VS Code hooks support is, at best, not GA — consistent with Lab 06 staying Advanced · CLI (Phase 1) |
+| Plugins / marketplace (`copilot plugin ...`) | No entry in either IDE-support table | Absent from both `customization-cheat-sheet` and `copilot-feature-matrix` — treated as Copilot-CLI-specific, no VS Code equivalent exists to teach as a beginner-tier required step |
+
+**Refinement to the Phase 1 "`memory` MCP server" note:** checking
+`.vscode/mcp.json` (not just `.copilot/mcp-config.json`) shows the real
+state is more precise than "this repo removed its memory server" — the
+**CLI** config (`.copilot/mcp-config.json`) dropped `memory`, but the
+**VS Code** config (`.vscode/mcp.json`) still ships it. Phase 3 (Lab 10)
+must describe this surface-specific split accurately rather than repeating
+the issue text's blanket "removed" framing verbatim.
+
+### Rewrite approach
+
+For each required step that only *inspects* a repo file (`cat`, `ls`,
+`head` equivalents), the VS Code-compliant version asks Copilot Chat in
+Agent mode to show the file, rather than instructing the learner to open a
+terminal. For steps that *invoke* the standalone CLI product specifically
+(`copilot`, `copilot --agent`, `copilot plugin ...`), the fix is either (a)
+a direct VS Code equivalent per the table above (agent dropdown, prompt
+file picker, automatic skill loading), or (b) — only for plugins/marketplace,
+which have no VS Code equivalent — moving the step into an
+**Advanced (optional): Copilot CLI** callout. Bash/PowerShell terminal
+blocks are kept only where a lab's *appendix* step genuinely creates a
+file no editor affordance in the lab covers (e.g. heredoc file creation),
+since creating a file is surface-agnostic groundwork, not a CLI-only act;
+VS Code users can create the same file through the editor instead, which
+the lab now says explicitly.
+
+### Execution log — per-lab changes and two load-bearing bug fixes
+
+Beyond surface rephrasing, two edits were **factual-accuracy fixes**, not
+just VS Code-preference changes:
+
+1. **`labs/lab03.md` §3.3** — the lab's primary flow added MCP access to a
+   custom agent via `mcp-servers: ["context7"]` in the agent's YAML
+   frontmatter. The property table at
+   `docs.github.com/en/copilot/reference/custom-agents-configuration`
+   states `mcp-servers` is "Not used in VS Code and other IDE custom
+   agents" — it is cloud-agent/CLI-only. This was wrong for a
+   VS-Code-primary lab regardless of the Phase 2 rewrite; the lab now
+   leads with VS Code's **"Configure Tools..."** button (adds tool names
+   like `context7/*` to the agent's `tools:` list) and keeps
+   `mcp-servers:` as an explicitly-labeled cloud/CLI-only alternative.
+2. **`labs/lab05.md` §5.1** — the lab claimed the repo "ships with 6 MCP
+   servers," matching `docs/_meta/registry.yaml`'s `mcp_servers:` list.
+   Neither actual config file has all 6: `.vscode/mcp.json` and
+   `.copilot/mcp-config.json` both omit `fabric`, which `labs/lab12.md`
+   confirms is deliberately added later as Lab 12's own exercise. Fixed to
+   say 5 (the Labs 1–11 baseline) and added the config schema difference
+   (`.vscode/mcp.json` uses `servers`/`stdio`; `.copilot/mcp-config.json`
+   uses `mcpServers`/`local`) as an explicit teaching point. The stale
+   solution file `solutions/lab05-mcp-config/.mcp.json` (old schema) was
+   replaced with `solutions/lab05-mcp-config/mcp.json` (correct schema).
+
+Per-lab summary:
+
+| Lab | Change |
+|---|---|
+| `setup.md` | Already compliant (redirect stub to README); no edit |
+| `lab01.md` | Moved CLI marketplace/plugin content to new "Advanced (optional)" section; `1.1`/`1.4` reframed for Chat + agent picker |
+| `lab02.md` | Restart callout reordered VS Code-first; CLI-specific wording genericized |
+| `lab03.md` | `mcp-servers:` cloud/CLI-only bug fixed (see above); restart order; agent-picker testing flow |
+| `lab04.md` | Removed CLI REPL step from skill-activation test |
+| `lab05.md` | "6 servers" bug fixed to 5 (see above); CLI-currency content moved to Advanced section; `.vscode/mcp.json` made primary |
+| `lab07.md` | Stale `claude-opus-4.6` cost-budget mention fixed to `claude-opus-5` (registry `models.premium`); CLI-currency table moved to Advanced section; §7.4 delegation test reframed to the VS Code agent picker |
+| Appendices (`dotnet`/`node` lab03) | Already compliant, no edit |
+| Appendices (`dotnet`/`node` lab04) | Already compliant (explicitly notes prompt files are IDE-only), no edit |
+| Appendices (`dotnet`/`node` lab05) | Genericized "inside Copilot CLI" phrasing; fixed incorrect `@context7` agent-mention syntax (MCP servers are tools Copilot calls, not `@`-invocable chat participants) |
+
+The `claude-opus-4.6`/lab07.md entry was removed from
+`tests/content-currency/model-ids-in-registry.test.ts`'s `KNOWN_MODEL_DRIFT`
+allow-list since it is now fixed; the `lab10.md` entries remain for Phase 3.
+
+Full targeted suite (`tests/content-currency`, `tests/lab-structure`,
+`tests/meta`) and the full `npx vitest run` both pass after these changes,
+modulo the same 2 pre-existing sandbox-network failures from the Phase 0
+baseline (`gh aw compile` blocked by a 403 on the GitHub releases API,
+unrelated to lab content).
+
 ## Status and next step
 
-`status: draft`. Phase 2 (beginner track) appends its own section below
-this one rather than replacing it.
+`status: draft`. Phase 2 (beginner track: `setup.md`, `lab01`–`lab05`,
+`lab07`, and dotnet/node appendices) is complete. Phase 3 (Lab 10 rebuild)
+appends its own section below this one rather than replacing it.
