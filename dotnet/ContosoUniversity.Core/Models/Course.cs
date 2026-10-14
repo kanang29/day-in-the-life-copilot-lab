@@ -22,6 +22,11 @@ namespace ContosoUniversity.Core.Models
         [StringLength(255)]
         public string? TeachingMaterialImagePath { get; set; }
 
+        /// <summary>
+        /// The maximum number of students that can enroll in this course.
+        /// </summary>
+        public int MaxEnrollment { get; set; } = 30;
+
         public virtual Department Department { get; set; } = null!;
         public virtual ICollection<Enrollment> Enrollments { get; set; } = new List<Enrollment>();
         public virtual ICollection<CourseAssignment> CourseAssignments { get; set; } = new List<CourseAssignment>();
