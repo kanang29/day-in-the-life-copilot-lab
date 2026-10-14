@@ -31,6 +31,7 @@ References:
 - [Enterprise managed settings (GA, 2026-07-01)](https://github.blog/changelog/2026-07-01-enterprise-managed-settings-json-is-generally-available/)
 - [`plugin-template/README.md`](../plugin-template/README.md)
 - [`docs/_meta/registry.yaml`](../docs/_meta/registry.yaml) — CLI version floor + model tiers
+- [Authoring a Copilot CLI Extension](lab-copilot-cli-extensions.md) — if the plugin you're packaging bundles a custom tool rather than just an agent/skill/hook, author it as a Copilot CLI extension and reference it from this manifest's `extensions` field
 
 ## 11.0 Copilot CLI currency (2026 refresh)
 
@@ -81,6 +82,33 @@ plugin is a directory with:
 `docs/_meta/registry.yaml → copilot_cli_version_floor`. CI enforces this
 (see `tests/plugin-template/manifest-schema.test.ts`).
 
+> ⚠️ **`manifest.yaml` is this lab's own illustrative schema, not the
+> literal file `copilot plugin install` reads.** It predates, and doesn't
+> match, either manifest format Copilot CLI documents today — it keeps its
+> own shape (YAML, `mcp_servers:`, a nested `entrypoints:` block,
+> `minimum_cli_version`) so this repo's `install.mjs`/`policy.mjs` tooling
+> and CI tests stay internally consistent and teachable. If you're
+> packaging a **real** plugin, the manifest must be named `plugin.json` and
+> match one of two current formats:
+> - **Agent Plugins 1.0** — a required `$schema:
+>   https://agent-plugins.org/schemas/1.1.0/plugin.schema.json`; only
+>   `name` (required) plus metadata (`version`, `description`, …) are valid
+>   top-level keys — `agents`/`skills`/`hooks`/`mcpServers` are **not**
+>   top-level fields here. Copilot-specific components live under a
+>   reverse-DNS `com.github.copilot/` directory (`com.github.copilot/agents/`,
+>   `.../hooks/hooks.json`, etc.); skills only from `skills/`; MCP servers
+>   only from a root `mcp.json`.
+> - **Legacy Copilot plugins** — no `$schema`. Flat, optional
+>   component-path fields default to a `dir/` convention: `agents`,
+>   `skills`, `commands`, `hooks` (a path to a hooks **config file**, or an
+>   inline object — not a list of raw script paths), `mcpServers`
+>   (camelCase, a path or inline object), `lspServers`. Neither format has a
+>   `minimum_cli_version` or `entrypoints` field; both are this repo's own
+>   invention and are silently ignored by a real installer.
+>
+> Sources (fetched directly): [About plugins](https://docs.github.com/en/copilot/concepts/agents/about-plugins)
+> and the [CLI plugin reference](https://docs.github.com/en/copilot/reference/copilot-cli-reference/cli-plugin-reference).
+
 ## 11.2 Scaffold a Plugin with `extensions_manage`
 
 🖥️ **In Copilot CLI:**
@@ -122,8 +150,24 @@ like `contoso-internal/contoso-copilot-plugins` that hosts one or more
 plugins. Consumers install with:
 
 ```sh
-copilot plugin install contoso-internal/contoso-copilot-plugins --ref v0.1.0
+copilot plugin install contoso-internal/contoso-copilot-plugins
 ```
+
+> ⚠️ **A direct `OWNER/REPO` install has no version-pin flag.** The
+> `copilot plugin install` specification supports `plugin@marketplace`,
+> `OWNER/REPO`, `OWNER/REPO:PATH/TO/PLUGIN`, a Git URL, or a local path —
+> and its options are limited to the deprecated `--config-dir`. There is no
+> `--ref`/`--tag` equivalent, so a direct repo install always tracks
+> whatever is on the default branch today. To pin to a reviewed release
+> instead, register the repo as a **marketplace** at that tag — `copilot
+> plugin marketplace add` *does* accept a `#ref` suffix — then install the
+> named plugin from it:
+> ```sh
+> copilot plugin marketplace add contoso-internal/contoso-copilot-plugins#v0.1.0
+> copilot plugin install contoso-copilot-starter@contoso-copilot-plugins
+> ```
+> See [Lab 16](lab16.md) for the enterprise-enforced equivalent
+> (`extraKnownMarketplaces` + `enabledPlugins` in `managed-settings.json`).
 
 To pin the org registry so developers cannot accidentally install from
 elsewhere, set the environment variable at the org onboarding layer

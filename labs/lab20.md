@@ -67,9 +67,10 @@ At enterprise scale, three things break that assumption:
 At the enterprise/org level, token/usage visibility is a governance
 concern, not a per-developer curiosity:
 
-- **Audit logs (Lab 17 §17.3)** give you *policy and session-lifecycle*
-  events — that an `agent_session.task` ran, what config it touched — but
-  explicitly **not** token/cost figures or conversation content.
+- **Audit logs (Lab 17 §17.3)** give you *policy and session-level*
+  events — the `agent_session_id` an event came from, what config it
+  touched — but explicitly **not** token/cost figures or conversation
+  content.
 - **Copilot usage metrics/billing views** (enterprise/org settings) are
   the actual source for aggregate seat usage and premium-request
   consumption — check your enterprise's Copilot usage dashboard, which is

@@ -26,8 +26,11 @@ shift of 2026: the move to **default-on model availability**.
 References:
 - [Agents and enterprise management](https://docs.github.com/copilot/concepts/agents/enterprise-management)
 - [Reviewing audit logs for Copilot](https://docs.github.com/en/enterprise-cloud@latest/copilot/how-tos/administer-copilot/manage-for-enterprise/review-audit-logs)
+- [Audit log events for agents](https://docs.github.com/en/enterprise-cloud@latest/copilot/reference/enterprise-administrators/agentic-audit-log-events) — confirmed via direct fetch (`action`, `actor_is_agent`, `agent_session_id`, `user` fields)
 - [Default model enablement for Copilot Business and Enterprise](https://github.blog/changelog/2026-07-29-default-model-enablement-for-copilot-business-and-enterprise/) — confirmed via direct fetch
 - [`docs/_meta/registry.yaml`](../docs/_meta/registry.yaml) `model_default_availability_policy`
+- [Lab 16 — Enterprise Marketplace & Plugin Governance](lab16.md) — the `managed-settings.json` mechanism this lab's AI Controls nav configures
+- [Lab 20 — Enterprise Token Optimization & Reporting](lab20.md) — takes the default-on model policy from §17.2 to the usage-reporting problem it creates
 
 ## 17.0 Copilot CLI currency (2026 refresh)
 
@@ -42,11 +45,11 @@ area (not merely "Copilot settings") that covers:
 - **Custom admin roles** scoped to AI/Copilot management, separate from
   full org-owner access — lets an enterprise delegate "manage Copilot
   policy" without granting broader admin rights.
-- **Agent session activity** — a view of coding-agent and other
+- **Agent session activity** — a view of cloud-agent and other
   agent-driven sessions across the enterprise/org, filterable by repo,
   actor, and time range.
 - **Managed settings source-org selection** — the same "AI Controls" tab
-  Lab 16 used to pick which org's `.github-private` repo hosts
+  [Lab 16](lab16.md) used to pick which org's `.github-private` repo hosts
   `managed-settings.json`.
 - **Global model availability policy** — see §17.2.
 
@@ -97,13 +100,17 @@ include:
 
 - Access changes (who can use Copilot, plan changes)
 - Content-exclusion policy changes
-- Coding-agent configuration changes
-- MCP policy changes (including managed-settings.json commits, per Lab 16)
-- Firewall allowlist changes (for coding-agent network access)
-- An `actor_is_agent` field distinguishing human-initiated vs. agent-
-  initiated audit events
-- `agent_session.task` lifecycle events (session start/end, task
-  completion)
+- Cloud-agent configuration changes
+- MCP policy changes (including managed-settings.json commits, per [Lab 16](lab16.md))
+- Firewall allowlist changes (for cloud-agent network access)
+
+Filter to agent-driven activity with the `actor:Copilot` search term. Per
+the published agentic-audit-log-events reference, each matching event
+carries four key fields — `action` (e.g. `pull_request.create`),
+`actor_is_agent` (always `true` on agentic events), `agent_session_id` (a
+unique ID linking the event back to the agent session that produced it,
+present only when the event came from an agent session), and `user` (who
+initiated the session).
 
 Retention is **180 days** in the standard audit log; enterprises that need
 longer retention stream to a SIEM.
@@ -124,7 +131,7 @@ us, and what does it NOT give us?
 ```
 
 > 💡 **Expected answer:** the audit log shows policy/config-level events
-> (e.g. that an agent session ran, what MCP/coding-agent config changed) —
+> (e.g. that an agent session ran, what MCP/cloud-agent config changed) —
 > it does not capture the literal local CLI conversation content. That
 > would require a different mechanism (e.g. a locally-enforced logging
 > hook the org opts into, which is out of scope for the platform audit

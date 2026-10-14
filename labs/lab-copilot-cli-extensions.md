@@ -26,6 +26,8 @@ References (read for canonical contracts):
 - Runtime authoring guide (saved during this workshop's session): `~/.copilot/session-state/$(uuidgen)/files/copilot-cli-extensions-authoring-guide.md` — output of `extensions_manage operation: "guide"` against your locally installed `copilot` build. **This is the source of truth for every extension code line in this lab.** The `<id>` segment is your live session UUID; if you need a fresh placeholder, regenerate one with `uuidgen` (Bash/zsh) or `[guid]::NewGuid().ToString()` (PowerShell) — do **not** literally type `<id>` into the path.
 - [Hooks configuration](https://docs.github.com/en/copilot/reference/hooks-configuration)
 - [About hooks](https://docs.github.com/en/copilot/concepts/agents/cloud-agent/about-hooks)
+- [Lab 11 — Building & Distributing a Copilot Plugin](lab11.md) — a plugin's `extensions` field can bundle one or more `extension.mjs` directories exactly like the one you build here; Lab 11 is packaging/distribution, this lab is authoring
+- [Lab 16 — Enterprise Marketplace & Plugin Governance](lab16.md) — governs which marketplace a plugin bundling an extension may come from
 
 ---
 
@@ -209,7 +211,7 @@ The hook reads the event JSON from stdin (the runtime passes `{toolName, toolArg
 
 > 🚨 **`preToolUse` honors `deny` only.** The runtime accepts `"allow"` and `"ask"` permissionDecision values today but **does not act on them** — see [Hooks configuration](https://docs.github.com/en/copilot/reference/hooks-configuration). The mental model the docs reinforce: *the hook is a veto, not a permission grant*. **Absence of `deny` is allow.** A hook that emits `"allow"` is a no-op; one that emits `"ask"` is also a no-op.
 >
-> Do not internalize an `allow`/`ask` decision model from prior tooling — the hardening lab (`labs/lab-hardening.md`, delivered by Workstream B) re-states this banner verbatim.
+> Do not internalize an `allow`/`ask` decision model from prior tooling — the hardening lab ([`labs/lab-hardening.md`](lab-hardening.md)) re-states this banner verbatim.
 
 > 📏 **Bytes vs. characters — the 10 KB cap is exactly 10000 bytes.** The bash hook uses `wc -c`, which counts **bytes**, not characters (`wc -m` is the character counter, and it depends on the current locale). The PowerShell branch uses `[System.Text.Encoding]::UTF8.GetByteCount($args.text)`, which is also a byte count. This matters when the input contains multi-byte UTF-8 (emoji, CJK, accented Latin): a 5000-character paste of CJK is ~15000 bytes and **will** trip the deny gate, which is the intent — token cost scales with bytes-on-the-wire, not glyphs-on-screen. If you re-tune the threshold, keep both branches on the same byte basis or your bash and PowerShell users will see different deny behavior.
 
@@ -282,7 +284,7 @@ Three operational decisions, made explicit:
 
 - **Project-scope vs user-scope.** Files in `.github/extensions/` are **committed**, reviewed under CODEOWNERS, and shared with the team — that is where `clab-summarize` belongs once the team has agreed it is useful. The user-level extensions directory is **personal** — that is where to keep your idiosyncratic dev-loop extensions (auto-format-on-save, your private summarizer with a sharper prompt, etc.). The guide states: *"Project extensions shadow user extensions on name collision."*
 - **Token-cost framing.** Every call to a Copilot CLI extension whose body invokes the model **is** an LLM call. There is no free-tier path. The cheapest cost control you have is the deterministic `preToolUse` gate from §4 — it is microseconds and certain. The next-cheapest is a tight tool description that discourages the agent from calling the tool when it does not need to. The most expensive is fixing it at the model layer with retries.
-- **Forward-compat.** Tool allow-lists at the agent and MCP layer compose with the `preToolUse` deny pattern in this lab — see the upcoming `labs/lab-hardening.md` (Workstream B of the materials-gap branch) for the deterministic-control reference and the hardened `code-reviewer` agent that uses it.
+- **Forward-compat.** Tool allow-lists at the agent and MCP layer compose with the `preToolUse` deny pattern in this lab — see [`labs/lab-hardening.md`](lab-hardening.md) for the deterministic-control reference and the hardened `code-reviewer` agent that uses it.
 
 ---
 

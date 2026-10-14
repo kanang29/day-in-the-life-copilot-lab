@@ -473,8 +473,128 @@ the pre-Phase-4 baseline (`git stash` + re-run) — a sandbox-network 403
 installing the `gh aw` CLI extension, unrelated to this phase's content.
 `runtime-tools-secret_scanning` clean on all 13 changed files.
 
+## Phase 5 — Extensibility & enterprise cluster (11, 16, 17, 20, `lab-copilot-cli-extensions`)
+
+Per the Phase 1 merge map, both sub-clusters here are **keep-all**: 11 ↔ 16
+↔ `lab-copilot-cli-extensions` (distinct personas — author a plugin vs.
+admin governs the marketplace vs. author a CLI extension) and 16 ↔ 17 ↔ 20
+(distinct admin mechanisms, each backed by its own registry key). This
+phase (a) resolves the plugin-manifest-format drift the issue names
+explicitly, (b) fixes real bugs found during verification, and (c) adds
+the cross-links the merge map deferred here.
+
+### Decisions
+
+1. **Plugin manifest format drift (issue "Known drift" item 9) — labeled
+   illustrative, not migrated.** Fetched
+   `https://docs.github.com/en/copilot/concepts/agents/about-plugins` and
+   the CLI plugin reference directly. Confirmed two current formats exist,
+   **both** named `plugin.json` (never `manifest.yaml`): Agent Plugins 1.0
+   (requires `$schema`; only `name` + metadata are top-level; Copilot
+   components live under `com.github.copilot/`) and Legacy (no `$schema`;
+   flat optional fields `agents`/`skills`/`commands`/`hooks`/`mcpServers`/
+   `lspServers`, `hooks` being a path to a hooks config file or inline
+   object, not a raw script list). This repo's `plugin-template/manifest.yaml`
+   and `modernization-bundle/manifest.yaml` match neither — wrong
+   filename/extension, no `$schema`, `mcp_servers:` (snake_case) instead of
+   `mcpServers`, a nested `entrypoints:` wrapper neither format has, and an
+   invented `minimum_cli_version` field. Spec 001 flagged this as "needs a
+   maintainer decision, not a unilateral fix" and the issue itself offers
+   two options: migrate the manifest format for real, or label it
+   illustrative and show the real shape. **Chose the label option**: a full
+   migration would rename the manifest file, flatten `entrypoints:` away,
+   remap `prompts:` (no home in either real schema — closest real analogue
+   is `commands`), and rewrite `install.mjs`/`policy.mjs`/all 4
+   `tests/plugin-template/*` suites plus `modernization-bundle/`'s copy —
+   exactly the scale of change spec 001 said needed maintainer sign-off,
+   not an AI unilateral call, and out of proportion to a lab-content
+   refresh. Added a callout in `labs/lab11.md` §11.1 labeling
+   `manifest.yaml` as this lab's own illustrative schema and showing both
+   real formats' field names side-by-side, so a learner packaging a real
+   plugin doesn't copy the wrong shape. `plugin-template/manifest.yaml`,
+   `modernization-bundle/manifest.yaml`, `install.mjs`, `policy.mjs`, and
+   the plugin-template test suites are unchanged.
+2. **`copilot plugin install --ref v0.1.0` — confirmed-nonexistent flag,
+   fixed.** `labs/lab11.md` §11.3 used a `--ref` flag on
+   `copilot plugin install` to pin a release tag. The CLI plugin
+   reference's "Plugin specification for `install` command" table lists
+   only 5 forms (`plugin@marketplace`, `OWNER/REPO`, `OWNER/REPO:PATH`, a
+   Git URL, a local path) and `install`'s options table lists only the
+   deprecated `--config-dir` — no ref/tag flag exists for a direct install.
+   `copilot plugin marketplace add SOURCE` **does** document a
+   `owner/repo#ref` form. Rewrote the example to register the org repo as
+   a pinned marketplace (`copilot plugin marketplace add
+   contoso-internal/contoso-copilot-plugins#v0.1.0`) then install the
+   named plugin from it — consistent with Lab 16's own
+   `extraKnownMarketplaces` + `enabledPlugins` pattern for the same repo.
+3. **`agent_session.task` — confirmed-nonexistent field, fixed in two
+   labs.** `labs/lab17.md` §17.3 and `labs/lab20.md` §20.2 both claimed an
+   `agent_session.task` field with "lifecycle events (session start/end,
+   task completion)". Fetched
+   `https://docs.github.com/en/enterprise-cloud@latest/copilot/reference/enterprise-administrators/agentic-audit-log-events`
+   directly: the real schema has exactly four key fields —`action`,
+   `actor_is_agent`, `agent_session_id` (an identifier, not a lifecycle
+   event stream), and `user`. No `agent_session.task` field, and no
+   documented "lifecycle events" concept. Corrected both labs to describe
+   the real four fields and added the reference URL to Lab 17.
+4. **"Coding-agent" → "Cloud-agent" in Lab 17.** Same product rename from
+   Phase 4, found recurring in a lab outside that phase's cluster (Lab 17
+   wasn't in Phase 4's list). Fixed the 3 descriptive-prose occurrences in
+   `labs/lab17.md` (§17.1 nav bullet, §17.3 audit-event bullet, §17.3
+   discuss/answer) — these are prose labels, not literal frozen API/event
+   names, so the rename applies cleanly.
+5. **`lab-hardening.md` no longer "upcoming."** `labs/lab-copilot-cli-extensions.md`
+   §6 and its solution `README.md`'s forward-link both called
+   `labs/lab-hardening.md` "the upcoming ... lab (Workstream B of the
+   materials-gap branch)" — but the file already exists, fully written,
+   with its own dotnet/node appendices and solution scaffold. Reworded
+   both to a plain cross-link; the internal "Workstream B"/"materials-gap
+   branch" jargon added nothing a reader could act on.
+6. **Cross-links added (deferred here by the Phase 1 merge map).** Lab 16
+   already linked to/from Lab 11 and Lab 17; Lab 20 already linked to Lab
+   16 and Lab 17. The real gap was **Lab 17 had zero links back** to any
+   cluster sibling, and the 11 ↔ `lab-copilot-cli-extensions` pair (a
+   plugin's `extensions` field can bundle a Copilot CLI extension) had no
+   link either direction. Added: Lab 17's References block now links Lab
+   16 and Lab 20, plus inline links on its two prose mentions of Lab 16;
+   Lab 11's References block links `lab-copilot-cli-extensions.md`;
+   `lab-copilot-cli-extensions.md`'s References block links Lab 11 and Lab
+   16. The `03 ↔ 06 ↔ lab-hardening` cross-link gap noted in the Phase 1
+   merge map is explicitly tracked for Phase 6 (advanced CLI cluster) and
+   is out of this phase's scope.
+7. **Known-drift items 3 (`infer:`) and 8 (MCP syntax) — scanned, clean.**
+   Grepped all five cluster files for `infer:`, SSE, and MCP config-path
+   mentions; none found, no action needed.
+
+### Verification ledger
+
+| Claim | Primary source fetched | Status |
+|---|---|---|
+| Two current plugin manifest formats, both named `plugin.json`; Agent Plugins 1.0 requires `$schema`, Legacy doesn't | `https://docs.github.com/en/copilot/concepts/agents/about-plugins` (fetched directly, field tables read) | VERIFIED |
+| Legacy format's `hooks` field is a path to a hooks config file or inline object, not a raw script list; `mcpServers` is camelCase | same page | VERIFIED |
+| `copilot plugin install` has no ref/tag/version-pin flag or specification suffix | `https://docs.github.com/en/copilot/reference/copilot-cli-reference/cli-plugin-reference` (fetched directly, 3 passes) — "Plugin specification for `install` command" and "`copilot plugin install` options" tables | VERIFIED |
+| `copilot plugin marketplace add SOURCE` accepts `owner/repo#ref` | same page — `marketplace` subcommand table: "`add SOURCE` ... (`owner/repo`, `owner/repo#ref`, a URL, or a local path)" | VERIFIED |
+| Agentic audit-log events carry exactly `action`, `actor_is_agent`, `agent_session_id`, `user` — no `agent_session.task` field | `https://docs.github.com/en/enterprise-cloud@latest/copilot/reference/enterprise-administrators/agentic-audit-log-events` (fetched directly) | VERIFIED |
+| Enterprise audit log excludes local CLI/IDE conversation content; 180-day retention; SIEM streaming | `https://docs.github.com/en/enterprise-cloud@latest/copilot/how-tos/administer-copilot/manage-for-enterprise/review-audit-logs` (fetched directly) | VERIFIED |
+| `enterprise_managed_settings` registry block (keys, precedence, GA date) matches the published schema reference | partial direct fetch of `https://docs.github.com/en/enterprise-cloud@latest/copilot/reference/enterprise-administrators/enterprise-managed-settings` — spot-checked `permissions.disableBypassPermissionsMode`/`.deny`/`.ask` rows, no discrepancy found in the portion checked | SPOT-CHECKED, no discrepancy |
+| `labs/lab-hardening.md` already exists (not "upcoming") | direct repo read: `labs/lab-hardening.md`, its dotnet/node appendices, and `solutions/lab-hardening/` all present and populated | VERIFIED |
+
+### Test results
+
+Targeted: `tests/lab-structure/*`, `tests/content-currency/*`,
+`tests/plugin-template/*` — 242 tests pass (plugin-template suites
+confirm `manifest.yaml`/`install.mjs`/`policy.mjs` are unchanged and still
+green, since Decision 1 chose not to touch them). Full `npx vitest run` —
+564 of 566 pass; the same 2 pre-existing sandbox-network failures from
+Phases 0/2/4 (`tests/workflows/weekly-audit-dry-run.test.ts`,
+`tests/workflows/weekly-audit-schema.test.ts`, HTTP 403 installing the
+`gh aw` CLI extension) reproduce, unrelated to this phase's content.
+`runtime-tools-secret_scanning` clean on all 5 changed files.
+
 ## Status and next step
 
-`status: draft`. Phases 2 (beginner track), 3 (Lab 10 rebuild), and 4
-(GitHub platform cluster) are complete. Phase 5 (appendix reconciliation)
-appends its own section below this one rather than replacing it.
+`status: draft`. Phases 2 (beginner track), 3 (Lab 10 rebuild), 4 (GitHub
+platform cluster), and 5 (extensibility & enterprise cluster) are
+complete. Phase 6 (advanced CLI cluster: 06, 12, 13, 14, 15,
+`lab-hardening`) appends its own section below this one rather than
+replacing it.
