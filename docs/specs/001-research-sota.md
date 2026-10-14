@@ -3,76 +3,70 @@ id: "001"
 title: "Research: State of the GitHub Copilot Surface (SOTA)"
 status: draft
 created: 2026-10-14
+updated: 2026-10-14
 depends_on: []
 blocks:
-  - docs/specs/002-curriculum-architecture.md
-  - docs/specs/003-lab-refresh-standard.md
-  - docs/specs/004-memory-lab.md
+  - docs/specs/002-lab10-memory.md
 related_issue: "kanang29/day-in-the-life-copilot-lab#3"
 ---
 
 # 001 — Research: State of the GitHub Copilot Surface (SOTA)
 
-> 📁 **Path note:** issue #3 refers to this document as `specs/001-research-sota.md`.
-> It lives at `docs/specs/001-research-sota.md` instead, for two concrete reasons:
-> this repo's own `scripts/hooks/pre-tool-use-doc-blocker.sh` only allows new
-> Markdown files under `docs/`, `.github/`, `labs/`, `solutions/`, or
-> `plugin-template/`; and Lab 18 already establishes `docs/specs/*.md` as this
-> repo's spec-writing convention (see `labs/lab18.md` §18.1, which has a learner
-> save a spec to `docs/specs/course-prerequisites.md`). The `001-`, `002-`, …
-> numbering issue #3 asks for is preserved; only the parent directory changed.
+> 📁 **Path note:** this document lives at `docs/specs/001-research-sota.md`,
+> not a bare `specs/` directory, for two concrete reasons: this repo's own
+> `scripts/hooks/pre-tool-use-doc-blocker.sh` only allows new Markdown files
+> under `docs/`, `.github/`, `labs/`, `solutions/`, or `plugin-template/`;
+> and Lab 18 already establishes `docs/specs/*.md` as this repo's
+> spec-writing convention (see `labs/lab18.md` §18.1, which has a learner
+> save a spec to `docs/specs/course-prerequisites.md`). The `001-`, `002-`,
+> … numbering follows that same convention.
 
 ## Purpose and scope
 
 Issue [#3 "Brother Hackathon: Lab curriculum refresh"](https://github.com/kanang29/day-in-the-life-copilot-lab/issues/3)
-fixes a dependency chain for the curriculum-refresh epic: this spec must be
-**merged and verified** before `docs/specs/002-curriculum-architecture.md`,
-`docs/specs/003-lab-refresh-standard.md`, and `docs/specs/004-memory-lab.md`
-can be written. Those three specs — not this one — define the curriculum's
-retire-and-merge map, the per-lab refresh standard (including the
-frontmatter `surface`/`tier` schema), and the Lab 10 rebuild. **Nothing in
-this document proposes lab edits.** Its only job is to answer, with cited
-primary sources, "what is actually true right now" for the twelve areas
-issue #3 names: agents, skills, prompt files, instruction hierarchy and
-precedence, CLI extensions, plugins, gh-aw, MCP, coding agent, code review,
-memory, and the model lineup.
+asks the curriculum to be **correct** (every command runs, every path
+resolves, every version matches `docs/_meta/registry.yaml`) and **current**
+(agents, skills, prompt files, instruction precedence, CLI extensions,
+plugins, gh-aw, MCP, coding agent, code review, memory, and the model
+lineup have all moved in 2026). **Nothing in this document proposes lab
+edits.** Its only job is to answer, with cited primary sources, "what is
+actually true right now" for those twelve areas, so that any lab-by-lab
+correctness pass — starting with Lab 10, which the issue singles out for
+[its own spec](002-lab10-memory.md) — has verified facts to work from
+instead of re-deriving them.
 
-Per issue #3's own epistemic rule — *"Facts reach a lab only through
-spec-forge, whose verifier stage opens every cited primary source
-independently and grades each claim. A search-engine summary is a lead, not
-a source. No `UNVERIFIED` claim enters a lab."* — every claim below is
-tagged with how it was established (see [Method](#method--how-claims-were-verified)).
-This repo does not yet have a `spec-forge` workflow; this document is a
-manual, single-session approximation of what that verifier stage should do,
-produced so the epic's Phase 3 execution has a real artifact to review
-rather than staying blocked indefinitely.
+Every claim below is tagged with how it was established (see
+[Method](#method--how-claims-were-verified)); a search-engine summary alone
+is treated as a lead, not a source, so unconfirmed leads are marked
+`UNVERIFIED — blocked` rather than stated as fact (see claim 16 for a
+concrete example of why that distinction matters).
 
 ## Method — how claims were verified
 
-Three tiers of confidence are used, matching issue #3's own vocabulary:
+Three tiers of confidence are used:
 
 | Tag | Meaning |
 |-----|---------|
 | **VERIFIED** | A primary source (a `docs.github.com` page, or a GitHub repository itself) was opened directly in this session and the claim below reflects what that fetch returned. The URL is the citation. |
 | **PARTIALLY VERIFIED** | A primary source was opened, but it only confirms part of the claim, or the claim required reconciling two primary sources that disagree. |
-| **UNVERIFIED — blocked** | A search-engine summary surfaced a lead, but the sandbox this research ran in could not reach the primary source to confirm it (DNS/network block). Per issue #3's own rule, these do **not** count as facts and must not be copied into a lab until re-verified from an environment that can reach the source. |
+| **UNVERIFIED — blocked** | A search-engine summary surfaced a lead, but the sandbox this research ran in could not reach the primary source to confirm it (DNS/network block). These do **not** count as facts and must not be copied into a lab until re-verified from an environment that can reach the source. |
 
 Two domains were unreachable from this session's sandbox for every attempt:
 `github.blog` and `modelcontextprotocol.io` (both failed DNS resolution).
-`docs.github.com` and `github.com` were reachable. This is itself a finding:
-**a future `spec-forge` implementation needs network egress to `github.blog`
-and `modelcontextprotocol.io`, or it cannot verify changelog- and
-MCP-spec-sourced claims at all** — a meaningful fraction of this repo's
-existing citations (e.g. `docs/_meta/registry.yaml`'s MCP spec note, several
-`github.blog/changelog/...` links already in labs) point at exactly those
-two domains.
+`docs.github.com`, `github.com`, and `raw.githubusercontent.com` were
+reachable. This is itself a finding: **whoever re-runs this research later
+needs network egress to `github.blog` and `modelcontextprotocol.io`, or
+they cannot verify changelog- and MCP-spec-sourced claims at all** — a
+meaningful fraction of this repo's existing citations (e.g.
+`docs/_meta/registry.yaml`'s MCP spec note, several `github.blog/changelog/...`
+links already in labs) point at exactly those two domains.
 
 ## Baseline this repo already pins
 
 `docs/_meta/registry.yaml` is this repo's single source of truth for
 versions (per `CONTRIBUTING.md`); this spec does not re-litigate it, only
-notes where live research agrees or disagrees with it so specs 002–004 don't
-have to re-derive the same checks:
+notes where live research agrees or disagrees with it so a future
+correctness pass doesn't have to re-derive the same checks:
 
 | Registry key | Current pin |
 |---|---|
@@ -188,10 +182,9 @@ have to re-derive the same checks:
     illustrative format for Lab 11/16 that was never meant to match a real
     Copilot CLI manifest 1:1, in which case Lab 11 should say so
     explicitly, or (b) it was meant to track the real format and has
-    drifted, in which case `docs/specs/002-curriculum-architecture.md` or
-    `docs/specs/003-lab-refresh-standard.md` should scope a Lab 11/16
-    update. Flagging only — **no lab or template file is changed by this
-    spec.**
+    drifted, in which case a future lab-correctness pass should scope a
+    Lab 11/16 update. Flagging only — **no lab or template file is changed
+    by this spec.**
   - Current CLI plugin commands confirmed live: `copilot plugin marketplace
     list/browse/add/remove`, `copilot plugin install/list/update/uninstall/
     disable/enable`, default marketplace `awesome-copilot`. These match
@@ -239,10 +232,10 @@ have to re-derive the same checks:
   independently re-opened this session — `modelcontextprotocol.io` failed
   DNS resolution from this sandbox on every attempt. This claim is already
   treated as load-bearing by Lab 05 and Lab 10 (`mcp_protocol_spec_version`
-  in the registry). It should be the **first** item a `spec-forge` verifier
-  re-checks once it runs somewhere with access to that domain, precisely
-  because so much downstream content depends on it and this session could
-  not re-confirm it from a primary source.
+  in the registry). It should be the **first** item re-checked from an
+  environment with access to that domain, precisely because so much
+  downstream content depends on it and this session could not re-confirm it
+  from a primary source.
 
 ### 9. Coding agent
 
@@ -264,10 +257,9 @@ have to re-derive the same checks:
     citation this repo relies on (`labs/lab18.md`'s "About Copilot Coding
     Agent" reference) now 404s. `registry.yaml`'s `labs:` block and several
     lab titles (e.g. Lab 09 "Copilot Coding Agent & Code Review") still use
-    the old name. Per issue #3's non-goals ("No renumbering... not a
-    rewrite for its own sake"), renaming the *lab title* is a judgment call
-    for `docs/specs/002`/`003` — this spec only confirms the underlying
-    docs fact and the specific broken link.
+    the old name. Renaming the *lab title* is a judgment call for whoever
+    next revises Lab 09 — this spec only confirms the underlying docs fact
+    and the specific broken link.
 
 ### 10. Code review
 
@@ -279,8 +271,8 @@ have to re-derive the same checks:
   use Copilot code review (two policies, enterprise-gated), and review
   "effort levels" (Lite vs. Balanced) have published cost ranges ($0.05–$1
   Lite, $0.25–$5 Balanced, in AI credits). None of this contradicts
-  anything currently taught in Lab 09; it is additive and a candidate for
-  `docs/specs/002`/`003` to scope as an enhancement, not a correction.
+  anything currently taught in Lab 09; it is additive content for a future
+  Lab 09 pass to scope as an enhancement, not a correction.
 
 ### 11. Memory
 
@@ -289,16 +281,16 @@ have to re-derive the same checks:
   application-layer convention, not a protocol feature). The MCP-spec
   caveat in [§8](#8-mcp-model-context-protocol) is the one piece of this
   area that remains **UNVERIFIED — blocked** rather than confirmed.
-  Issue #3 asks `docs/specs/004-memory-lab.md` to additionally cover **loop
-  engineering** and **graph engineering** and to optionally use "the local
-  SCNS project" as a per-directory-vault example. This session confirmed
-  by search that **no file, directory, or reference to "SCNS" exists
-  anywhere in this repository** (`grep -ri SCNS` across the full tree
-  returns nothing) and that **neither "loop engineering" nor "graph
-  engineering" appears anywhere in this repo today**. `docs/specs/004`
-  cannot assume either exists yet; both are net-new content for whoever
-  authors that spec, not something this research can verify or source
-  today.
+  Issue #3 asks Lab 10's dedicated spec to additionally cover **loop
+  engineering** and **graph engineering**, and optionally to use "the local
+  SCNS project" as a per-directory-vault example. This session confirmed by
+  search that **no file, directory, or reference to "SCNS" exists anywhere
+  in this repository** (`grep -ri SCNS` across the full tree returns
+  nothing) and that, at the time this claim was checked, **neither "loop
+  engineering" nor "graph engineering" appeared anywhere in this repo**.
+  [`docs/specs/002-lab10-memory.md`](002-lab10-memory.md) could not assume
+  either existed and had to source or define both terms from this repo's
+  own artifacts rather than adapt prior art.
 
 ### 12. Model lineup
 
@@ -329,18 +321,18 @@ have to re-derive the same checks:
     exact name, but this spec does not assert a specific retirement date
     for `gpt-5.2` or `claude-opus-4.7` because no explicit deprecation
     notice (unlike the Claude Fable footnote, which *is* explicit) was
-    found for either. `docs/specs/002`/`003` should treat `registry.yaml`'s
-    `models:` block as needing a maintainer-driven refresh pass, informed
-    by this table, rather than this spec silently rewriting it.
+    found for either. Whoever next refreshes `registry.yaml`'s `models:`
+    block should treat it as needing a maintainer-driven pass, informed by
+    this table, rather than this spec silently rewriting it.
   - **UNVERIFIED — blocked**: a web search claimed Claude Sonnet 4.5 and
     4.6 were both deprecated on 2026-09-01 in favor of Sonnet 5/5.5. The
     live GA table directly **contradicts half of that claim** — Sonnet 4.6
     is still listed as GA. The source changelog URL the search cited
     (`github.blog/changelog/...`) could not be opened from this sandbox to
     resolve the discrepancy. This is the clearest example this session
-    produced of why issue #3 insists a search-engine summary is a lead,
-    not a source: treating that summary as fact would have put a wrong
-    claim in front of the next spec.
+    produced of why a search-engine summary is treated as a lead, not a
+    source, throughout this document: treating that summary as fact would
+    have put a wrong claim in front of the next reader.
 
 ## Verification ledger
 
@@ -363,41 +355,37 @@ have to re-derive the same checks:
 | 15 | `gpt-5.2` and `claude-opus-4.7` absent from the current Supported AI Models GA table | [supported-models](https://docs.github.com/en/copilot/reference/ai-models/supported-models) | VERIFIED |
 | 16 | Claude Sonnet 4.5 **and** 4.6 both deprecated 2026-09-01 | web search only, citing an unreachable `github.blog` changelog | UNVERIFIED — blocked; contradicted in part by claim 15's own source (4.6 still GA) |
 
-## Handoff — inputs for specs 002/003/004
+## Handoff — inputs for Lab 10's spec and future lab passes
 
-This section is advisory input, not a decision. `docs/specs/002-curriculum-architecture.md`,
-`docs/specs/003-lab-refresh-standard.md`, and `docs/specs/004-memory-lab.md`
-still need to be written and reviewed independently; nothing here pre-empts
-that:
+This section is advisory input, not a decision.
+[`docs/specs/002-lab10-memory.md`](002-lab10-memory.md) consumes claim 14
+directly. The remaining claims below aren't blocking anything today, but
+they're recorded here so a future correctness pass on the affected labs
+doesn't have to re-derive them:
 
-- **For `docs/specs/002` (curriculum architecture):** the gh-aw org-rename
-  drift (claim 8) and the "Copilot coding agent" rename (claim 12) are
-  candidates for the retire-and-merge / correction map, scoped to
-  `lab-gh-extensions.md` and the Lab 09 title respectively — but the actual
-  decision (host lab, redirect stub, title change or not) belongs to that
-  spec.
-- **For `docs/specs/003` (lab-refresh standard):** claim 1 (`infer`
-  retirement) and claim 7 (plugin manifest format) are good candidates for
-  whatever "no hardcoded version / stale API" check the refresh standard
-  defines, since both are concrete, dated, primary-sourced facts a lab
-  could get wrong silently.
-- **For `docs/specs/004` (memory lab):** claim 14 means the Lab 10 rebuild
-  has no existing SCNS/loop-engineering/graph-engineering content to adapt
-  — that spec needs to source or define those terms from scratch, and
-  should not assume prior art exists in this repo.
-- **For whichever spec ends up owning it:** claims 9, 11, and 16 are
-  explicitly **not** resolved by this document and must not be copied into
-  any lab as fact until a verifier with access to `github.blog` and
-  `modelcontextprotocol.io` re-checks them.
+- **gh-aw org rename (claim 8) and "Copilot coding agent" rename
+  (claim 12):** concrete, dated drift in `labs/lab-gh-extensions.md` and
+  `labs/lab18.md`'s References section respectively (the latter cites a
+  URL that now 404s). Whoever next touches those labs should fix the
+  specific broken link and installation command; the lab title / naming
+  decision for Lab 09 is a separate judgment call.
+- **`infer:` retirement (claim 1) and plugin manifest format (claim 7):**
+  concrete, dated, primary-sourced facts a lab could get wrong silently if
+  rewritten without checking this spec first.
+- **Claim 14 (no prior SCNS/loop-engineering/graph-engineering content):**
+  addressed directly by `docs/specs/002-lab10-memory.md`, which had to
+  source or define those terms from this repo's own artifacts rather than
+  adapt prior art.
+- **Claims 9, 11, and 16** are explicitly **not** resolved by this document
+  and must not be copied into any lab as fact until re-checked from an
+  environment that can reach `github.blog` and `modelcontextprotocol.io`.
 
 ## Status and next step
 
-This document is `status: draft`. Per issue #3's acceptance criteria,
-`docs/specs/001-research-sota.md` must be **merged and verified** before
-`docs/specs/002/003/004` are authored, and per the issue's own tracking
-table ("Nothing pushes or opens a PR without John's explicit per-action
-approval"), that verification is a maintainer decision this session cannot
-make for itself. The next action on this spec is human review — either
-confirming the findings above are acceptable as `verified`, or sending any
-of the `UNVERIFIED — blocked` items back for re-research from an
-environment that can reach `github.blog` and `modelcontextprotocol.io`.
+This document is `status: draft`. The next action on it is human review —
+either confirming the findings above are acceptable as `verified`, or
+sending any of the `UNVERIFIED — blocked` items back for re-research from
+an environment that can reach `github.blog` and `modelcontextprotocol.io`.
+Nothing in this repository currently gates other work behind that review;
+it exists so facts stay traceable to a primary source rather than being
+re-asserted from memory.

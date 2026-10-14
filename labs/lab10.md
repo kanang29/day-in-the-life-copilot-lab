@@ -3,7 +3,7 @@ title: "Agent Memory: Personalities, Lessons, and Consolidation"
 lab_number: 10
 pace:
   presenter_minutes: 5
-  self_paced_minutes: 20
+  self_paced_minutes: 25
 registry: docs/_meta/registry.yaml
 ---
 
@@ -32,7 +32,14 @@ itself*. Layer 3 is the rulebook that governs how Layer 2 gets written.
 Promotion goes upward: raw → wiki → schema. Nothing lives in two layers
 at once.
 
-> ⏱️ Presenter pace: 5 minutes | Self-paced: 20 minutes
+Two disciplines sit next to this pattern without being part of it:
+**graph engineering** (modeling memory as entities and relations instead
+of files — §10.2d) and **loop engineering** (the properties that make an
+automated promotion cycle safe — §10.5a). You'll meet both by name below,
+using artifacts this repo already ships, so you can recognize them
+elsewhere even though this lab's own memory stays file-based.
+
+> ⏱️ Presenter pace: 5 minutes | Self-paced: 25 minutes
 
 > 💰 **Cost Budget** — ~15k in / ~5k out across the three layers.
 > Markdown round-trips are cheap; no knowledge-graph server chews tokens
@@ -271,6 +278,56 @@ Get-ChildItem $lessons
 > gotcha, a decision) it belongs in Layer 2. If it's a *binding rule*
 > every task must obey, it belongs in Layer 3.
 
+### 10.2d Graph engineering — the road not taken
+
+Layer 2 is **file-based** memory: facts live in markdown, keyed by
+filename, read top-to-bottom. The other common way to model memory is a
+**knowledge graph** — facts as **entities** (nodes, each with a name, a
+type, and a list of observations), **relations** (directed edges between
+entities — "X works_at Y"), and **observations** (atomic facts attached to
+one entity). This repo already pins a real implementation of that model;
+it just doesn't use it for cross-session memory.
+
+🖥️ **Read what this repo already pins, without installing anything:**
+
+**WSL/Bash:**
+```bash
+grep -A6 'name: memory' docs/_meta/registry.yaml
+```
+
+**PowerShell:**
+```powershell
+Select-String -Path docs/_meta/registry.yaml -Pattern 'name: memory' -Context 0,6
+```
+
+That's the `memory` MCP server (`@modelcontextprotocol/server-memory`) —
+the same one [Lab 05 §5.1](lab05.md#51-examine-existing-mcp-configuration)
+showed you in the MCP server table. Its tool surface —
+`create_entities`, `create_relations`, `add_observations`, `read_graph`,
+`search_nodes` — **is** graph engineering: you design a schema of entity
+types and relation types, then query by *traversal* ("what does X relate
+to?") instead of by file path.
+
+Graph engineering earns its keep when relationships are the point and
+they're dense and many-to-many — "which of these 40 people worked on
+which of these 12 projects, and which decisions cite which prior
+decisions" doesn't nest cleanly into a directory tree. That is **not**
+this repo's problem. Layer 2's facts are mostly linear — "here is what's
+true about this one project" — recalled by one agent, in one directory,
+revised by a human-reviewed diff. A graph adds a server to run, a schema
+to design, and a query language to learn, to solve a many-to-many problem
+this lab doesn't have. [Lab 05 §5.3](lab05.md#53-cross-session-persistence--markdown-lessons-not-a-server)
+and [`docs/memory-decision-tree.md`](../docs/memory-decision-tree.md) make
+the same call: files, not a graph. Now you've seen the actual tool being
+set aside, not just been told it exists.
+
+> 💡 **When would a graph earn its keep?** Tracking cross-team dependency
+> ownership across 50 services, or citation chains across hundreds of
+> architectural decision records, fans relationships out in every
+> direction — traversal queries start winning over `grep`. One project's
+> lessons wiki isn't that; a services registry or a decision-record corpus
+> might be.
+
 ## 10.3 Layer 3 — The Schema (how the wiki gets written)
 
 **Lifetime:** forever, in git.
@@ -486,6 +543,43 @@ shell), type the slash command `/handoff_prompt` with work description
 complete". The output is itself a Layer 1 artefact — it dies with the
 next session unless you graduate durable findings into Layer 2 or 3.
 
+### 10.5a Loop engineering
+
+`/consolidate-lessons` is a **loop**: it reads the wiki's current state,
+decides what changed, and writes a new state back. **Loop engineering**
+is the discipline of making that cycle safe to run repeatedly — four
+properties, all of which this lab's own loop already has:
+
+| Property | What it means | Where you already saw it |
+|---|---|---|
+| **Direction** | State moves one way without a human step reversing it. | Promotion only ever runs L1 → L2 → L3 (§10.4c); nothing auto-demotes. |
+| **Idempotency** | Running it again doesn't duplicate work already done. | Re-running `/consolidate-lessons` doesn't re-promote a lesson that already has a `Promoted to:` value. |
+| **Cadence** | It runs on a deliberate schedule, not continuously. | §10.4d: session-end or weekly, never on every tool call. |
+| **Drift detection** | Disagreements surface for a human instead of being silently resolved. | The `--dry-run` step (§10.4a) and the `CONTRADICTION` flag (§10.4b). |
+
+🖥️ **See the counter-example this repo tried and retired:**
+
+**WSL/Bash:**
+```bash
+jq '.hooks | keys' .github/hooks/default.json
+ls scripts/hooks/ | grep -i observe || echo "no automated observer script ships in this repo"
+```
+
+**PowerShell:**
+```powershell
+(Get-Content .github/hooks/default.json | ConvertFrom-Json).hooks.PSObject.Properties.Name
+if (Get-ChildItem scripts/hooks | Where-Object Name -match 'observe') { "found" } else { "no automated observer script ships in this repo" }
+```
+
+An earlier iteration of this repo (`.github/skills/continuous-learning-v2`,
+`scripts/hooks/observe.sh`/`.ps1`) tried capturing lessons automatically on
+every tool call — a loop with no cadence and no human drift-detection
+step. It's retired (`tests/hooks/retired-observer.test.ts` asserts it
+stays gone) in favor of the loop above, which only writes when you
+explicitly ask and only after you've read the dry-run. A loop without a
+human checkpoint isn't safer for being automatic — it just fails
+silently instead of loudly.
+
 <details>
 <summary>Key Takeaways</summary>
 
@@ -495,6 +589,8 @@ next session unless you graduate durable findings into Layer 2 or 3.
 | `.copilot/lessons/`, `~/.copilot/lessons/` | 2 | Across sessions, in markdown |
 | `AGENTS.md`, `.github/instructions/`, agent personalities | 3 | Forever, binding |
 | Reindex / LSP | — | Automatic; reads code, stores nothing |
+| Graph engineering (entities, relations, observations) | — | Not this repo's memory; see the `memory` MCP server (§10.2d) |
+| Loop engineering (direction, idempotency, cadence, drift-detection) | — | The properties behind `/consolidate-lessons` itself (§10.5a) |
 
 Promotion: L1 → L2 when durable; L2 project → L2 global when cross-repo;
 L2 → L3 when binding on every task. Nothing lives in two layers at once.
@@ -517,7 +613,9 @@ You've now mapped every memory surface the local Copilot CLI exposes:
 - ✅ **Lab 01–09** — agents, skills, hooks, MCP, orchestration, gh-aw,
   Coding Agent, Code Review.
 - ✅ **Lab 10** — three-layer agent memory: raw sources, the wiki, the
-  schema, and the consolidation loop that keeps them clean.
+  schema, and the consolidation loop that keeps them clean — plus graph
+  engineering and loop engineering, named and distinguished from this
+  repo's own pattern.
 - ⏭ **Lab 11** — building and distributing a Copilot plugin
   (enterprise marketplace pattern) so the lessons and schema you curated
   above ship to other teams.

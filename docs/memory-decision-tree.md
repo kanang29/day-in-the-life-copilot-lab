@@ -133,11 +133,22 @@ of the three-layer model:
   workshop intentionally teaches the markdown-wiki pattern instead.
   Markdown round-trips are cheap, git-reviewable, and don't require a
   separate process to host. If you're tempted to stand one up, write
-  a lesson in Layer 2 first and see if that's enough.
+  a lesson in Layer 2 first and see if that's enough. Modeling memory as
+  entities, relations, and observations instead of files is a real
+  discipline — **graph engineering** — and this repo already pins a real
+  implementation of it (the `memory` MCP server in
+  `docs/_meta/registry.yaml`); see [Lab 10 §10.2d](../labs/lab10.md#102d-graph-engineering--the-road-not-taken)
+  for why it's the right call for a dense, many-to-many relationship
+  graph and the wrong one for this repo's mostly-linear project facts.
 - **Behaviour-capture / "instinct" loops** — earlier iterations of the
   repo explored automated behaviour capture. The current pattern is
   simpler: capture the behaviour as a lesson in Layer 2, and if it
-  turns out to be universal, promote it to Layer 3 by hand.
+  turns out to be universal, promote it to Layer 3 by hand. Designing an
+  automated promotion cycle so it's safe to re-run is **loop
+  engineering** — direction, idempotency, cadence, and drift-detection;
+  see [Lab 10 §10.5a](../labs/lab10.md#105a-loop-engineering) for how
+  `/consolidate-lessons` has all four and why the retired, fully-automated
+  observer didn't.
 
 ---
 
