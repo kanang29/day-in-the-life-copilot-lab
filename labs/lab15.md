@@ -11,6 +11,13 @@ registry: docs/_meta/registry.yaml
 
 # 15 — LSP & Code Intelligence in Copilot CLI
 
+> **Two ways to work with this lab**
+> - **In Copilot CLI:** follow the steps below to inspect and use CLI
+>   LSP-backed code intelligence.
+> - **In VS Code:** use the editor's own language features for navigation;
+>   they are separate from the Copilot CLI LSP integration taught here. Use
+>   the VS Code integrated terminal to run the CLI-specific exercises.
+
 In this lab you will learn how Copilot CLI uses **Language Server Protocol
 (LSP) servers** to get precise, compiler-grade understanding of your code —
 and why that beats grep/text-search for navigation and refactoring tasks.

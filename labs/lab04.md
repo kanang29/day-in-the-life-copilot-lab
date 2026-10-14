@@ -11,6 +11,13 @@ registry: docs/_meta/registry.yaml
 
 # 4 — Skills & Prompts
 
+> **Two ways to follow this lab**
+> - **In VS Code:** create and test both the skill and the `.prompt.md` prompt
+>   file in Copilot Chat.
+> - **In Copilot CLI:** create and test the skill in a CLI session. User-authored
+>   `.prompt.md` files are not a CLI feature; use the prompt text directly in
+>   the CLI instead.
+
 In this lab you will create a new skill and prompt template for .NET testing.
 
 > ⏱️ Presenter pace: 4 minutes | Self-paced: 15 minutes

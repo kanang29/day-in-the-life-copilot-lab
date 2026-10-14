@@ -11,6 +11,12 @@ registry: docs/_meta/registry.yaml
 
 # 7 — Multi-Agent Orchestration
 
+> **Two ways to follow this lab**
+> - **In VS Code:** use the Copilot Chat agent picker and the walkthrough
+>   below to create and test the orchestrator.
+> - **In Copilot CLI:** use the same agent files in a CLI session; CLI-specific
+>   orchestration features are covered in the optional section.
+
 In this lab you will create an orchestrator agent that coordinates a development workflow.
 
 > ⏱️ Presenter pace: 4 minutes | Self-paced: 20 minutes

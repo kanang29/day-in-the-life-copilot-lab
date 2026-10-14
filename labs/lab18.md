@@ -11,6 +11,13 @@ registry: docs/_meta/registry.yaml
 
 # 18 — Spec-Driven Design, Stacked PRs & Code Review in the Loop
 
+> **Two ways to work through this lab**
+> - **In VS Code:** write and revise the spec and code locally; use GitHub.com
+>   for pull-request reviews and cloud-agent actions.
+> - **In Copilot CLI:** use the terminal for local spec, Git, and `gh` steps
+>   where shown; review and collaboration actions still take place on
+>   GitHub.com.
+
 This lab closes the modernization arc: you'll write a **spec** (not a
 vague issue), turn it into a gh-aw-driven PRD (extending Lab 08), then —
 because a real spec usually produces more change than fits comfortably in

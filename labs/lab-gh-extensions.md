@@ -11,6 +11,13 @@ registry: docs/_meta/registry.yaml
 
 # Lab — Building a GitHub CLI Extension that Calls an LLM
 
+> **Two ways to work with this lab**
+> - **In Copilot CLI:** use the terminal commands below to build and run the
+>   GitHub CLI extension.
+> - **In VS Code:** edit the extension source in the Explorer or an editor,
+>   then run `gh clab` from the integrated terminal. The extension runs
+>   through GitHub CLI, not Copilot Chat.
+
 > ⏱️ Presenter pace: 12 minutes | Self-paced: 30 minutes
 
 In this lab you will build **`gh clab`** — an *interpreted Node* GitHub CLI

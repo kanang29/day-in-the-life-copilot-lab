@@ -11,6 +11,13 @@ registry: docs/_meta/registry.yaml
 
 # Lab — Authoring a Copilot CLI Extension and Triggering It from a Hook
 
+> **Two ways to work with this lab**
+> - **In Copilot CLI:** author, load, and trigger the extension and hooks
+>   using the CLI steps below.
+> - **In VS Code:** edit and inspect the extension and hook files in the
+>   editor, then use Copilot CLI to load and exercise them. VS Code has no
+>   native Copilot CLI extension or hook execution path.
+
 > ⏱️ Presenter pace: 12 minutes | Self-paced: 35 minutes
 
 In this lab you will author a **Copilot CLI extension** — a JS module that runs inside the CLI's runtime and registers a custom tool — and then wire two **hooks** around it: one that deterministically denies oversize inputs *before* the LLM is called, and one that detects a deterministic trigger pattern. The point is to feel the seam where deterministic gates meet probabilistic LLM-backed bodies.

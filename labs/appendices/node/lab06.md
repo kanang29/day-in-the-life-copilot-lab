@@ -6,6 +6,11 @@ track: node
 
 # Lab 06 — Node track appendix: post-tool-use build hook
 
+> **In Copilot CLI:** create and run the Node build hook using the steps
+> below.
+> **In VS Code:** edit and inspect the hook in the editor, then run and verify
+> it with Copilot CLI; this lab's hook execution path is CLI-specific.
+
 This appendix gives you the Node.js variant of the post-tool-use build hook created in [`labs/lab06.md`](../../lab06.md).
 
 ## A. Create `.github/hooks/post-tool-use-node-build.sh`

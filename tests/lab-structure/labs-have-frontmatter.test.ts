@@ -33,6 +33,19 @@ function listLabFiles(): string[] {
   return [...numbered, ...extras].sort();
 }
 
+function listAppendixFiles(): string[] {
+  const appendixDir = join(LABS_DIR, "appendices");
+  if (!existsSync(appendixDir)) return [];
+  return readdirSync(appendixDir, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    .flatMap((entry) =>
+      readdirSync(join(appendixDir, entry.name))
+        .filter((file) => file.endsWith(".md"))
+        .map((file) => join("appendices", entry.name, file)),
+    )
+    .sort();
+}
+
 describe("lab-structure: labs have required frontmatter", () => {
   const labs = listLabFiles();
 
@@ -107,6 +120,19 @@ describe("lab-structure: labs have required frontmatter", () => {
           `${lab} is tier:beginner so it must be surface:vscode (completable entirely in VS Code Copilot)`,
         ).toBe("vscode");
       }
+    },
+  );
+
+  it.each([...labs, ...listAppendixFiles()])(
+    "%s documents both Copilot CLI and VS Code paths",
+    (lab) => {
+      const raw = readFileSync(join(LABS_DIR, lab), "utf8");
+      expect(raw, `${lab} must state the VS Code path`).toContain(
+        "**In VS Code:**",
+      );
+      expect(raw, `${lab} must state the Copilot CLI path`).toContain(
+        "**In Copilot CLI:**",
+      );
     },
   );
 });

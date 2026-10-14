@@ -11,6 +11,14 @@ registry: docs/_meta/registry.yaml
 
 # 16 — Enterprise Marketplace & Plugin Governance
 
+> **Two ways to work through this lab**
+> - **In VS Code:** review or edit a managed-settings example locally; an
+>   enterprise admin must configure and verify enforcement through the
+>   GitHub.com AI Controls settings.
+> - **In Copilot CLI:** the CLI consumes applicable managed settings, but
+>   does not configure the enterprise policy; use GitHub.com for the admin
+>   steps below.
+
 Lab 11 taught you how to build and distribute a Copilot plugin, and
 introduced `managed-settings.json` in passing. This lab goes deep on the
 **GA enterprise governance mechanism** itself: the real schema, the AI

@@ -11,6 +11,11 @@ registry: docs/_meta/registry.yaml
 
 # 1 — Exploring Copilot Configuration
 
+> **Two ways to follow this lab**
+> - **In VS Code:** follow the main walkthrough in the editor and Copilot Chat.
+> - **In Copilot CLI:** use the same repository configuration files; the
+>   optional CLI section at the end covers CLI-specific power features.
+
 In this lab you will discover and understand the Copilot configuration files that ship with this repository.
 
 > ⏱️ Presenter pace: 4 minutes | Self-paced: 10 minutes

@@ -11,6 +11,13 @@ registry: docs/_meta/registry.yaml
 
 # 8 — GitHub Agentic Workflows: PRD Generation
 
+> **Two ways to work through this lab**
+> - **In VS Code:** edit and review the workflow files locally; configure
+>   repository secrets and observe workflow runs on GitHub.com.
+> - **In Copilot CLI:** use the included terminal commands for local compile
+>   or validation steps. The agentic workflow itself runs in GitHub Actions,
+>   not in a Copilot CLI session.
+
 In this lab you will explore how GitHub Agentic Workflows (gh-aw) automate document generation. You'll examine a workflow that generates a Product Requirements Document (PRD) when a feature branch is created.
 
 > ⏱️ Presenter pace: 5 minutes | Self-paced: 15 minutes

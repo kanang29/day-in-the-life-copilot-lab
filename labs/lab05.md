@@ -11,6 +11,12 @@ registry: docs/_meta/registry.yaml
 
 # 5 — MCP Server Configuration
 
+> **Two ways to follow this lab**
+> - **In VS Code:** follow the main walkthrough using `.vscode/mcp.json` and
+>   Copilot Chat.
+> - **In Copilot CLI:** configure the CLI's separate MCP config as shown in
+>   the optional CLI section; the two clients do not share a config file.
+
 In this lab you will explore and configure Model Context Protocol (MCP) servers.
 
 > ⏱️ Presenter pace: 3 minutes | Self-paced: 15 minutes

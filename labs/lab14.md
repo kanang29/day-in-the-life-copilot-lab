@@ -11,6 +11,13 @@ registry: docs/_meta/registry.yaml
 
 # 14 — Orchestrator + tmux Pattern (Deep-Dive)
 
+> **Two ways to work with this lab**
+> - **In Copilot CLI:** run the orchestrator and worker panes in tmux as
+>   described below.
+> - **In VS Code:** edit the scripts in the editor and run the same CLI
+>   commands from VS Code's integrated terminal; the tmux orchestration
+>   itself has no native Copilot Chat equivalent.
+
 In Lab 13 you met **A2A / ACP** at the concept level and ran a
 two-agent implementer + critic loop in a single Copilot CLI session.
 Lab 14 takes the same idea to its production shape: **one tmux session,

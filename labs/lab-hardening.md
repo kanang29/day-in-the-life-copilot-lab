@@ -11,6 +11,13 @@ registry: docs/_meta/registry.yaml
 
 # Lab — Hardening Skills, Agents, and MCP for Deterministic Production Use
 
+> **Two ways to work with this lab**
+> - **In Copilot CLI:** configure and verify the CLI hooks and tool
+>   restrictions using the steps below.
+> - **In VS Code:** edit the shared agent and hook files in the editor. The
+>   hook enforcement path taught here is CLI-specific, so verify it by
+>   running Copilot CLI.
+
 > ⚠️ **Read this first — this lab's hooks only ever emit `deny`, by design.**
 > `preToolUse`'s `permissionDecision` is a real three-way switch —
 > `"allow"`, `"deny"`, and `"ask"` all genuinely control whether the tool

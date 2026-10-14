@@ -11,6 +11,13 @@ registry: docs/_meta/registry.yaml
 
 # 9 — Copilot Cloud Agent & Code Review
 
+> **Two ways to work through this lab**
+> - **In VS Code:** edit repository instructions locally; use GitHub.com for
+>   review settings, issue assignment, and cloud-agent activity.
+> - **In Copilot CLI:** use the terminal for local repository work, but
+>   cloud-agent assignment and GitHub code-review controls have no CLI
+>   equivalent in this lab; complete those steps on GitHub.com.
+
 In this lab you will chain two platform-level agentic features: the **Copilot Cloud Agent** to implement a feature from a GitHub Issue, and **Copilot Code Review** to automatically review the resulting pull request. You won't write a single line of code — you'll write an issue, and two AI agents handle the rest.
 
 > ⏱️ Presenter pace: 5 minutes | Self-paced: 22 minutes

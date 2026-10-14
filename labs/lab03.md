@@ -11,6 +11,13 @@ registry: docs/_meta/registry.yaml
 
 # 3 — Creating a .NET Development Agent
 
+> **Two ways to follow this lab**
+> - **In VS Code:** create the agent file, configure its tools, and select it
+>   from the Copilot Chat agent picker.
+> - **In Copilot CLI:** use the same `.agent.md` file from a CLI session in
+>   the repository; configure CLI tool access using the CLI-specific notes
+>   below rather than VS Code's tool configuration.
+
 In this lab you will create a custom agent specialized for .NET development with ContosoUniversity.
 
 > ⏱️ Presenter pace: 4 minutes | Self-paced: 15 minutes

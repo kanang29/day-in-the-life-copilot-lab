@@ -11,6 +11,13 @@ registry: docs/_meta/registry.yaml
 
 # 6 — Hooks
 
+> **Two ways to work with this lab**
+> - **In Copilot CLI:** create, configure, and run the hooks using the CLI
+>   steps below.
+> - **In VS Code:** use the editor to author and inspect the hook files, then
+>   run and verify them with Copilot CLI. Hooks are not a supported VS Code
+>   execution path in this lab.
+
 In this lab you will explore the hook system and create a new hook for .NET build verification.
 This is the hands-on counterpart to the tool-gating guardrail you'll harden in
 [`lab-hardening.md`](lab-hardening.md), which pairs a `preToolUse` hook with the

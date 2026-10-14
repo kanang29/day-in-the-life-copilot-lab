@@ -7,6 +7,11 @@ parent_lab: lab-copilot-cli-extensions.md
 
 # Node Appendix — `lab-copilot-cli-extensions`
 
+> **In Copilot CLI:** run the Node-specific extension and hook steps below.
+> **In VS Code:** edit the same files in the editor, then run and verify
+> them with Copilot CLI; these extensions and hooks have no native VS Code
+> execution path.
+
 This appendix is a track-specific completion path for [`labs/lab-copilot-cli-extensions.md`](../../lab-copilot-cli-extensions.md). The base lab is language-agnostic; this page wires `clab_summarize` into a typical **Node.js / TypeScript** inner loop so the extension earns its place in a real Node workflow.
 
 > Pair with: [`labs/appendices/dotnet/lab-copilot-cli-extensions.md`](../dotnet/lab-copilot-cli-extensions.md) for the .NET-track equivalent.

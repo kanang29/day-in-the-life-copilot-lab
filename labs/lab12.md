@@ -11,6 +11,11 @@ registry: docs/_meta/registry.yaml
 
 # 12 — Fabric MCP with Copilot CLI & VS Code
 
+> **Two ways to follow this lab**
+> - **In Copilot CLI:** follow Part A and use the CLI MCP configuration.
+> - **In VS Code:** follow Part B and use `.vscode/mcp.json`; the VS Code and
+>   CLI setup steps are separate paths to the Fabric MCP server.
+
 In this lab you will wire **Microsoft Fabric** into Copilot, enumerate
 lakehouses from the CLI, run a notebook cell, and refactor a notebook in
 VS Code with inline chat and agent mode — all while keeping secrets out

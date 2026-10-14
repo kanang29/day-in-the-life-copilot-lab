@@ -11,6 +11,13 @@ registry: docs/_meta/registry.yaml
 
 # 13 — A2A Concepts with Copilot CLI ACP
 
+> **Two ways to work with this lab**
+> - **In Copilot CLI:** run the single-session and multi-process exercises
+>   below; the live ACP-style process work is CLI-specific.
+> - **In VS Code:** use the editor for the shared files and Copilot Chat for
+>   supported subagent concepts. VS Code does not provide the lab's
+>   multi-process CLI workflow.
+
 In this lab you'll learn what **agent-to-agent (A2A)** orchestration is
 using Copilot CLI's local primitives (`task`, `write_agent`,
 `read_agent`), drive a concrete **two-agent task** (an *implementer*

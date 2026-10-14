@@ -11,6 +11,13 @@ registry: docs/_meta/registry.yaml
 
 # 2 — Custom Instructions & AGENTS.md
 
+> **Two ways to follow this lab**
+> - **In VS Code:** edit the instruction files in the Explorer and test them
+>   in Copilot Chat as described below.
+> - **In Copilot CLI:** edit the same repository instruction files, start
+>   Copilot CLI from the repository root, and test the instructions in a
+>   session for that workspace.
+
 In this lab you will modify custom instructions and AGENTS.md to customize Copilot behavior.
 
 > ⏱️ Presenter pace: 4 minutes | Self-paced: 15 minutes

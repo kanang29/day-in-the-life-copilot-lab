@@ -11,6 +11,13 @@ registry: docs/_meta/registry.yaml
 
 # 10 — Agent Memory: Personalities, Lessons, and Consolidation
 
+> **Two ways to follow this lab**
+> - **In VS Code:** use Copilot Chat and the `.github/prompts/` files for the
+>   main consolidation flow.
+> - **In Copilot CLI:** work with the shared markdown memory files and use
+>   CLI-supported skills where noted. User-authored prompt files and their
+>   slash commands are VS Code-only; the lab calls out the CLI alternative.
+
 This lab teaches **how Copilot remembers things across sessions — without
 a knowledge-graph server, without embeddings, without anything that isn't
 already plain markdown in git.**

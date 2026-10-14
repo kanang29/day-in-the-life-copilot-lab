@@ -11,6 +11,14 @@ registry: docs/_meta/registry.yaml
 
 # 17 — GitHub Admin Controls for Copilot/AI
 
+> **Two ways to work through this lab**
+> - **In VS Code:** use the editor to take notes or inspect linked examples;
+>   the organization controls and audit-log walkthrough must be completed
+>   in GitHub.com.
+> - **In Copilot CLI:** no CLI command configures these organization
+>   controls; review the CLI's effective behavior only after an admin makes
+>   changes in GitHub.com.
+
 This lab surveys the **AI Controls** area of enterprise/org settings — the
 centralized nav where admins manage Copilot policy, review agent activity,
 and audit AI-driven changes — and walks through the single biggest policy

@@ -11,6 +11,13 @@ registry: docs/_meta/registry.yaml
 
 # 11 — Building & Distributing a Copilot Plugin (Enterprise Marketplace Pattern)
 
+> **Two ways to work with this lab**
+> - **In Copilot CLI:** create, install, and test the plugin using the CLI
+>   commands below.
+> - **In VS Code:** edit the plugin files in the Explorer or an editor, then
+>   use Copilot CLI to install and verify them. VS Code has no equivalent
+>   plugin marketplace workflow in this lab.
+
 In this lab you will scaffold a Copilot plugin, bundle an agent + skill + hook,
 publish it to a **private org-internal registry repo**, install it into a fresh
 workspace, and enforce an org allowlist policy that blocks untrusted sources.

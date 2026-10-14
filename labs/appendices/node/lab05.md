@@ -6,6 +6,10 @@ track: node
 
 # Lab 05 — Node track appendix: MCP picks
 
+> **In VS Code:** follow the MCP setup steps with `.vscode/mcp.json`.
+> **In Copilot CLI:** configure the CLI's separate MCP config using the CLI
+> notes in the main lab; the two clients do not share a config file.
+
 The MCP servers introduced in [`labs/lab05.md`](../../lab05.md) all apply to the Node track. This appendix calls out which servers earn the most leverage when working in the Fastify + Drizzle stack and how to wire them.
 
 ## A. Recommended MCP picks for the Node track

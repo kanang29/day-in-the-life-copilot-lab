@@ -7,6 +7,11 @@ parent_lab: lab03.md
 
 # .NET Appendix — Lab 03
 
+> **In VS Code:** create and test the .NET agent with the Copilot Chat agent
+> picker.
+> **In Copilot CLI:** use the same `.agent.md` file from a CLI session in the
+> repository; configure CLI tool access separately from VS Code.
+
 This appendix supplies the **.NET-track** content for [Lab 03 — Creating a Development Agent](../../lab03.md). When the lab tells you to author a track-specific dev agent, paste the body below into `.github/agents/dotnet-dev.agent.md`.
 
 > Pair with: [`labs/appendices/node/lab03.md`](../node/lab03.md) for the Node-track equivalent.

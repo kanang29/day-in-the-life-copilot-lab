@@ -11,6 +11,14 @@ registry: docs/_meta/registry.yaml
 
 # 20 — Enterprise Token Optimization & Reporting
 
+> **Two ways to work through this lab**
+> - **In VS Code:** review local policy and documentation examples; the
+>   organization usage reports and governance settings are accessed in
+>   GitHub.com.
+> - **In Copilot CLI:** CLI users are covered as the audience of the policy,
+>   but the organization-level reporting and governance steps have no CLI
+>   equivalent; complete them in GitHub.com.
+
 [`docs/token-and-model-guide.md`](../docs/token-and-model-guide.md) taught
 individual-scale token discipline: model tiers, batching, context hygiene,
 and `/cost-check`. This lab takes the same discipline to the **enterprise/
