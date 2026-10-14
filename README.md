@@ -469,6 +469,16 @@ Get-Content AGENTS.md
 - [ ] Lab 08: gh-aw: PRD Generation
 - [ ] Lab 09: Copilot Cloud Agent & Code Review
 - [ ] Lab 10: Agent memory — personalities, lessons, and consolidation
+- [ ] Lab 11: Building & Distributing a Copilot Plugin
+- [ ] Lab 12: Fabric MCP with Copilot CLI & VS Code
+- [ ] Lab 13: A2A Concepts with Copilot CLI ACP
+- [ ] Lab 14: Orchestrator + tmux Pattern (Deep-Dive)
+- [ ] Lab 15: LSP & Code Intelligence in Copilot CLI
+- [ ] Lab 16: Enterprise Marketplace & Plugin Governance
+- [ ] Lab 17: GitHub Admin Controls for Copilot/AI
+- [ ] Lab 18: Spec-Driven Design, Stacked PRs & Code Review in the Loop
+- [ ] Lab 19: Self-Improving Agents & Skills
+- [ ] Lab 20: Enterprise Token Optimization & Reporting
 ```
 
 ---
