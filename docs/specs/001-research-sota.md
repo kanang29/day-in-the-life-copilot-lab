@@ -227,16 +227,19 @@ correctness pass doesn't have to re-derive the same checks:
   specification but still supported for backwards compatibility."* This
   matches the finding already **applied** in this repo's accuracy ledger
   (`workshop/slides/20-module-2.md`).
-- **UNVERIFIED — blocked**: `docs/_meta/registry.yaml`'s claim that the
-  **2026-07-28 MCP spec revision** removed protocol-level sessions
-  (no `Mcp-Session-Id`, no stateful `initialize` handshake) could not be
-  independently re-opened this session — `modelcontextprotocol.io` failed
-  DNS resolution from this sandbox on every attempt. This claim is already
-  treated as load-bearing by Lab 05 and Lab 10 (`mcp_protocol_spec_version`
-  in the registry). It should be the **first** item re-checked from an
-  environment with access to that domain, precisely because so much
-  downstream content depends on it and this session could not re-confirm it
-  from a primary source.
+- **VERIFIED** (re-checked in Phase 3) — `modelcontextprotocol.io` still
+  fails DNS resolution from this sandbox, but its own source repository,
+  [`modelcontextprotocol/modelcontextprotocol`](https://raw.githubusercontent.com/modelcontextprotocol/modelcontextprotocol/main/docs/specification/2026-07-28/changelog.mdx)
+  — the content source the website itself is built from, same path,
+  same title ("Key Changes") — is reachable and confirms the claim
+  verbatim: *"Remove protocol-level sessions and the `Mcp-Session-Id`
+  header from the Streamable HTTP transport... Servers that need
+  cross-call state use explicit, server-minted handles passed as
+  ordinary tool arguments"* (item 1), plus *"remove the
+  `initialize`/`notifications/initialized` handshake"* (item 2). This
+  matches `docs/_meta/registry.yaml`'s `mcp_protocol_spec_version` claim
+  and what Lab 05 and Lab 10 already teach — no lab text changes needed
+  for this claim specifically, only this status update.
 
 ### 9. Coding agent
 
@@ -349,7 +352,7 @@ correctness pass doesn't have to re-derive the same checks:
 | 8 | `githubnext/gh-aw` → `github/gh-aw` move; `lab-gh-extensions.md` not updated | [github/gh-aw](https://github.com/github/gh-aw) (redirect observed directly) | VERIFIED |
 | 9 | Upstream `gh-aw` exact latest release number | GitHub releases API / HTML | UNVERIFIED — blocked (403 / unparseable) |
 | 10 | SSE transport deprecated in MCP spec | [add-mcp-servers](https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/add-mcp-servers) | VERIFIED (already applied in this repo) |
-| 11 | 2026-07-28 MCP spec revision removed protocol-level sessions | `modelcontextprotocol.io` (unreachable) | UNVERIFIED — blocked |
+| 11 | 2026-07-28 MCP spec revision removed protocol-level sessions | [spec source repo](https://raw.githubusercontent.com/modelcontextprotocol/modelcontextprotocol/main/docs/specification/2026-07-28/changelog.mdx) (`modelcontextprotocol.io` itself unreachable by DNS; its own source repo is not) | VERIFIED |
 | 12 | "Copilot coding agent" docs URL cited by `lab18.md` now 404s; product renamed "Copilot cloud agent" | direct fetch of the cited URL + [code-review](https://docs.github.com/en/copilot/concepts/agents/code-review) | VERIFIED |
 | 13 | Copilot code review now available on Azure DevOps (preview) and to unlicensed org members | [code-review](https://docs.github.com/en/copilot/concepts/agents/code-review) | VERIFIED |
 | 14 | No "SCNS", "loop engineering", or "graph engineering" content exists anywhere in this repo today | full-tree `grep` run in this session | VERIFIED |
@@ -377,9 +380,11 @@ doesn't have to re-derive them:
   addressed directly by `docs/specs/002-lab10-memory.md`, which had to
   source or define those terms from this repo's own artifacts rather than
   adapt prior art.
-- **Claims 9, 11, and 16** are explicitly **not** resolved by this document
-  and must not be copied into any lab as fact until re-checked from an
-  environment that can reach `github.blog` and `modelcontextprotocol.io`.
+- **Claims 9 and 16** are explicitly **not** resolved by this document and
+  must not be copied into any lab as fact until re-checked from an
+  environment that can reach `github.blog`. (Claim 11 was re-checked and
+  **verified** in Phase 3 — see above; `modelcontextprotocol.io`'s DNS
+  block does not extend to its own source repo on GitHub.)
 
 ## Status and next step
 

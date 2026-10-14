@@ -128,7 +128,8 @@ of the three-layer model:
   layer over files you already have. It has no lifetime of its own; it
   remembers whatever is currently checked in. If your question is
   answerable by reading the code, you don't need any memory layer at
-  all. Covered in [Lab 10 §10.0](../labs/lab10.md).
+  all. See [`Repository indexing`](https://docs.github.com/en/copilot/concepts/context/repository-indexing),
+  cited in [Lab 10](../labs/lab10.md)'s references.
 - **Knowledge-graph servers** (e.g. a memory-MCP-style graph) — the
   workshop intentionally teaches the markdown-wiki pattern instead.
   Markdown round-trips are cheap, git-reviewable, and don't require a
@@ -140,6 +141,9 @@ of the three-layer model:
   `docs/_meta/registry.yaml`); see [Lab 10 §10.2d](../labs/lab10.md#102d-graph-engineering--the-road-not-taken)
   for why it's the right call for a dense, many-to-many relationship
   graph and the wrong one for this repo's mostly-linear project facts.
+  The file-based flavor of the same discipline — hub notes, typed links,
+  backlinks-by-convention — stays inside the markdown wiki and is
+  practiced hands-on in [Lab 10 §10.2e](../labs/lab10.md#102e-file-based-graph-engineering--hubs-typed-links-backlinks).
 - **Behaviour-capture / "instinct" loops** — earlier iterations of the
   repo explored automated behaviour capture. The current pattern is
   simpler: capture the behaviour as a lesson in Layer 2, and if it

@@ -4,17 +4,16 @@ lab_number: 10
 tier: beginner
 surface: vscode
 pace:
-  presenter_minutes: 5
-  self_paced_minutes: 25
+  presenter_minutes: 6
+  self_paced_minutes: 35
 registry: docs/_meta/registry.yaml
 ---
 
 # 10 — Agent Memory: Personalities, Lessons, and Consolidation
 
-This is the capstone for the local Copilot CLI surface. It teaches **how
-Copilot remembers things across sessions — without a knowledge-graph
-server, without embeddings, without anything that isn't already plain
-markdown in git.**
+This lab teaches **how Copilot remembers things across sessions — without
+a knowledge-graph server, without embeddings, without anything that isn't
+already plain markdown in git.**
 
 Andrej Karpathy observed that LLMs compound knowledge dramatically better
 when they maintain **their own notes** instead of re-deriving context on
@@ -25,7 +24,7 @@ teaches that pattern in three layers:
 
 | Layer | Name | Surface | Lifetime |
 |-------|------|---------|----------|
-| 1 | **Raw sources** | `plan.md`, SQL todos, session transcripts | This session |
+| 1 | **Raw sources** | This chat's context (plus `plan.md`, SQL todos on Copilot CLI) | This session |
 | 2 | **The Wiki** | `.copilot/lessons/` (project) + `~/.copilot/lessons/` (global) | Across sessions, in markdown |
 | 3 | **The Schema** | `AGENTS.md`, `.github/instructions/*.md`, agent personalities | Forever, binding |
 
@@ -34,33 +33,45 @@ itself*. Layer 3 is the rulebook that governs how Layer 2 gets written.
 Promotion goes upward: raw → wiki → schema. Nothing lives in two layers
 at once.
 
-Two disciplines sit next to this pattern without being part of it:
-**graph engineering** (modeling memory as entities and relations instead
-of files — §10.2d) and **loop engineering** (the properties that make an
-automated promotion cycle safe — §10.5a). You'll meet both by name below,
-using artifacts this repo already ships, so you can recognize them
-elsewhere even though this lab's own memory stays file-based.
+Two disciplines extend this pattern rather than replacing it:
+**graph engineering** — structuring the wiki itself as a navigable graph
+of hub notes, typed links, and backlinks (§10.2e), plus the knowledge-graph
+*server* model this repo deliberately doesn't use for memory (§10.2d) —
+and **loop engineering** — the properties that make a memory-promotion
+cycle safe to run repeatedly (§10.5a). You'll practice both hands-on below
+using artifacts this repo already ships, not just meet them by name.
 
-> ⏱️ Presenter pace: 5 minutes | Self-paced: 25 minutes
+> 🖥️ **Surface:** every required step below works entirely inside **VS
+> Code's Copilot Chat** — no standalone Copilot CLI install needed. An
+> **Advanced (optional)** section (§10.1a) covers the CLI-only
+> session-state surface (`plan.md`, the SQL `todos` store, `/fleet`) for
+> learners who also use Copilot CLI.
 
-> 💰 **Cost Budget** — ~15k in / ~5k out across the three layers.
-> Markdown round-trips are cheap; no knowledge-graph server chews tokens
-> on every turn. Run Layer 1 and Layer 2 on `claude-haiku-4.5` or
-> `gpt-5-mini` (mechanical edits); stay on `auto` or upshift to
-> `claude-opus-4.7` only for the §10.4 consolidation pass. `/clear`
-> between §10.3 and §10.4. Full guidance:
-> [`docs/token-and-model-guide.md`](../docs/token-and-model-guide.md).
+> ⏱️ Presenter pace: 6 minutes | Self-paced: 35 minutes
+
+> 💰 **Cost Budget** — ~18k in / ~6k out across the three layers plus the
+> new graph/loop/vault exercises. Markdown round-trips are cheap; no
+> knowledge-graph server chews tokens on every turn. Use the registry's
+> `models.cheap` tier (e.g. `claude-haiku-4.5`, `gpt-5-mini`) for Layer 1–2
+> mechanical edits and log/index appends; `auto` is a fine default
+> throughout. Upshift to `models.premium` only for the §10.4 consolidation
+> pass, where cross-document reconciliation benefits from the stronger
+> tier. Start a new chat (or `/clear` on Copilot CLI) between §10.3 and
+> §10.4. Full guidance, including the
+> current `models.cheap|standard|premium` membership:
+> [`docs/token-and-model-guide.md`](../docs/token-and-model-guide.md) and
+> [`docs/_meta/registry.yaml`](../docs/_meta/registry.yaml).
 >
-> **Tier picker for this lab:**
+> | Tier (registry key) | When to use it here |
+> |------|--------------------|
+> | `models.cheap` | §10.1–10.3 schema + log appends, file reads, the typed-link and vault exercises |
+> | `models.standard` | Mid-complexity edits, schema drafting, the bounded loop iteration (§10.5a) |
+> | `models.premium` | §10.4 interactive consolidation pass only |
 >
-> | Tier | Model | When to use it here | Rough cost vs. Opus 4.7 |
-> |------|-------|--------------------|-------------------------|
-> | Cheap | `claude-haiku-4.5` / `gpt-5-mini` | §10.1–10.3 schema + log appends, file reads | ≈ 1/15× |
-> | Standard | `claude-sonnet-4.6` / `gpt-5.4` | Mid-complexity edits, schema drafting | ≈ 1/5× |
-> | Premium (prior gen) | `claude-opus-4.6` | `task`-tool sub-agent dispatches per repo policy — pin here, not 4.7 | ≈ 0.7× |
-> | Premium (current) | `claude-opus-4.7` | §10.4 interactive consolidation pass only | 1.0× (baseline) |
->
-> Opus 4.7 is roughly 30–40 % more expensive per token than 4.6 and noticeably better at multi-document reconciliation; Haiku 4.5 is the new low-tier default and ~15× cheaper than 4.7 for the routine append/read loops in §10.1–10.3. Sub-agents launched via the `task` tool stay pinned to `claude-opus-4.6` (see repo `copilot-instructions.md`); the upshift to 4.7 applies only to your interactive pane during §10.4.
+> This lab names registry tiers, not model IDs — see
+> [`docs/_meta/registry.yaml`](../docs/_meta/registry.yaml)'s `models:`
+> block for which specific models back each tier today; that list changes
+> independently of this lab text.
 
 References:
 - [Repository indexing](https://docs.github.com/en/copilot/concepts/context/repository-indexing)
@@ -69,44 +80,54 @@ References:
 - [`.github/instructions/lessons.instructions.md`](../.github/instructions/lessons.instructions.md) — the schema
 - [`.github/prompts/consolidate-lessons.prompt.md`](../.github/prompts/consolidate-lessons.prompt.md) — the command
 
-## 10.0 Copilot CLI surface check (2026 refresh)
-
-<!-- @include docs/_partials/currency.md — do not edit inline; edit the partial and re-sync. -->
-> 💡 Commands below reflect the current Copilot CLI surface as of this lab
-> refresh (CLI floor per [`docs/_meta/registry.yaml`](../docs/_meta/registry.yaml):
-> see `copilot_cli_version_floor`). Versions, model tiers, and MCP server pins
-> live in the registry — labs reference it rather than hardcoding values, so a
-> single registry update propagates everywhere.
-
-> 🆕 **Terminal UX refresh (confirmed GA, ~Aug 2026):** `/plugin`, `/mcp`, and
-> `/skills` are real interactive commands backed by an in-terminal dashboard —
-> you can discover, install, and configure plugins, MCP servers, and skills
-> without hand-editing config files. The terminal also gained tabs for
-> browsing issues/PRs/gists. Config-file editing still works and is what the
-> underlying `extensions_manage` MCP tool inspects, but the dashboard is now
-> the primary interactive path for a human at the prompt.
-
-| Capability | Command / surface | Use when |
-|------------|-------------------|----------|
-| **Install a plugin** | `/plugin install owner/repo` (or the `/plugin` dashboard) | Pulling a packaged multi-agent or skill bundle from a marketplace or org-internal plugin source. |
-| **Parallel subagents** | `/fleet` | Fanning work out across multiple short-lived workers under one orchestrator (see [Lab 14 — Orchestrator + tmux](../labs/lab14.md)). |
-| **Plan mode vs autopilot mode** | `Shift+Tab` toggles plan mode; autopilot mode is the default | Plan-heavy work (design, decomposition) runs in plan mode; well-scoped execution runs in autopilot mode. |
-| **Mid-session model switch** | `/model <tier-or-id>` | Upshift to `models.premium` (per [`registry.yaml`](../docs/_meta/registry.yaml)) for hard reasoning; downshift to `models.cheap` for tool-heavy loops. Note: an enterprise's global model-default-availability policy (see [Lab 17](../labs/lab17.md)) may make additional models selectable here even if the registry's curated tiers don't list them. |
-| **Local tool discovery (model-side)** | `extensions_manage` MCP tool, `operation: "list"` / `"inspect"` / `"guide"` / `"scaffold"` | The agent enumerating which agents, skills, hooks, and extensions are contributing to the session before wiring a handoff. Invoke as a tool call (e.g. `extensions_manage({operation: "list"})`), **not** as `/extensions_manage` — there is no such slash command. |
-| **Local tool discovery (user-side)** | `/skills`, `/plugin`, `/mcp` | The human listing or managing skills, plugins, and MCP servers from the prompt via the in-terminal dashboard. These are real built-in slashes; `/extensions manage` and `/extensions mode` are **not** — use `Shift+Tab` to toggle plan/autopilot modes. |
-| **LSP-backed code intelligence** | Automatic — no slash command | Copilot CLI transparently prefers a configured language server over text search for go-to-definition, find references, rename, and call hierarchy. See [Lab 15 — LSP & Code Intelligence](../labs/lab15.md). |
-<!-- @end-include docs/_partials/currency.md -->
-
 ## 10.1 Layer 1 — Raw sources (session-scoped)
 
-**Lifetime:** this session only.
-**Surfaces:** `~/.copilot/session-state/<id>/plan.md`, the per-session SQL
-`todos`/`todo_deps` tables, session transcripts, scratch files in `files/`.
+**Lifetime:** this chat session only.
+**Surfaces (VS Code):** the current Copilot Chat conversation itself —
+its context window, any todo/plan list the agent is tracking for you in
+that chat, scratch notes you keep in an open editor tab. All of it
+disappears the moment you open a new chat; none of it is written to disk
+unless you explicitly ask the agent to save it.
 
-Use this layer for the **work-in-flight**: the plan you are executing right
-now, the todos you have not finished, the half-formed scratchpad. None of
-it is meant to outlive the task. You've seen this layer in every earlier
-lab — we just name it explicitly here so the promotion story is clear.
+Use this layer for the **work-in-flight**: the plan you are executing
+right now, the todos you have not finished, the half-formed scratchpad.
+None of it is meant to outlive the task.
+
+🖥️ **Try it — ask the agent to track its own plan for you:**
+
+```
+Create a short plan for adding a "Department dashboard" page. Track it as
+a checklist and keep me updated on progress as you work.
+```
+
+Close this chat and open a new one, then ask what the plan was — the
+agent won't know. That's the point: Layer 1 dies with the session, which
+is exactly why Layer 2 exists.
+
+> 💡 **Built-in memory features, checked against official docs:** as of
+> this lab's last refresh, neither VS Code nor GitHub ship a distinct,
+> named, persistent **cross-session** memory product beyond the
+> instructions/prompt-file mechanism this lab already covers in Layer 3.
+> (Primary-source verification for this specific claim was attempted
+> during this refresh and blocked by a sandboxed network — re-check
+> against `code.visualstudio.com/docs` and `docs.github.com` before
+> teaching otherwise.) If that changes, this is the paragraph to update —
+> everything else in this lab is unaffected either way, because the wiki
+> in §10.2 is plain markdown your repo owns, not a vendor feature.
+
+> 💡 **Rule of thumb:** if a teammate joining tomorrow would need this
+> information, it does *not* belong in Layer 1. Raw sources feed the wiki
+> — they are not the wiki themselves. Before starting a new chat, ask the
+> agent to graduate anything durable into Layer 2.
+
+### 10.1a Advanced (optional) — Copilot CLI session state and surface
+
+> ⚠️ Everything in this subsection requires a local Copilot CLI install.
+> It is not needed to complete this lab — skip to [§10.2](#102-layer-2--the-wiki-llm-maintained-markdown)
+> if you're working entirely in VS Code.
+
+Copilot CLI gives Layer 1 a concrete on-disk shape VS Code doesn't expose
+directly: a per-session `plan.md` and a SQL `todos`/`todo_deps` store.
 
 🖥️ **Try it — todo tracking via the session SQL store:**
 
@@ -140,10 +161,31 @@ cat ~/.copilot/session-state/*/plan.md 2>/dev/null | head -60
 Get-Content $HOME/.copilot/session-state/*/plan.md -ErrorAction SilentlyContinue | Select-Object -First 60
 ```
 
-> 💡 **Rule of thumb:** if a teammate joining tomorrow would need this
-> information, it does *not* belong in Layer 1. Raw sources feed the wiki —
-> they are not the wiki themselves. Before `/clear`, ask the agent to
-> graduate anything durable into Layer 2.
+<!-- @include docs/_partials/currency.md — do not edit inline; edit the partial and re-sync. -->
+> 💡 Commands below reflect the current Copilot CLI surface as of this lab
+> refresh (CLI floor per [`docs/_meta/registry.yaml`](../docs/_meta/registry.yaml):
+> see `copilot_cli_version_floor`). Versions, model tiers, and MCP server pins
+> live in the registry — labs reference it rather than hardcoding values, so a
+> single registry update propagates everywhere.
+
+> 🆕 **Terminal UX refresh (confirmed GA, ~Aug 2026):** `/plugin`, `/mcp`, and
+> `/skills` are real interactive commands backed by an in-terminal dashboard —
+> you can discover, install, and configure plugins, MCP servers, and skills
+> without hand-editing config files. The terminal also gained tabs for
+> browsing issues/PRs/gists. Config-file editing still works and is what the
+> underlying `extensions_manage` MCP tool inspects, but the dashboard is now
+> the primary interactive path for a human at the prompt.
+
+| Capability | Command / surface | Use when |
+|------------|-------------------|----------|
+| **Install a plugin** | `/plugin install owner/repo` (or the `/plugin` dashboard) | Pulling a packaged multi-agent or skill bundle from a marketplace or org-internal plugin source. |
+| **Parallel subagents** | `/fleet` | Fanning work out across multiple short-lived workers under one orchestrator (see [Lab 14 — Orchestrator + tmux](../labs/lab14.md)). |
+| **Plan mode vs autopilot mode** | `Shift+Tab` toggles plan mode; autopilot mode is the default | Plan-heavy work (design, decomposition) runs in plan mode; well-scoped execution runs in autopilot mode. |
+| **Mid-session model switch** | `/model <tier-or-id>` | Upshift to `models.premium` (per [`registry.yaml`](../docs/_meta/registry.yaml)) for hard reasoning; downshift to `models.cheap` for tool-heavy loops. Note: an enterprise's global model-default-availability policy (see [Lab 17](../labs/lab17.md)) may make additional models selectable here even if the registry's curated tiers don't list them. |
+| **Local tool discovery (model-side)** | `extensions_manage` MCP tool, `operation: "list"` / `"inspect"` / `"guide"` / `"scaffold"` | The agent enumerating which agents, skills, hooks, and extensions are contributing to the session before wiring a handoff. Invoke as a tool call (e.g. `extensions_manage({operation: "list"})`), **not** as `/extensions_manage` — there is no such slash command. |
+| **Local tool discovery (user-side)** | `/skills`, `/plugin`, `/mcp` | The human listing or managing skills, plugins, and MCP servers from the prompt via the in-terminal dashboard. These are real built-in slashes; `/extensions manage` and `/extensions mode` are **not** — use `Shift+Tab` to toggle plan/autopilot modes. |
+| **LSP-backed code intelligence** | Automatic — no slash command | Copilot CLI transparently prefers a configured language server over text search for go-to-definition, find references, rename, and call hierarchy. See [Lab 15 — LSP & Code Intelligence](../labs/lab15.md). |
+<!-- @end-include docs/_partials/currency.md -->
 
 ## 10.2 Layer 2 — The Wiki (LLM-maintained markdown)
 
@@ -330,6 +372,85 @@ set aside, not just been told it exists.
 > lessons wiki isn't that; a services registry or a decision-record corpus
 > might be.
 
+### 10.2e File-based graph engineering — hubs, typed links, backlinks
+
+You don't need a server to get the *navigational* benefit of a graph —
+following a relationship instead of loading every file. The wiki you
+already have in `.copilot/lessons/` can carry that structure directly:
+
+- **Hub note.** `index.md` already *is* a hub note — a catalog of
+  pointers grouped by topic, read before anything else. You've been
+  using this pattern since §10.2b without the vocabulary for it.
+- **Typed links.** The schema's `related:` front-matter key (see
+  [`.github/instructions/lessons.instructions.md`](../.github/instructions/lessons.instructions.md))
+  is a plain, untyped list. Three optional sibling keys add a relationship
+  *type* when it matters: `relates-to` (two lessons share context but
+  neither depends on the other), `supersedes` (this lesson replaces an
+  older one — the superseded file should be stubbed, not deleted, so old
+  links don't 404), and `contradicts` (a project lesson deliberately
+  disagrees with a global one — the same situation `scope:
+  project-override` already flags in §10.2c, now expressed as an edge
+  instead of a flag).
+- **Backlinks.** Markdown links are one-directional by default. This
+  schema's convention for a backlink is: when you add a typed link from
+  A to B, also add the reciprocal entry in B's own front-matter in the
+  same edit. `index.md` grouping both lessons under one topic heading is
+  the cheapest backlink of all — it's already there for every lesson you
+  index.
+- **Per-directory vaults.** One `.copilot/lessons/` per subtree instead
+  of one project-wide wiki — covered hands-on below with a fixture.
+
+🖥️ **Hands-on (d) — link three lessons through typed links, then follow them:**
+
+Ask the agent to create two small scratch lessons alongside the existing
+`example-lesson.md`, cross-linked with typed front-matter:
+
+```
+Create two new lesson files in .copilot/lessons/: "prefer-xunit-fixtures"
+(tags: dotnet, testing) and "powershell-parity-for-labs" (tags: labs,
+powershell). Give prefer-xunit-fixtures a relates-to link to
+example-lesson.md. Give powershell-parity-for-labs a relates-to link to
+prefer-xunit-fixtures. Add both to index.md under appropriate headings,
+and add the reciprocal relates-to entry in example-lesson.md pointing
+back to prefer-xunit-fixtures.
+```
+
+Then ask a question that **requires** the agent to follow the chain
+instead of answering from one file alone:
+
+```
+Starting from powershell-parity-for-labs, what does this repo believe
+about verifying .NET changes, and why does that belief also show up in
+lessons about lab-writing conventions? Follow the links; don't just
+summarize one file.
+```
+
+A correct answer traces `powershell-parity-for-labs` → `relates-to` →
+`prefer-xunit-fixtures` → `relates-to` → `example-lesson.md`, and explains
+the connection (both are about "don't trust a narrow check; verify the
+whole surface"). That traversal — follow the edge, don't load everything
+— is graph engineering, done without a server. Clean up the two scratch
+files in [§10.6](#106-cleanup) once you've confirmed the traversal works.
+
+🖥️ **Hands-on (e) — explore a per-directory vault fixture:**
+
+[`labs/fixtures/lab10/scns-vault/`](../labs/fixtures/lab10/scns-vault/)
+is a small, sanitized, **generic** per-directory vault fixture (not a
+real project layout — see its own `README.md` for why). Ask the agent:
+
+```
+Read labs/fixtures/lab10/scns-vault/README.md, then compare
+module-a/.copilot/lessons/index.md and module-b/.copilot/lessons/index.md.
+Why do they never cross-link, and when would you choose this layout over
+one project-wide .copilot/lessons/?
+```
+
+The answer you're looking for: a per-directory vault earns its split
+when subtrees have genuinely different owners, conventions, or
+lifecycles — a `module-a`-only lesson has no business cluttering
+`module-b`'s hub. If everything in your repo is one team's concern, one
+flat wiki stays simpler; don't split pre-emptively.
+
 ## 10.3 Layer 3 — The Schema (how the wiki gets written)
 
 **Lifetime:** forever, in git.
@@ -363,7 +484,73 @@ You should see scoped instruction files (e.g. `dotnet.instructions.md`,
 `AGENTS.md`. Copilot pulls all three into every session in this repo
 without you asking.
 
-### 10.3a Extend the schema
+### 10.3a `AGENTS.md` conventions — root, nested, and alternatives
+
+[Lab 02](lab02.md) already covers how `.github/copilot-instructions.md`,
+path-scoped `*.instructions.md`, and `AGENTS.md` combine and take
+precedence in general — go there for the basics. What's specific to
+memory is **where** an `AGENTS.md` lives and what happens when there's
+more than one:
+
+- **Additive, not a replacement.** A repo-root `AGENTS.md` and
+  `.github/copilot-instructions.md` both load for every session; neither
+  silences the other.
+- **Nested, nearest-wins.** A subdirectory can have its own `AGENTS.md`.
+  When you're working inside that subtree, the nested file's guidance
+  takes precedence over the root file's for anything the two disagree
+  on — the agent uses the **nearest** `AGENTS.md` to the files it's
+  editing, not only the root one.
+- **Accepted alternatives.** `CLAUDE.md` and `GEMINI.md` are recognized
+  as equivalent to `AGENTS.md` by name, for teams already standardized on
+  those filenames.
+- **Only what agents can't discover themselves.** `AGENTS.md` content
+  should be the non-obvious stuff — commands, conventions, gotchas — not
+  a restatement of what a directory listing or a `README.md` already
+  shows.
+
+🖥️ **Hands-on (b) — add a nested `AGENTS.md` and observe nearest-wins:**
+
+**WSL/Bash:**
+```bash
+test -f dotnet/AGENTS.md && echo "dotnet/AGENTS.md already exists" || \
+  printf '# AGENTS.md — dotnet/\n\nScratch rule for Lab 10 §10.3a: when summarizing this directory, always mention it is .NET 8 / EF Core.\n' > dotnet/AGENTS.md
+cat dotnet/AGENTS.md
+```
+
+**PowerShell:**
+```powershell
+if (Test-Path "dotnet/AGENTS.md") { "dotnet/AGENTS.md already exists" } else {
+  "# AGENTS.md — dotnet/`n`nScratch rule for Lab 10 §10.3a: when summarizing this directory, always mention it is .NET 8 / EF Core.`n" | Set-Content "dotnet/AGENTS.md" -Encoding UTF8
+}
+Get-Content dotnet/AGENTS.md
+```
+
+Then, in a fresh chat, ask:
+
+```
+Summarize what's in the dotnet/ directory.
+```
+
+The summary should mention ".NET 8 / EF Core" even though you never said
+that in this chat — the nested `dotnet/AGENTS.md` won, because it's
+nearer to the files in question than the repo root one. Delete the
+scratch file once you've confirmed it (it's not meant to become a real
+convention — see [§10.6](#106-cleanup)):
+
+**WSL/Bash:**
+```bash
+rm -f dotnet/AGENTS.md
+```
+
+**PowerShell:**
+```powershell
+Remove-Item dotnet/AGENTS.md -ErrorAction SilentlyContinue
+```
+
+> 💡 If your repo has a `node/` directory instead (or in addition), the
+> same exercise works there — the point is nearest-wins, not the stack.
+
+### 10.3b Extend the schema
 
 Schema changes are binding on every future session. Keep them tight:
 
@@ -376,7 +563,7 @@ dotnet/ContosoUniversity.Tests/Fixtures/."
 Now open a fresh session and ask the agent to scaffold a repository — it
 will follow the rule because Layer 3 is loaded automatically.
 
-### 10.3b Agent personalities — the stewardship story
+### 10.3c Agent personalities — the stewardship story
 
 `AGENTS.md` and `.github/instructions/` apply to *all* agents. But this
 repo also ships agent **personalities** — role-specialized agents with
@@ -434,8 +621,12 @@ Get-Content .github/prompts/consolidate-lessons.prompt.md | Select-Object -First
 ### 10.4a Dry run first
 
 Always start with `--dry-run` so you can see what would change.
-`/consolidate-lessons` is an **inner-Copilot slash command** — type it
-**in the Copilot prompt** (not in your shell):
+`/consolidate-lessons` is a **prompt file**
+([`.github/prompts/consolidate-lessons.prompt.md`](../.github/prompts/consolidate-lessons.prompt.md)),
+and prompt files are a **VS Code / Visual Studio / JetBrains** surface —
+type it in **VS Code's Copilot Chat** input box, not in a terminal and
+not in the Copilot CLI's interactive prompt (Copilot CLI doesn't expose a
+slash command for user-authored prompt files):
 
 ```text
 /consolidate-lessons --dry-run --scope both
@@ -449,8 +640,8 @@ front-matter (`tags`, `scope`) and re-run the dry run.
 
 ### 10.4b Live consolidation
 
-When the dry-run looks right, run for real — again, **in the Copilot
-prompt**, not in your shell:
+When the dry-run looks right, run for real — again, in **VS Code's
+Copilot Chat**, not a terminal:
 
 ```text
 /consolidate-lessons --scope both
@@ -495,18 +686,18 @@ delete the lesson (keep the `log.md` history). The wiki stays a
 
 ### 10.4d Autopilot — one paragraph, not a feature
 
-If you want consolidation to run on a cadence, add a cron/launchd/Task
-Scheduler entry that launches a non-interactive Copilot session and
-sends the slash command as the prompt — for example:
-
-```bash
-copilot --prompt '/consolidate-lessons --scope both' --allow-all-tools
-```
-
-(Slash commands are inner-Copilot, so they reach the runtime via
-`--prompt`, not as bare shell arguments.) This repo does not ship a
-schedule — cadences are environment-specific and belong in your
-personal setup.
+You cannot schedule `/consolidate-lessons` through a cron/launchd/Task
+Scheduler entry that launches a non-interactive Copilot CLI session —
+prompt files are a VS Code/Visual Studio/JetBrains surface, and Copilot
+CLI exposes no slash command for a user-authored `.prompt.md` file, so a
+command like `copilot --prompt '/consolidate-lessons --scope both'` does
+not do what it looks like it does: the CLI sees the literal text, not a
+prompt-file invocation. If you want consolidation on a cadence today,
+run it interactively in VS Code on whatever schedule suits you (weekly is
+a reasonable default), or convert the prompt into a skill first — skills
+*are* invocable from Copilot CLI, unlike prompt files, but that's a
+repo customization beyond this lab. This repo does not ship a schedule;
+cadences are environment-specific and belong in your personal setup.
 
 ---
 
@@ -515,20 +706,23 @@ personal setup.
 ```
  Layer 1                   Layer 2                    Layer 3
  Raw sources  ───────────► The Wiki  ────────────►   The Schema
- (plan.md,                (.copilot/lessons/,         (AGENTS.md,
-  SQL todos)              ~/.copilot/lessons/)        instructions,
+ (this chat's              (.copilot/lessons/,         (AGENTS.md,
+  context)                 ~/.copilot/lessons/)        instructions,
                                                       agent personalities)
 
-   session        /consolidate-lessons       hardens into a rule
-  only dies       promotes log → topic       when it must apply
-   at /clear      and project → global       on every task
+   session         /consolidate-lessons       hardens into a rule
+  only dies        promotes log → topic       when it must apply
+ at a new chat     and project → global       on every task
 ```
 
 Three layers, one direction of promotion, zero servers to operate.
 Your checklist for the next real task:
 
-1. **Open the session (L1):** `/checkpoint create "<task>"`, write a short
-   plan.md, insert todos into the SQL store.
+1. **Open the session (L1):** start a new chat. Optionally mark the start
+   with the `/checkpoint create "<task>"` prompt file (VS Code Copilot
+   Chat — see [§10.1a](#101a-advanced-optional--copilot-cli-session-state-and-surface)
+   if you're on Copilot CLI instead, where the same session also gets a
+   concrete `plan.md` and SQL `todos` row set).
 2. **Consult the wiki (L2):** ask the agent to check
    `.copilot/lessons/index.md` and `~/.copilot/lessons/index.md` before
    starting.
@@ -536,11 +730,12 @@ Your checklist for the next real task:
    time goes into `log.md` with evidence cited.
 4. **Harden into schema (L3):** if a rule should apply on every task,
    propose it during consolidation — not mid-feature.
-5. **Consolidate weekly:** `/consolidate-lessons --dry-run` first; commit
-   the live run when the diff is clean.
+5. **Consolidate weekly:** `/consolidate-lessons --dry-run` first (VS
+   Code Copilot Chat); commit the live run when the diff is clean.
 
-🖥️ **End-of-lab handoff drill:** in the Copilot prompt (not your
-shell), type the slash command `/handoff_prompt` with work description
+🖥️ **End-of-lab handoff drill:** in **VS Code's Copilot Chat** (this is
+a prompt file — not the Copilot CLI's interactive prompt, and not your
+shell), type the slash command `/handoff` with work description
 "Completed Lab 10 — three-layer agent memory" and stop reason "Lab
 complete". The output is itself a Layer 1 artefact — it dies with the
 next session unless you graduate durable findings into Layer 2 or 3.
@@ -558,6 +753,41 @@ properties, all of which this lab's own loop already has:
 | **Idempotency** | Running it again doesn't duplicate work already done. | Re-running `/consolidate-lessons` doesn't re-promote a lesson that already has a `Promoted to:` value. |
 | **Cadence** | It runs on a deliberate schedule, not continuously. | §10.4d: session-end or weekly, never on every tool call. |
 | **Drift detection** | Disagreements surface for a human instead of being silently resolved. | The `--dry-run` step (§10.4a) and the `CONTRADICTION` flag (§10.4b). |
+
+🖥️ **Hands-on (c) — run one bounded loop iteration with an explicit stop condition:**
+
+`/consolidate-lessons` is one example of this loop; you can run the same
+shape by hand for a one-off check. The bound and the stop condition are
+stated **before** you start, not decided afterward:
+
+```
+Run exactly one iteration of this loop, then stop regardless of what you
+find — do not re-run it even if the result suggests more work:
+
+1. Read memory: check .copilot/lessons/index.md for any existing lesson
+   about shell-command parity in labs.
+2. Plan: decide what one check would confirm whether labs/lab10.md itself
+   follows that convention.
+3. Act: run that one check (e.g. grep for ```bash fences without a
+   matching ```powershell fence nearby).
+4. Verify: look at the check's actual output, not your prediction of it.
+5. Record a lesson: append one entry to .copilot/lessons/log.md with the
+   finding either way — pass or fail — leaving "Promoted to:" blank.
+
+Stop condition: exactly one iteration. Report the log.md entry you wrote
+and stop.
+```
+
+That's all five loop-engineering ingredients in miniature: a **direction**
+(read → plan → act → verify → record, never backward), an explicit
+**bound** (one iteration, stated up front — not "keep going until it's
+good"), a **checkpoint** (the log.md entry is the artifact that proves
+the iteration happened), and a **stop condition** that ends the loop
+regardless of outcome. Start a new chat (or `/clear` on Copilot CLI)
+before your next task — don't let an open-ended continuation of "well,
+now let's also fix it" bleed into the next session's context. If the
+check found something worth fixing, that's a *new*, separately-scoped
+task, planned fresh.
 
 🖥️ **See the counter-example this repo tried and retired:**
 
@@ -587,12 +817,13 @@ silently instead of loudly.
 
 | Concept | Layer | Lifetime |
 |---------|------:|----------|
-| `plan.md`, SQL todos, `/checkpoint`, session-state | 1 | This session |
+| This chat's context (`/checkpoint`, `plan.md` + SQL todos on CLI) | 1 | This session |
 | `.copilot/lessons/`, `~/.copilot/lessons/` | 2 | Across sessions, in markdown |
 | `AGENTS.md`, `.github/instructions/`, agent personalities | 3 | Forever, binding |
 | Reindex / LSP | — | Automatic; reads code, stores nothing |
-| Graph engineering (entities, relations, observations) | — | Not this repo's memory; see the `memory` MCP server (§10.2d) |
-| Loop engineering (direction, idempotency, cadence, drift-detection) | — | The properties behind `/consolidate-lessons` itself (§10.5a) |
+| Graph engineering, MCP-server flavor (entities, relations, observations) | — | Not this repo's memory; the road not taken (§10.2d) |
+| Graph engineering, file-based flavor (hubs, typed links, backlinks) | 2 | Practiced hands-on (§10.2e) |
+| Loop engineering (direction, idempotency, cadence, drift-detection) | — | The properties behind `/consolidate-lessons`, practiced hands-on (§10.5a) |
 
 Promotion: L1 → L2 when durable; L2 project → L2 global when cross-repo;
 L2 → L3 when binding on every task. Nothing lives in two layers at once.
@@ -610,14 +841,16 @@ See [`solutions/lab10-session-management/`](../solutions/lab10-session-managemen
 
 ## Lab Complete 🎉
 
-You've now mapped every memory surface the local Copilot CLI exposes:
+You've now mapped every memory surface Copilot exposes, in VS Code and
+on the CLI:
 
 - ✅ **Lab 01–09** — agents, skills, hooks, MCP, orchestration, gh-aw,
   Coding Agent, Code Review.
 - ✅ **Lab 10** — three-layer agent memory: raw sources, the wiki, the
-  schema, and the consolidation loop that keeps them clean — plus graph
-  engineering and loop engineering, named and distinguished from this
-  repo's own pattern.
+  schema, and the consolidation loop that keeps them clean — plus
+  hands-on file-based graph engineering (§10.2e) and loop engineering
+  (§10.5a), each also contrasted with the heavier pattern this repo set
+  aside (a knowledge-graph MCP server, an automated observer hook).
 - ⏭ **Lab 11** — building and distributing a Copilot plugin
   (enterprise marketplace pattern) so the lessons and schema you curated
   above ship to other teams.

@@ -10,6 +10,13 @@ related_issue: "kanang29/day-in-the-life-copilot-lab#3"
 
 # 002 — Lab 10 rebuild: memory, loop engineering, graph engineering
 
+> 📎 **Status note:** issue #3's Phase 3 instruction is "save the spec
+> below as `docs/specs/004-memory-lab.md`, then implement it," with its
+> own (shorter, more prescriptive) Lab 10 spec text. This document's audit
+> and content plan predate that instruction but remain accurate; Phase 3
+> implements against [`004-memory-lab.md`](004-memory-lab.md), consolidating
+> this spec's findings rather than duplicating them. Read 004 first.
+
 ## Purpose and scope
 
 Issue [#3](https://github.com/kanang29/day-in-the-life-copilot-lab/issues/3)

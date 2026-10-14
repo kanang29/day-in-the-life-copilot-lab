@@ -38,20 +38,6 @@ interface KnownDrift {
 
 const KNOWN_MODEL_DRIFT: KnownDrift[] = [
   {
-    file: "lab10.md",
-    modelId: "claude-opus-4.6",
-    reason:
-      "Same stale AGENTS.md pin, plus Lab 10 hardcodes model IDs instead of registry tiers (known drift item 11).",
-    fixedInPhase: "Phase 3 (Lab 10 rebuild)",
-  },
-  {
-    file: "lab10.md",
-    modelId: "claude-opus-4.7",
-    reason:
-      "Pre-refresh model name; Lab 10 hardcodes model IDs instead of registry tiers (known drift item 11).",
-    fixedInPhase: "Phase 3 (Lab 10 rebuild)",
-  },
-  {
     file: "lab13.md",
     modelId: "claude-opus-4.6",
     reason:

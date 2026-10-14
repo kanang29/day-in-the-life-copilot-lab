@@ -52,6 +52,32 @@ Rules:
   `/consolidate-lessons` reports tag drift.
 - `updated` must change on every edit. `created` never changes.
 
+### Optional typed links
+
+`related:` is a plain, untyped list — fine for "see also." When the
+relationship itself matters, add one or more of these optional sibling
+keys instead of (or alongside) `related:`, each a list of paths relative
+to the lesson file:
+
+```yaml
+relates-to:
+  - some-other-lesson.md    # shares context; neither depends on the other
+supersedes:
+  - old-lesson.md           # this lesson replaces that one
+contradicts:
+  - conflicting-lesson.md   # a project lesson deliberately disagrees
+                            # with a global one (pairs with scope:
+                            # project-override above)
+```
+
+When you add a typed link from lesson A to lesson B, add the reciprocal
+entry in B's own front-matter in the same edit — that's this schema's
+backlink convention; nothing computes it for you. A lesson named by
+`supersedes` should be stubbed (front-matter plus a one-line pointer to
+its replacement), not deleted, so existing links don't break. See
+[Lab 10 §10.2e](../../labs/lab10.md) for a worked example of following a
+chain of typed links instead of reading every file.
+
 ## Required sections in topic files
 
 In order, each topic file has:

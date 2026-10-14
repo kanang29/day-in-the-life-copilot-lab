@@ -264,8 +264,117 @@ modulo the same 2 pre-existing sandbox-network failures from the Phase 0
 baseline (`gh aw compile` blocked by a 403 on the GitHub releases API,
 unrelated to lab content).
 
+## Phase 3 — Lab 10 rebuild
+
+Lab 10 is rebuilt against [`004-memory-lab.md`](004-memory-lab.md)'s spec
+(the issue's own embedded Lab 10 section, carried verbatim). This phase
+touches only `labs/lab10.md` and its directly-coupled files — not the
+retire-and-merge map (Phase 4) or the appendices (Phase 5).
+
+### Load-bearing bug fixes (beyond VS Code-preference rephrasing)
+
+1. **Prompt-file slash commands reframed as VS Code-only, everywhere in
+   the lab.** Known-drift item 5 (issue #3) and
+   [`001-research-sota.md`](001-research-sota.md) claim 3 both establish
+   that `.prompt.md` files are a VS Code/Visual Studio/JetBrains surface
+   with no Copilot CLI slash-command equivalent. The pre-rewrite lab told
+   learners to type `/consolidate-lessons`, `/checkpoint`, and
+   `/handoff_prompt` "in the Copilot prompt" — ambiguous wording that an
+   attendee on Copilot CLI could easily misread as "the CLI's interactive
+   prompt." Worse, §10.4d's "Autopilot" subsection showed
+   `copilot --prompt '/consolidate-lessons --scope both' --allow-all-tools`
+   as a working example — a **direct violation** of the known-drift rule,
+   since the CLI has no slash command for a user-authored prompt file and
+   that command does not do what it appears to do. Every instance across
+   §10.1, §10.4a/b/d, and §10.5/10.5a now explicitly says "VS Code's
+   Copilot Chat," and §10.4d now states plainly that scheduled/unattended
+   consolidation via the CLI isn't supported today, with "run it
+   interactively in VS Code" and "convert the prompt into a skill first"
+   (skills *are* CLI-invocable) as the two honest alternatives — matching
+   the known-drift note's own suggested fixes.
+2. **Stale slash-command name `/handoff_prompt`.** The prompt file is
+   `.github/prompts/handoff.prompt.md`; VS Code invokes prompt files by
+   filename-minus-extension, so the command is `/handoff`, not
+   `/handoff_prompt`. This stale name also appeared in
+   `solutions/lab10-session-management/README.md` and `sample-handoff.md`
+   (the lab's own referenced reference-implementation) and was fixed in
+   all three files for consistency. (`docs/_meta/accuracy-ledger-exclusions.md`
+   excludes these same files from an earlier, unrelated, already-completed
+   automated sweep dated 2026-04-24 — that exclusion does not apply to
+   this issue's explicitly-scoped Lab 10 rebuild.)
+3. **Duplicate section number.** The new CLI-only "Advanced" subsection
+   was first added as `### 10.1 Advanced`, colliding with the existing
+   `## 10.1 Layer 1` heading. Renumbered to `### 10.1a` (matching the
+   `10.2a`–`10.2e` / `10.3a`–`10.3c` lettered-subsection convention already
+   in use), and the one internal link to it was fixed to match.
+4. **Stale anchor in `docs/memory-decision-tree.md`.** Pointed at a
+   "Lab 10 §10.0" that no longer exists post-rewrite; replaced with a link
+   to the actual reindex source cited in Lab 10's own references list.
+
+### Content additions (per `004-memory-lab.md` "Must cover")
+
+- **`AGENTS.md` conventions** — new `### 10.3a` (root vs. nested,
+  nearest-wins, `CLAUDE.md`/`GEMINI.md` alternatives), explicitly linking
+  back to Lab 02 for precedence mechanics rather than re-teaching them.
+  Hands-on: add a nested `dotnet/AGENTS.md`, observe nearest-wins, clean up.
+- **Loop engineering, practiced not just named** — new hands-on (c) in
+  `§10.5a`: a bounded, one-iteration read→plan→act→verify→record exercise
+  with an explicit stop condition, ending in a real `log.md` entry.
+- **Graph engineering, practiced not just named** — new `### 10.2e`
+  (hub notes, typed links `relates-to`/`supersedes`/`contradicts`,
+  backlinks-by-convention, per-directory vaults), kept distinct from the
+  existing `§10.2d` "road not taken" (the knowledge-graph MCP server this
+  repo deliberately doesn't use for memory). `.github/instructions/lessons.instructions.md`
+  gained an additive "Optional typed links" subsection documenting the
+  three new front-matter keys, consistent with the issue's "Keep: the
+  schema" instruction.
+- **Per-directory vault worked example** — `labs/fixtures/lab10/scns-vault/`
+  (README + two module directories, each with its own `.copilot/lessons/`).
+  The issue names "the local SCNS project" as a possible worked example;
+  that project's own folder tree is still an unfilled placeholder in this
+  repo, so a generic, repo-owned fixture was built instead of forcing a
+  reference to content that doesn't exist yet.
+
+### Verification
+
+- Spec 001 claim 11 (MCP 2026-07-28 session-removal) flipped
+  `UNVERIFIED` → `VERIFIED`: `modelcontextprotocol.io` is DNS-blocked in
+  this sandbox, but its source repo
+  (`raw.githubusercontent.com/modelcontextprotocol/modelcontextprotocol`)
+  mirrors the same changelog verbatim and is reachable — a primary-source
+  substitute, not a search-engine summary. Claims 9 and 16 remain out of
+  Phase 3 scope.
+- `docs/_meta/registry.yaml` and `docs/token-and-model-guide.md` both had
+  the pre-rewrite Lab 10 title ("Session & Memory Management"); fixed to
+  match the title this lab has actually carried since the last rewrite
+  ("Agent Memory: Personalities, Lessons, and Consolidation").
+- The model-tier cost-budget block no longer names specific model IDs —
+  it cites `models.cheap|standard|premium` and links
+  `docs/_meta/registry.yaml`, matching known-drift item 11 and the
+  `lab07.md` precedent from Phase 2. The two now-stale `lab10.md` entries
+  (`claude-opus-4.6`, `claude-opus-4.7`) were removed from
+  `tests/content-currency/model-ids-in-registry.test.ts`'s
+  `KNOWN_MODEL_DRIFT` allow-list.
+- Pace bumped (presenter 5→6 min, self-paced 25→35 min) to reflect the
+  added hands-on content; synced across the lab's frontmatter, its `⏱️`
+  callout, and `docs/_meta/registry.yaml`. `pace_workshop_minutes` (7)
+  was left unchanged — `tests/workshop/time-budget.test.ts` only requires
+  `pace_workshop_minutes >= pace_presenter_minutes` (7 ≥ 6 still holds)
+  and does not couple individual lab pace fields to
+  `workshop/curriculum.md`'s module-level minutes, so the workshop
+  deck (out of Phase 3 scope, and listed in the pre-existing, unrelated
+  `accuracy-ledger-exclusions.md`) did not need a change.
+
+### Test results
+
+Targeted: `tests/content-currency/model-ids-in-registry.test.ts`,
+`tests/workshop/time-budget.test.ts`, `tests/memory/*`,
+`tests/lab-structure/*` all pass. Full `npx vitest run` pass recorded in
+the Phase 3 `report_progress` commit, modulo the same 2 pre-existing
+sandbox-network failures noted in Phase 0/2 (unrelated to lab content).
+
 ## Status and next step
 
-`status: draft`. Phase 2 (beginner track: `setup.md`, `lab01`–`lab05`,
-`lab07`, and dotnet/node appendices) is complete. Phase 3 (Lab 10 rebuild)
-appends its own section below this one rather than replacing it.
+`status: draft`. Phases 2 (beginner track) and 3 (Lab 10 rebuild) are
+complete. Phase 4 (retire-and-merge execution) appends its own section
+below this one rather than replacing it.
