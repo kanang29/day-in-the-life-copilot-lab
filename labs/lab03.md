@@ -179,6 +179,6 @@ See [`solutions/lab03-dotnet-dev-agent/dotnet-dev.agent.md`](../solutions/lab03-
 
 </details>
 
-> This agent is now available for orchestration in Lab 07, where you'll coordinate multiple agents working together.
+> This agent is now available for orchestration in Lab 07, where you'll coordinate multiple agents working together. For a production-hardening pass that locks this kind of agent down to an explicit tool allow-list and backs it with a `preToolUse` hook (Lab 06), see [`lab-hardening.md`](lab-hardening.md).
 
 **Next:** [Lab 04 — Skills & Prompts](lab04.md)

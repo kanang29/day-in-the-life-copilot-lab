@@ -12,11 +12,16 @@ registry: docs/_meta/registry.yaml
 # 6 — Hooks
 
 In this lab you will explore the hook system and create a new hook for .NET build verification.
+This is the hands-on counterpart to the tool-gating guardrail you'll harden in
+[`lab-hardening.md`](lab-hardening.md), which pairs a `preToolUse` hook with the
+custom agent from [Lab 03](lab03.md) for defense in depth.
 
 > ⏱️ Presenter pace: 3 minutes | Self-paced: 10 minutes
 
 References:
-- [Copilot hooks](https://docs.github.com/en/copilot/using-github-copilot/using-hooks)
+- [About hooks for GitHub Copilot](https://docs.github.com/en/copilot/concepts/agents/hooks)
+- [Using hooks with GitHub Copilot CLI](https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/use-hooks) — includes the real troubleshooting table used in §6.4 below
+- [GitHub Copilot hooks reference](https://docs.github.com/en/copilot/reference/hooks-reference)
 
 > 🧭 **Track appendices** — the post-tool-use build hook recipe per stack lives in
 > [`labs/appendices/dotnet/lab06.md`](appendices/dotnet/lab06.md) and
@@ -380,7 +385,17 @@ echo '{"toolName":"Bash","toolArgs":{"command":"ls"},"cwd":"."}' \
 
 > 💡 **Expected output:** You should see `✅ Build succeeded` in the Copilot output after editing a .cs file. If you see `⚠️ BUILD FAILED`, check the build errors. If you see nothing, verify permissions: `ls -la scripts/hooks/post-tool-use-dotnet-build.sh`.
 
-> 💡 **Verifying hooks in VS Code:** To confirm whether a hook fired and see its output, open the **Output** panel (`Cmd+Shift+U` / `Ctrl+Shift+U`), then select **"GitHub Copilot Chat Hooks"** from the dropdown menu. This shows execution logs for all hooks, including exit codes and any stdout/stderr output.
+> ⚠️ **Hooks run in the CLI terminal itself, not VS Code.** Hooks are
+> supported only for Copilot CLI and Copilot cloud agent — there is no VS
+> Code hooks surface or output channel, so the hook's own `echo`/`Write-Host`
+> lines appear inline in the same terminal session you're already watching,
+> right after the tool call that triggered them. If a hook seems silent,
+> work through the real troubleshooting checklist instead of looking for a
+> GUI panel: confirm the file is under `.github/hooks/` (or
+> `~/.copilot/hooks/` for a user-level hook), validate the JSON
+> (`jq . .github/hooks/default.json`), confirm `"version": 1` is present,
+> and confirm the script is executable (`chmod +x`) with a proper shebang.
+> Source: [Using hooks with GitHub Copilot CLI § Troubleshooting](https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/use-hooks#troubleshooting).
 
 ## 6.5 Final
 
@@ -422,6 +437,11 @@ echo '{"toolName":"Bash","toolArgs":{"command":"ls"},"cwd":"."}' \
 See [`solutions/lab06-hooks/post-tool-use-dotnet-build.sh`](../solutions/lab06-hooks/post-tool-use-dotnet-build.sh)
 
 </details>
+
+> This `postToolUse` hook reports on a build after the fact. For a
+> `preToolUse` hook that can **deny** a tool call outright — paired with the
+> custom agent from Lab 03 as a belt-and-braces guardrail — see
+> [`lab-hardening.md`](lab-hardening.md).
 
 **Next:** [Lab 07 — Multi-Agent Orchestration](lab07.md)
 

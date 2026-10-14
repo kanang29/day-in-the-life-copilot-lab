@@ -34,8 +34,8 @@ Anchor lab: [`labs/lab-copilot-cli-extensions.md`](../../labs/lab-copilot-cli-ex
             └───│ (deterministic gate)       │◀───────────────────┘
                 │ → emits permissionDecision │     runtime offers tool call
                 │   "deny" if size>10KB      │     to all preToolUse hooks
-                │ ⚠ deny-only; allow/ask     │
-                │   accepted but ignored     │
+                │ only emits "deny",         │
+                │ never "allow"              │
                 └────────────┬───────────────┘
                              │ no deny → call proceeds
                              ▼
@@ -53,7 +53,7 @@ The dashed line is the deterministic ↔ probabilistic boundary. Everything abov
 ## Three rules to remember
 
 - **`gh extension` ≠ Copilot CLI extension ≠ MCP server.** Different processes, different triggers, different auth. Lab §1 has the table.
-- **`preToolUse` is veto-only.** `deny` is honored; `allow`/`ask` are accepted but ignored. *Absence of `deny` is allow.* This is restated verbatim in `labs/lab-hardening.md`.
+- **`preToolUse`'s `permissionDecision` is a real three-way switch** — `allow`/`deny`/`ask` all genuinely control execution — but this hook only ever emits `deny`, by convention: an explicit `allow` would bypass the user's own trust settings. *Silence lets the normal permission flow decide.* This is restated verbatim in `labs/lab-hardening.md`.
 - **`userPromptSubmitted` cannot mutate the prompt.** The JSON-config hook surface is detection-only. If you need the trigger to actually invoke a tool, use the SDK-side `onUserPromptSubmitted` inside `joinSession({ hooks })` — that surface has access to `session.send()` and `session.sendAndWait()`. The runtime authoring guide documents both surfaces; defaulting to JSON for auditability and SDK-side for behavior is the working rule.
 
 ---
