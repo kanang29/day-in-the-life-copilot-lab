@@ -73,7 +73,7 @@ description: "Weekly staleness audit — opens a PR with registry/lab updates an
 
 Notice: **read-only `permissions:`**, an **explicit `bash:` allowlist** (no `*`), two MCP servers attached inline, and all mutation funneled through `safe-outputs.create-pull-request` with `max: 1`. That's the shape of a CI agent you can trust.
 
-Full spec: <https://github.github.io/gh-aw/reference/frontmatter/>.
+Full spec: <https://github.github.com/gh-aw/reference/frontmatter/>.
 
 ---
 

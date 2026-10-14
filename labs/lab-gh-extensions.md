@@ -279,7 +279,7 @@ conflate these three:
 |--------------------------|----------------------------------------------------------------|--------------------------------------|--------------------------------------------------------------------------------|
 | **`gh extension`** (this lab) | `gh` CLI — `gh extension install/list/upgrade/remove`           | External process, invoked by `gh`    | [docs.github.com/en/github-cli/github-cli/using-github-cli-extensions](https://docs.github.com/en/github-cli/github-cli/using-github-cli-extensions) |
 | **Copilot CLI extensions** | Copilot CLI runtime via `extensions_manage` / `extensions_reload` | *Inside* the Copilot CLI agent process | [`labs/lab-copilot-cli-extensions.md`](lab-copilot-cli-extensions.md) (workshop lab) |
-| **`gh-aw`** (Agentic Workflows) | Installed as a `gh` extension (`gh extension install githubnext/gh-aw`) but a separate product | Compiles markdown → GitHub Actions YAML that runs in CI | Repo only — **no canonical `docs.github.com` page.** Source: <https://github.com/githubnext/gh-aw> |
+| **`gh-aw`** (Agentic Workflows) | Installed as a `gh` extension (`gh extension install github/gh-aw`) but a separate product | Compiles markdown → GitHub Actions YAML that runs in CI | Not on `docs.github.com` — canonical docs are a dedicated site: <https://github.github.com/gh-aw/>. Source: <https://github.com/github/gh-aw> (moved from the `githubnext` incubation org; the old `githubnext/gh-aw` slug now redirects here) |
 
 Key takeaways:
 
@@ -288,9 +288,9 @@ Key takeaways:
   the Copilot agent. Different runtime, different authoring model. Treat them
   as siblings, not variants.
 - `gh-aw` uses `gh extension` only as a *delivery mechanism*. It is orthogonal
-  to Copilot CLI and has no documented integration with `~/.copilot/*`. Because
-  `gh-aw` docs live outside `docs.github.com`, treat any `gh-aw` claim in a
-  workshop as "verify against the repo README."
+  to Copilot CLI and has no documented integration with `~/.copilot/*`. Its
+  docs live on `github.github.com/gh-aw/`, not `docs.github.com` — don't
+  conflate "has a canonical docs site" with "is a `docs.github.com` feature."
 
 ## References
 
@@ -298,7 +298,8 @@ Key takeaways:
 - Creating GitHub CLI extensions — <https://docs.github.com/en/github-cli/github-cli/creating-github-cli-extensions>
 - GitHub Models — <https://docs.github.com/en/github-models>
 - `gh-models` source — <https://github.com/github/gh-models>
-- `gh-aw` source — <https://github.com/githubnext/gh-aw>
+- `gh-aw` docs — <https://github.github.com/gh-aw/>
+- `gh-aw` source — <https://github.com/github/gh-aw> — pin installs to [`gh_aw_schema_version`](../docs/_meta/registry.yaml): `gh extension install github/gh-aw --pin v<version>`
 
 ## Cleanup
 

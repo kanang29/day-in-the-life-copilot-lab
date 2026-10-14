@@ -845,7 +845,7 @@ You've now mapped every memory surface Copilot exposes, in VS Code and
 on the CLI:
 
 - ✅ **Lab 01–09** — agents, skills, hooks, MCP, orchestration, gh-aw,
-  Coding Agent, Code Review.
+  Cloud Agent, Code Review.
 - ✅ **Lab 10** — three-layer agent memory: raw sources, the wiki, the
   schema, and the consolidation loop that keeps them clean — plus
   hands-on file-based graph engineering (§10.2e) and loop engineering

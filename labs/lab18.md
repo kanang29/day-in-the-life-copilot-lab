@@ -29,10 +29,10 @@ every layer before the next one is built on top of it.
 
 References:
 - [GitHub Spec Kit](https://github.com/github/spec-kit) — official spec-driven development toolkit
-- [About Copilot Coding Agent](https://docs.github.com/en/copilot/using-github-copilot/using-copilot-coding-agent)
+- [GitHub Copilot on GitHub.com](https://docs.github.com/en/copilot/concepts/copilot-surfaces/copilot-on-github) — Copilot cloud agent overview (renamed from "Copilot coding agent")
 - [About Copilot Code Review](https://docs.github.com/en/copilot/concepts/agents/code-review)
 - [Lab 08 — GitHub Agentic Workflows: PRD Generation](lab08.md)
-- [Lab 09 — Copilot Coding Agent & Code Review](lab09.md)
+- [Lab 09 — Copilot Cloud Agent & Code Review](lab09.md)
 - [`docs/_meta/registry.yaml`](../docs/_meta/registry.yaml) — `gh_aw_schema_version`
 
 ## 18.0 Copilot CLI currency (2026 refresh)

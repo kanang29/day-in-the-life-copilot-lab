@@ -23,8 +23,8 @@ issue text asked for by this filename, but the most direct way to satisfy
 its intent given that constraint. It is not a new research spec like `001`;
 it is a running decision log, updated once per phase rather than rewritten.
 
-Only **Phase 1** content is recorded below. Later phases append their own
-dated sections rather than editing Phase 1's.
+Each phase appends its own dated section below rather than editing an
+earlier phase's.
 
 ## Phase 1 — Standard and guardrails
 
@@ -373,8 +373,108 @@ Targeted: `tests/content-currency/model-ids-in-registry.test.ts`,
 the Phase 3 `report_progress` commit, modulo the same 2 pre-existing
 sandbox-network failures noted in Phase 0/2 (unrelated to lab content).
 
+## Phase 4 — GitHub platform cluster (08, 09, 18, 19, `lab-gh-extensions`)
+
+Per the Phase 1 merge map, this cluster is **keep-all** — no lab merges.
+This phase (a) renames the renamed Copilot product across the cluster,
+(b) fixes two real, previously-undiscovered reference bugs found during
+verification, and (c) adds the disambiguation callouts the merge map
+deferred here.
+
+### Decisions
+
+1. **"Copilot Coding Agent" → "Copilot Cloud Agent."** Fetched
+   `https://docs.github.com/en/copilot/concepts/agents/code-review` and
+   corroborating pages directly (2026-10-14) and confirmed GitHub renamed
+   the product; Lab 09 is the cluster's only lab that names it as a
+   proper noun throughout. Renamed case-preserving ("Coding Agent" →
+   "Cloud Agent", "Coding agent" → "Cloud agent", "coding agent" →
+   "cloud agent") across `labs/lab09.md`'s title, heading, and body (34
+   occurrences), plus the one stale mention each in `labs/lab10.md`'s
+   recap bullet, `README.md` (capability table, progress checklist,
+   concept glossary, lab table — 4 occurrences), `workshop/curriculum.md`,
+   `workshop/site/agenda.json`, and `workshop/site/hackathon.html`'s nav
+   list. `docs/_meta/registry.yaml`'s `labs.lab09.title` synced to match.
+   `docs/specs/001-research-sota.md` (a dated research record of the drift
+   itself) and the deeper narrative prose in `docs/workshop/presenter-script.md`
+   are intentionally left for Phase 6 (workshop asset reconciliation) — the
+   latter already uses correct "(formerly Copilot coding agent)"
+   historical framing in most places, so it isn't actively wrong, just
+   out of this phase's narrow title-sync scope.
+2. **gh-aw docs domain bug: `github.github.io` → `github.github.com`.**
+   Previously undiscovered. Fetched `github/gh-aw`'s own README via
+   `raw.githubusercontent.com` and confirmed the canonical docs domain is
+   `.com`, not `.io` (`.io` is also DNS-blocked in this sandbox, which is
+   itself informative but secondary — `.com` is simply the correct
+   domain). Fixed 5 occurrences in `labs/lab08.md` and 1 each in
+   `workshop/slides/40-module-4.md` and
+   `workshop/speaker-scripts/module-04-gh-aw.md`. Confirmed via
+   `github-mcp-server-get_file_contents` against `github/gh-aw`'s
+   `docs/src/content/docs/reference/` directory that every specific
+   sub-path already cited (`frontmatter`, `workflow-structure`, `auth`,
+   `safe-outputs`, `engines`, `faq`) genuinely exists, so only the domain
+   needed fixing, not the paths.
+3. **Dead URL `docs.github.com/en/copilot/using-github-copilot/using-copilot-coding-agent`.**
+   404s. Replaced with three live, directly-fetched URLs used for
+   different purposes (see Verification ledger): the "About" replacement
+   in `labs/lab09.md` and `labs/lab18.md`'s References sections, a
+   narrower enablement/policy page added as a second `lab09.md`
+   reference, and an access-governance page used for `lab09.md`'s inline
+   firewall-rules callout.
+4. **Disambiguation callouts added (deferred here by the Phase 1 merge
+   map).** `labs/lab-gh-extensions.md`'s existing §6 "Accuracy sidebar"
+   table already structurally satisfied this requirement but carried two
+   stale facts — fixed, not rewritten (see Decision 5). Added a short,
+   one-line pointer in `labs/lab08.md` clarifying that `gh-aw`, although
+   installed via `gh extension install`, is a different product from the
+   `gh extension create` this cluster's sibling lab teaches, cross-linking
+   to `lab-gh-extensions.md`'s sidebar for the fuller comparison.
+   `labs/lab18.md` and `labs/lab19.md` needed no equivalent addition —
+   both already read cleanly downstream of Lab 08's anchor framing.
+5. **`githubnext/gh-aw` → `github/gh-aw` (the org move itself).** Grepped
+   the full repo: every file except `labs/lab-gh-extensions.md` (table
+   + References, 2 occurrences) and `workshop/slides/55-module-5b-gh-extensions.md`
+   (mirrored table, 1 occurrence) already used the correct `github/gh-aw`
+   org. Fixed both, and corrected the attached claim in
+   `lab-gh-extensions.md`'s sidebar that gh-aw has "no canonical
+   `docs.github.com` page" — true as stated (it still isn't on that
+   domain) but written in a way that read as "no docs exist at all,"
+   which is now false given Decision 2's domain. Reworded to state
+   precisely: docs exist, just on `github.github.com/gh-aw/`, not
+   `docs.github.com`. Also added `gh_aw_schema_version` registry-pin
+   guidance (`gh extension install github/gh-aw --pin v<version>`,
+   matching the exact syntax already documented in
+   `docs/_meta/registry.yaml`) to `lab-gh-extensions.md`'s References,
+   since that lab's sidebar is the only place in the cluster that
+   mentions installing `gh-aw` without pointing at the registry pin.
+
+### Verification ledger
+
+| Claim | Primary source fetched | Status |
+|---|---|---|
+| `githubnext/gh-aw` → `github/gh-aw` org move | `https://github.com/githubnext/gh-aw` returns HTTP 301 → `https://github.com/github/gh-aw` (fetched directly) | VERIFIED |
+| gh-aw canonical docs domain is `github.github.com`, not `.io` | `github/gh-aw` README fetched via `raw.githubusercontent.com` | VERIFIED |
+| `/reference/{frontmatter,workflow-structure,auth,safe-outputs,engines,faq}` sub-paths exist | `github-mcp-server-get_file_contents` directory listing of `github/gh-aw`'s `docs/src/content/docs/reference/` | VERIFIED |
+| `using-copilot-coding-agent` URL is dead | direct fetch, 404 | VERIFIED |
+| `copilot-surfaces/copilot-on-github` is the real redirect target of the old coding-agent "about" URL | direct fetch of `.../concepts/agents/coding-agent/about-coding-agent`, observed redirect | VERIFIED |
+| Code Review: Azure DevOps support is public preview | direct fetch, `https://docs.github.com/en/copilot/concepts/agents/code-review` | VERIFIED |
+| Code Review: unlicensed-member access needs both "AI credits paid usage" and "Allow members without a Copilot license to use Copilot code review in GitHub.com" policies, enterprise-set values become read-only at org level | same page, paginated fetch | VERIFIED |
+| Code Review effort costs: Lite $0.05–$1, Balanced $0.25–$5 (AI credits) | same page | VERIFIED |
+| Code Review can hand a suggestion to Copilot Cloud Agent to open a follow-up PR (public preview) | same page | VERIFIED |
+
+### Test results
+
+Targeted: `tests/content-currency/*`, `tests/workshop/time-budget.test.ts`,
+`tests/meta/enumeration-parity.test.ts`, `tests/lab-structure/*` — 307
+tests pass. Full `npx vitest run` — 564 of 566 pass; the 2 failures
+(`tests/workflows/weekly-audit-dry-run.test.ts`,
+`tests/workflows/weekly-audit-schema.test.ts`) reproduce identically on
+the pre-Phase-4 baseline (`git stash` + re-run) — a sandbox-network 403
+installing the `gh aw` CLI extension, unrelated to this phase's content.
+`runtime-tools-secret_scanning` clean on all 13 changed files.
+
 ## Status and next step
 
-`status: draft`. Phases 2 (beginner track) and 3 (Lab 10 rebuild) are
-complete. Phase 4 (retire-and-merge execution) appends its own section
-below this one rather than replacing it.
+`status: draft`. Phases 2 (beginner track), 3 (Lab 10 rebuild), and 4
+(GitHub platform cluster) are complete. Phase 5 (appendix reconciliation)
+appends its own section below this one rather than replacing it.

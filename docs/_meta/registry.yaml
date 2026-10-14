@@ -249,10 +249,10 @@ labs:
     pace_workshop_minutes: 12
     pace_self_minutes: 15
   lab09:
-    title: "Copilot Coding Agent & Code Review"
+    title: "Copilot Cloud Agent & Code Review"
     pace_presenter_minutes: 5
     pace_workshop_minutes: 13
-    pace_self_minutes: 20
+    pace_self_minutes: 22
   lab10:
     title: "Agent Memory: Personalities, Lessons, and Consolidation"
     pace_presenter_minutes: 6

@@ -147,7 +147,7 @@ agent workflow using the current schema version pinned in
 through its generated GitHub Actions log.
 
 **Anchor labs.** `lab08` (PRD-generation agent workflow),
-`lab09` (Copilot coding agent + code-review agent workflow).
+`lab09` (Copilot cloud agent + code-review agent workflow).
 
 **Registry check.** 12 + 13 = **25 min**.
 

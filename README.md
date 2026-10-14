@@ -83,7 +83,7 @@ Most labs (01–07, 10) work with **any Copilot license**. A few labs require sp
 | Lab | Feature | Required License | GitHub Permissions |
 |-----|---------|-----------------|-------------------|
 | **Lab 08** | GitHub Agentic Workflows (`gh-aw`) | Copilot Business or Enterprise | Actions enabled, `COPILOT_GITHUB_TOKEN` secret ([setup](labs/lab08.md#84-configure-the-copilot_github_token-secret)) |
-| **Lab 09** | Copilot Coding Agent + Code Review | Copilot Pro+, Business, or Enterprise | Repo admin (to configure rulesets + enable coding agent) |
+| **Lab 09** | Copilot Cloud Agent + Code Review | Copilot Pro+, Business, or Enterprise | Repo admin (to configure rulesets + enable cloud agent) |
 | All other labs | Agents, Skills, Instructions, Prompts, Hooks, MCP, Orchestration | Any Copilot license (Individual+) | Repo write access |
 
 > **Note:** If your organization restricts Copilot features via policy, check with your admin that agent mode, MCP servers, and Copilot CLI are enabled.
@@ -467,7 +467,7 @@ Get-Content AGENTS.md
 - [ ] Lab 06: Hooks
 - [ ] Lab 07: Multi-Agent Orchestration
 - [ ] Lab 08: gh-aw: PRD Generation
-- [ ] Lab 09: Copilot Coding Agent & Code Review
+- [ ] Lab 09: Copilot Cloud Agent & Code Review
 - [ ] Lab 10: Agent memory — personalities, lessons, and consolidation
 ```
 
@@ -528,7 +528,7 @@ erDiagram
 | **Hooks** | Pre/post tool-use lifecycle automation | 06 |
 | **Orchestration** | Multi-agent coordination workflows | 07 |
 | **Agentic Workflows** | `gh-aw` CI/CD automation with AI agents | 08, 09 |
-| **Coding Agent** | Platform-level issue → PR implementation | 09 |
+| **Cloud Agent** | Platform-level issue → PR implementation | 09 |
 | **Code Review** | AI-powered pull request reviews | 09 |
 | **Reindex** | Automatic semantic understanding of your codebase | 10 |
 | **Session Management** | Agent memory via markdown lessons — decisions, handoffs, project wiki | 10 |
@@ -550,7 +550,7 @@ erDiagram
 | [Lab 06](labs/lab06.md) | Hooks | Pre/post tool hooks, build checks |
 | [Lab 07](labs/lab07.md) | Multi-Agent Orchestration | Orchestrator → dev → QA → review |
 | [Lab 08](labs/lab08.md) | gh-aw: PRD Generation | Branch creation triggers PM agent |
-| [Lab 09](labs/lab09.md) | Copilot Coding Agent & Code Review | Issue → Coding Agent → PR → AI review |
+| [Lab 09](labs/lab09.md) | Copilot Cloud Agent & Code Review | Issue → Cloud Agent → PR → AI review |
 | [Lab 10](labs/lab10.md) | Agent memory: personalities, lessons, and consolidation | Three Karpathy layers (Raw sources → Wiki → Schema), `/consolidate-lessons`, `.copilot/lessons/` |
 | [Lab 11](labs/lab11.md) | Building & Distributing a Copilot Plugin | Enterprise marketplace, private registry, SBOM, allowlist policy |
 | [Lab 12](labs/lab12.md) | Fabric MCP with Copilot CLI & VS Code | Fabric MCP wiring, lakehouse enumeration, inline-chat & agent-mode notebook editing, **offline Parquet simulator fallback**, notebook hygiene |
