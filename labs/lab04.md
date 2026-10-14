@@ -103,7 +103,7 @@ Example: "I need to write xUnit and Moq tests for the ASP.NET Core StudentsContr
 
 3. Now try the prompt:
 ```
-@create-dotnet-test for dotnet/ContosoUniversity.Web/Controllers/CoursesController.cs
+/create-dotnet-test for dotnet/ContosoUniversity.Web/Controllers/CoursesController.cs
 ```
 
 The prompt should generate a complete test class for the CoursesController.
