@@ -1,6 +1,8 @@
 ---
 title: "Authoring a Copilot CLI Extension and Triggering It from a Hook"
 lab_number: "cli-extensions"
+tier: advanced
+surface: cli
 pace:
   presenter_minutes: 12
   self_paced_minutes: 35
@@ -8,6 +10,13 @@ registry: docs/_meta/registry.yaml
 ---
 
 # Lab — Authoring a Copilot CLI Extension and Triggering It from a Hook
+
+> **Two ways to work with this lab**
+> - **In Copilot CLI:** author, load, and trigger the extension and hooks
+>   using the CLI steps below.
+> - **In VS Code:** edit and inspect the extension and hook files in the
+>   editor, then use Copilot CLI to load and exercise them. VS Code has no
+>   native Copilot CLI extension or hook execution path.
 
 > ⏱️ Presenter pace: 12 minutes | Self-paced: 35 minutes
 
@@ -22,8 +31,10 @@ In this lab you will author a **Copilot CLI extension** — a JS module that run
 References (read for canonical contracts):
 
 - Runtime authoring guide (saved during this workshop's session): `~/.copilot/session-state/$(uuidgen)/files/copilot-cli-extensions-authoring-guide.md` — output of `extensions_manage operation: "guide"` against your locally installed `copilot` build. **This is the source of truth for every extension code line in this lab.** The `<id>` segment is your live session UUID; if you need a fresh placeholder, regenerate one with `uuidgen` (Bash/zsh) or `[guid]::NewGuid().ToString()` (PowerShell) — do **not** literally type `<id>` into the path.
-- [Hooks configuration](https://docs.github.com/en/copilot/reference/hooks-configuration)
-- [About hooks](https://docs.github.com/en/copilot/concepts/agents/cloud-agent/about-hooks)
+- [Hooks configuration](https://docs.github.com/en/copilot/reference/hooks-reference)
+- [About hooks](https://docs.github.com/en/copilot/concepts/agents/hooks)
+- [Lab 11 — Building & Distributing a Copilot Plugin](lab11.md) — a plugin's `extensions` field can bundle one or more `extension.mjs` directories exactly like the one you build here; Lab 11 is packaging/distribution, this lab is authoring
+- [Lab 16 — Enterprise Marketplace & Plugin Governance](lab16.md) — governs which marketplace a plugin bundling an extension may come from
 
 ---
 
@@ -51,7 +62,7 @@ References (read for canonical contracts):
 | **Plan mode vs autopilot mode** | `Shift+Tab` toggles plan mode; autopilot mode is the default | Plan-heavy work (design, decomposition) runs in plan mode; well-scoped execution runs in autopilot mode. |
 | **Mid-session model switch** | `/model <tier-or-id>` | Upshift to `models.premium` (per [`registry.yaml`](../docs/_meta/registry.yaml)) for hard reasoning; downshift to `models.cheap` for tool-heavy loops. Note: an enterprise's global model-default-availability policy (see [Lab 17](../labs/lab17.md)) may make additional models selectable here even if the registry's curated tiers don't list them. |
 | **Local tool discovery (model-side)** | `extensions_manage` MCP tool, `operation: "list"` / `"inspect"` / `"guide"` / `"scaffold"` | The agent enumerating which agents, skills, hooks, and extensions are contributing to the session before wiring a handoff. Invoke as a tool call (e.g. `extensions_manage({operation: "list"})`), **not** as `/extensions_manage` — there is no such slash command. |
-| **Local tool discovery (user-side)** | `/skills`, `/plugin`, `/mcp` | The human listing or managing skills, plugins, and MCP servers from the prompt via the in-terminal dashboard. These are real built-in slashes; `/extensions manage` and `/extensions mode` are **not** — use `Shift+Tab` to toggle plan/autopilot modes. |
+| **Local tool discovery (user-side)** | `/skills`, `/plugin`, `/mcp` | The human listing or managing skills, plugins, and MCP servers from the prompt via the in-terminal dashboard. `/extensions manage` / `/extensions mode` also exist, but cover CLI extensions specifically and require `/experimental on` first — the three dashboards above are the primary path for everyday skill/plugin/MCP discovery. |
 | **LSP-backed code intelligence** | Automatic — no slash command | Copilot CLI transparently prefers a configured language server over text search for go-to-definition, find references, rename, and call hierarchy. See [Lab 15 — LSP & Code Intelligence](../labs/lab15.md). |
 <!-- @end-include docs/_partials/currency.md -->
 
@@ -178,7 +189,7 @@ The probabilistic body is powerful, and that is also why it is dangerous. Every 
 
 Copy [`solutions/lab-copilot-cli-extensions/.github/hooks/pretooluse-deny-large-input.json`](../solutions/lab-copilot-cli-extensions/.github/hooks/pretooluse-deny-large-input.json) into your repo's `.github/hooks/` directory.
 
-The shape (per [Hooks configuration](https://docs.github.com/en/copilot/reference/hooks-configuration)):
+The shape (per [Hooks configuration](https://docs.github.com/en/copilot/reference/hooks-reference)):
 
 ```json
 {
@@ -203,11 +214,11 @@ The hook reads the event JSON from stdin (the runtime passes `{toolName, toolArg
 {"permissionDecision":"deny","permissionDecisionReason":"<human-readable>"}
 ```
 
-### 4.2 The deny-only banner — read this carefully
+### 4.2 Why this hook only emits `deny` — read this carefully
 
-> 🚨 **`preToolUse` honors `deny` only.** The runtime accepts `"allow"` and `"ask"` permissionDecision values today but **does not act on them** — see [Hooks configuration](https://docs.github.com/en/copilot/reference/hooks-configuration). The mental model the docs reinforce: *the hook is a veto, not a permission grant*. **Absence of `deny` is allow.** A hook that emits `"allow"` is a no-op; one that emits `"ask"` is also a no-op.
+> 🚨 **`preToolUse`'s `permissionDecision` is a real three-way switch — `"allow"`, `"deny"`, and `"ask"` all genuinely control whether the tool executes** (`ask` degrades to `deny` under cloud agent / CLI autopilot, where no user is available to answer) — see [GitHub Copilot hooks reference](https://docs.github.com/en/copilot/reference/hooks-reference). But this hook, like every hook in this lab, only ever emits `deny`: an explicit `allow` would unconditionally force-approve the call, bypassing the user's own trust/confirmation settings for it — the opposite of a cost gate. **Silence (no output) is how the hook lets the normal permission flow decide** for everything it doesn't explicitly deny.
 >
-> Do not internalize an `allow`/`ask` decision model from prior tooling — the hardening lab (`labs/lab-hardening.md`, delivered by Workstream B) re-states this banner verbatim.
+> Do not internalize an allow-list-via-output model — the hardening lab ([`labs/lab-hardening.md`](lab-hardening.md)) teaches this same deny-only convention.
 
 > 📏 **Bytes vs. characters — the 10 KB cap is exactly 10000 bytes.** The bash hook uses `wc -c`, which counts **bytes**, not characters (`wc -m` is the character counter, and it depends on the current locale). The PowerShell branch uses `[System.Text.Encoding]::UTF8.GetByteCount($args.text)`, which is also a byte count. This matters when the input contains multi-byte UTF-8 (emoji, CJK, accented Latin): a 5000-character paste of CJK is ~15000 bytes and **will** trip the deny gate, which is the intent — token cost scales with bytes-on-the-wire, not glyphs-on-screen. If you re-tune the threshold, keep both branches on the same byte basis or your bash and PowerShell users will see different deny behavior.
 
@@ -242,7 +253,7 @@ It detects `^summarize:` and writes a single audit/telemetry line to stderr.
 
 ### 5.2 The honest limitation
 
-> ⚠️ **`userPromptSubmitted` output is not honored by the runtime today** ([Hooks configuration](https://docs.github.com/en/copilot/reference/hooks-configuration)): the docs label it as **prompt mutation not supported**. So the hook **cannot** rewrite the prompt to inject a tool call, and the config-file hook surface **cannot** itself call the extension.
+> ⚠️ **`userPromptSubmitted` output is not honored by the runtime today** ([Hooks configuration](https://docs.github.com/en/copilot/reference/hooks-reference)): the docs label it as **prompt mutation not supported**. So the hook **cannot** rewrite the prompt to inject a tool call, and the config-file hook surface **cannot** itself call the extension.
 >
 > What the hook *can* do is **detect** the deterministic trigger — reliably, before the agent reasons over the prompt — and emit telemetry. The actual tool call is then driven by the convention you taught the agent: when a user prompt starts with `summarize:`, the agent should call `clab_summarize` on the rest of the prompt. That convention can be reinforced in the agent's system prompt, in a SKILL.md, or in the tool description itself (the description in `clab-summarize` says "Summarize an arbitrary block of text…", which is enough for most agent reasoning).
 >
@@ -280,7 +291,7 @@ Three operational decisions, made explicit:
 
 - **Project-scope vs user-scope.** Files in `.github/extensions/` are **committed**, reviewed under CODEOWNERS, and shared with the team — that is where `clab-summarize` belongs once the team has agreed it is useful. The user-level extensions directory is **personal** — that is where to keep your idiosyncratic dev-loop extensions (auto-format-on-save, your private summarizer with a sharper prompt, etc.). The guide states: *"Project extensions shadow user extensions on name collision."*
 - **Token-cost framing.** Every call to a Copilot CLI extension whose body invokes the model **is** an LLM call. There is no free-tier path. The cheapest cost control you have is the deterministic `preToolUse` gate from §4 — it is microseconds and certain. The next-cheapest is a tight tool description that discourages the agent from calling the tool when it does not need to. The most expensive is fixing it at the model layer with retries.
-- **Forward-compat.** Tool allow-lists at the agent and MCP layer compose with the `preToolUse` deny pattern in this lab — see the upcoming `labs/lab-hardening.md` (Workstream B of the materials-gap branch) for the deterministic-control reference and the hardened `code-reviewer` agent that uses it.
+- **Forward-compat.** Tool allow-lists at the agent and MCP layer compose with the `preToolUse` deny pattern in this lab — see [`labs/lab-hardening.md`](lab-hardening.md) for the deterministic-control reference and the hardened `code-reviewer` agent that uses it.
 
 ---
 
@@ -306,7 +317,7 @@ The runtime authoring guide (`extensions_manage operation: "guide"`) documents f
 - `session.sendAndWait({ prompt })` — programmatic model invocation from inside an extension; relevant for `clab_summarize`.
 - `session.workspacePath`, `session.rpc`, `session.on(eventType, handler)` — session-object surfaces for plan/workspace introspection and event subscription.
 - `tool.handler` return shape `{ textResultForLlm, resultType: "success" | "failure" | "rejected" | "denied" }` — the structured result type vs. raw string return.
-- The SDK-side hook surface (`onUserPromptSubmitted`, `onPreToolUse`, `onPostToolUse`, `onSessionStart`, `onSessionEnd`, `onErrorOccurred`) inside `joinSession({ hooks: ... })` — distinct from the JSON-config hook surface in `.github/hooks/*.json` documented at [Hooks configuration](https://docs.github.com/en/copilot/reference/hooks-configuration). The two surfaces overlap but are not identical; **prefer the JSON-config surface for things you want auditable in code review, prefer the SDK-side surface for things that require access to `session.send()` / `session.on()`**.
+- The SDK-side hook surface (`onUserPromptSubmitted`, `onPreToolUse`, `onPostToolUse`, `onSessionStart`, `onSessionEnd`, `onErrorOccurred`) inside `joinSession({ hooks: ... })` — distinct from the JSON-config hook surface in `.github/hooks/*.json` documented at [Hooks configuration](https://docs.github.com/en/copilot/reference/hooks-reference). The two surfaces overlap but are not identical; **prefer the JSON-config surface for things you want auditable in code review, prefer the SDK-side surface for things that require access to `session.send()` / `session.on()`**.
 
 If your local guide disagrees with this lab on any of the above, **trust the guide** — it was emitted by the runtime you actually have installed. Open a PR against this lab to update the wording.
 

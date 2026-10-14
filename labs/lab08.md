@@ -1,6 +1,8 @@
 ---
 title: "GitHub Agentic Workflows: PRD Generation"
 lab_number: 8
+tier: advanced
+surface: github
 pace:
   presenter_minutes: 5
   self_paced_minutes: 15
@@ -8,6 +10,13 @@ registry: docs/_meta/registry.yaml
 ---
 
 # 8 — GitHub Agentic Workflows: PRD Generation
+
+> **Two ways to work through this lab**
+> - **In VS Code:** edit and review the workflow files locally; configure
+>   repository secrets and observe workflow runs on GitHub.com.
+> - **In Copilot CLI:** use the included terminal commands for local compile
+>   or validation steps. The agentic workflow itself runs in GitHub Actions,
+>   not in a Copilot CLI session.
 
 In this lab you will explore how GitHub Agentic Workflows (gh-aw) automate document generation. You'll examine a workflow that generates a Product Requirements Document (PRD) when a feature branch is created.
 
@@ -17,10 +26,17 @@ In this lab you will explore how GitHub Agentic Workflows (gh-aw) automate docum
 
 > 💡 **Enterprise context:** Everything up to now has been local — your agents, skills, hooks, and MCP servers on your dev machine. This lab crosses into the **platform layer**. GitHub Agentic Workflows run in GitHub Actions — they're CI/CD pipelines where the runner is an AI agent. This is where the GitHub ecosystem extends beyond your local station: PRD generation, code review, deployment automation, all triggered by standard GitHub events and governed by enterprise policies. Most of this is out-of-the-box.
 
+> ⚠️ **Not the same thing as `gh extension`:** gh-aw happens to be *installed*
+> via `gh extension install github/gh-aw`, but it's a separate product —
+> a markdown-to-GitHub-Actions compiler, not a CLI extension you'd write
+> yourself. If you're building your own `gh` CLI extension, that's
+> [`lab-gh-extensions.md`](lab-gh-extensions.md), which has a fuller
+> three-way comparison in its accuracy sidebar.
+
 References:
 - [GitHub Agentic Workflows](https://github.com/github/gh-aw)
-- [Workflow structure](https://github.github.io/gh-aw/reference/workflow-structure/)
-- [Frontmatter reference](https://github.github.io/gh-aw/reference/frontmatter/)
+- [Workflow structure](https://github.github.com/gh-aw/reference/workflow-structure/)
+- [Frontmatter reference](https://github.github.com/gh-aw/reference/frontmatter/)
 
 ## 8.0 Copilot CLI currency (2026 refresh)
 
@@ -46,7 +62,7 @@ References:
 | **Plan mode vs autopilot mode** | `Shift+Tab` toggles plan mode; autopilot mode is the default | Plan-heavy work (design, decomposition) runs in plan mode; well-scoped execution runs in autopilot mode. |
 | **Mid-session model switch** | `/model <tier-or-id>` | Upshift to `models.premium` (per [`registry.yaml`](../docs/_meta/registry.yaml)) for hard reasoning; downshift to `models.cheap` for tool-heavy loops. Note: an enterprise's global model-default-availability policy (see [Lab 17](../labs/lab17.md)) may make additional models selectable here even if the registry's curated tiers don't list them. |
 | **Local tool discovery (model-side)** | `extensions_manage` MCP tool, `operation: "list"` / `"inspect"` / `"guide"` / `"scaffold"` | The agent enumerating which agents, skills, hooks, and extensions are contributing to the session before wiring a handoff. Invoke as a tool call (e.g. `extensions_manage({operation: "list"})`), **not** as `/extensions_manage` — there is no such slash command. |
-| **Local tool discovery (user-side)** | `/skills`, `/plugin`, `/mcp` | The human listing or managing skills, plugins, and MCP servers from the prompt via the in-terminal dashboard. These are real built-in slashes; `/extensions manage` and `/extensions mode` are **not** — use `Shift+Tab` to toggle plan/autopilot modes. |
+| **Local tool discovery (user-side)** | `/skills`, `/plugin`, `/mcp` | The human listing or managing skills, plugins, and MCP servers from the prompt via the in-terminal dashboard. `/extensions manage` / `/extensions mode` also exist, but cover CLI extensions specifically and require `/experimental on` first — the three dashboards above are the primary path for everyday skill/plugin/MCP discovery. |
 | **LSP-backed code intelligence** | Automatic — no slash command | Copilot CLI transparently prefers a configured language server over text search for go-to-definition, find references, rename, and call hierarchy. See [Lab 15 — LSP & Code Intelligence](../labs/lab15.md). |
 <!-- @end-include docs/_partials/currency.md -->
 
@@ -209,7 +225,7 @@ jobs:
 
 gh-aw workflows use the Copilot CLI as their AI engine. To authenticate, you need a **fine-grained Personal Access Token (PAT)** stored as a repository secret.
 
-> ⚠️ **Security note — PATs in production.** GitHub [recommends GitHub Apps over PATs](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#keeping-your-personal-access-tokens-secure) for production CI/CD workflows because Apps use short-lived, auto-revoked tokens scoped to specific installations. However, **gh-aw currently requires a PAT for Copilot engine authentication** — GitHub App auth is supported for other gh-aw operations (tool access, safe outputs) but [not yet for `COPILOT_GITHUB_TOKEN`](https://github.github.io/gh-aw/reference/auth/#using-a-github-app-for-authentication). We use a fine-grained PAT in this workshop for convenience. For production deployments, follow the best practices below and monitor gh-aw releases for GitHub App support.
+> ⚠️ **Security note — PATs in production.** GitHub [recommends GitHub Apps over PATs](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#keeping-your-personal-access-tokens-secure) for production CI/CD workflows because Apps use short-lived, auto-revoked tokens scoped to specific installations. However, **gh-aw currently requires a PAT for Copilot engine authentication** — GitHub App auth is supported for other gh-aw operations (tool access, safe outputs) but [not yet for `COPILOT_GITHUB_TOKEN`](https://github.github.com/gh-aw/reference/auth/#using-a-github-app-for-authentication). We use a fine-grained PAT in this workshop for convenience. For production deployments, follow the best practices below and monitor gh-aw releases for GitHub App support.
 
 ### Create the PAT
 
@@ -238,7 +254,7 @@ Or 🌐 **on GitHub:**
 4. Value: paste your PAT
 5. Click **Add secret**
 
-> 💡 **Why a PAT?** The `COPILOT_GITHUB_TOKEN` authenticates the Copilot CLI agent running inside GitHub Actions. The token owner's account must have an active Copilot license. See [gh-aw authentication docs](https://github.github.io/gh-aw/reference/auth/#copilot_github_token) for details.
+> 💡 **Why a PAT?** The `COPILOT_GITHUB_TOKEN` authenticates the Copilot CLI agent running inside GitHub Actions. The token owner's account must have an active Copilot license. See [gh-aw authentication docs](https://github.github.com/gh-aw/reference/auth/#copilot_github_token) for details.
 
 > ⚠️ **Organization-owned repos:** If your repository belongs to an organization, ensure the PAT has access to the repository. Go to **Organization settings** → **Personal access tokens** → **Pending requests** to approve if needed.
 
@@ -266,7 +282,7 @@ The gh-aw safe-outputs pipeline creates PRs using the `GITHUB_TOKEN`. By default
 >   --body "PRD generated by gh-aw workflow."
 > ```
 
-**For production deployments**, the recommended approach is to use a **GitHub App** with scoped `pull-requests: write` permission in your workflow's [`safe-outputs.app:`](https://github.github.io/gh-aw/reference/auth/#using-a-github-app-for-authentication) block. This avoids the org-level toggle entirely, gives you short-lived tokens with per-repo scoping, and removes the dependency on org-wide settings.
+**For production deployments**, the recommended approach is to use a **GitHub App** with scoped `pull-requests: write` permission in your workflow's [`safe-outputs.app:`](https://github.github.com/gh-aw/reference/auth/#using-a-github-app-for-authentication) block. This avoids the org-level toggle entirely, gives you short-lived tokens with per-repo scoping, and removes the dependency on org-wide settings.
 
 ### Security best practices for PATs
 
@@ -281,7 +297,7 @@ Even though gh-aw requires a PAT for now, you can minimize risk:
 | **Revoke after the workshop** | Go to [**Settings** → **Developer settings** → **Fine-grained tokens**](https://github.com/settings/tokens?type=beta) and delete it |
 
 gh-aw also provides **defense-in-depth mitigations** even when using a PAT:
-- The agent runs with **read-only permissions** — writes go through the [safe-outputs](https://github.github.io/gh-aw/reference/safe-outputs/) pipeline
+- The agent runs with **read-only permissions** — writes go through the [safe-outputs](https://github.github.com/gh-aw/reference/safe-outputs/) pipeline
 - An **API proxy** holds the auth token outside the agent container, preventing exfiltration via prompt injection
 - **Secret redaction** automatically strips tokens from agent output
 - A **network firewall** restricts agent egress to an explicit domain allowlist

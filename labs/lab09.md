@@ -1,24 +1,34 @@
 ---
-title: "Copilot Coding Agent & Code Review"
+title: "Copilot Cloud Agent & Code Review"
 lab_number: 9
+tier: advanced
+surface: github
 pace:
   presenter_minutes: 5
-  self_paced_minutes: 20
+  self_paced_minutes: 22
 registry: docs/_meta/registry.yaml
 ---
 
-# 9 — Copilot Coding Agent & Code Review
+# 9 — Copilot Cloud Agent & Code Review
 
-In this lab you will chain two platform-level agentic features: the **Copilot Coding Agent** to implement a feature from a GitHub Issue, and **Copilot Code Review** to automatically review the resulting pull request. You won't write a single line of code — you'll write an issue, and two AI agents handle the rest.
+> **Two ways to work through this lab**
+> - **In VS Code:** edit repository instructions locally; use GitHub.com for
+>   review settings, issue assignment, and cloud-agent activity.
+> - **In Copilot CLI:** use the terminal for local repository work, but
+>   cloud-agent assignment and GitHub code-review controls have no CLI
+>   equivalent in this lab; complete those steps on GitHub.com.
 
-> ⏱️ Presenter pace: 5 minutes | Self-paced: 20 minutes
+In this lab you will chain two platform-level agentic features: the **Copilot Cloud Agent** to implement a feature from a GitHub Issue, and **Copilot Code Review** to automatically review the resulting pull request. You won't write a single line of code — you'll write an issue, and two AI agents handle the rest.
 
-> 🎤 **Presenter prep:** Before the session, create an issue, assign Copilot, and let the coding agent open a PR that gets auto-reviewed. When presenting, walk through the completed issue → PR → review chain — no waiting.
+> ⏱️ Presenter pace: 5 minutes | Self-paced: 22 minutes
 
-> 💡 **Enterprise context:** This lab showcases two **platform features** that require zero local tooling. The Coding Agent turns issues into pull requests. Code Review automatically reviews every PR against your `copilot-instructions.md`. Organization owners can enable both across **all repositories** from Copilot policy settings. This is the enterprise scale story: issue → implementation → review, all AI-assisted, all governed by org policies.
+> 🎤 **Presenter prep:** Before the session, create an issue, assign Copilot, and let the cloud agent open a PR that gets auto-reviewed. When presenting, walk through the completed issue → PR → review chain — no waiting.
+
+> 💡 **Enterprise context:** This lab showcases two **platform features** that require zero local tooling. The Cloud Agent turns issues into pull requests. Code Review automatically reviews every PR against your `copilot-instructions.md`. Organization owners can enable both across **all repositories** from Copilot policy settings. This is the enterprise scale story: issue → implementation → review, all AI-assisted, all governed by org policies.
 
 References:
-- [About Copilot Coding Agent](https://docs.github.com/en/copilot/using-github-copilot/using-copilot-coding-agent)
+- [GitHub Copilot on GitHub.com](https://docs.github.com/en/copilot/concepts/copilot-surfaces/copilot-on-github) — Copilot cloud agent overview (renamed from "Copilot coding agent"; the old "using-copilot-coding-agent" URL now redirects here)
+- [Concepts for GitHub Copilot cloud agent](https://docs.github.com/en/copilot/concepts/agents/cloud-agent)
 - [About Copilot Code Review](https://docs.github.com/en/copilot/concepts/agents/code-review)
 - [Configuring automatic code review](https://docs.github.com/en/copilot/how-tos/use-copilot-agents/request-a-code-review/configure-automatic-review)
 - [Using Copilot code review](https://docs.github.com/en/copilot/how-tos/use-copilot-agents/request-a-code-review/use-code-review)
@@ -47,7 +57,7 @@ References:
 | **Plan mode vs autopilot mode** | `Shift+Tab` toggles plan mode; autopilot mode is the default | Plan-heavy work (design, decomposition) runs in plan mode; well-scoped execution runs in autopilot mode. |
 | **Mid-session model switch** | `/model <tier-or-id>` | Upshift to `models.premium` (per [`registry.yaml`](../docs/_meta/registry.yaml)) for hard reasoning; downshift to `models.cheap` for tool-heavy loops. Note: an enterprise's global model-default-availability policy (see [Lab 17](../labs/lab17.md)) may make additional models selectable here even if the registry's curated tiers don't list them. |
 | **Local tool discovery (model-side)** | `extensions_manage` MCP tool, `operation: "list"` / `"inspect"` / `"guide"` / `"scaffold"` | The agent enumerating which agents, skills, hooks, and extensions are contributing to the session before wiring a handoff. Invoke as a tool call (e.g. `extensions_manage({operation: "list"})`), **not** as `/extensions_manage` — there is no such slash command. |
-| **Local tool discovery (user-side)** | `/skills`, `/plugin`, `/mcp` | The human listing or managing skills, plugins, and MCP servers from the prompt via the in-terminal dashboard. These are real built-in slashes; `/extensions manage` and `/extensions mode` are **not** — use `Shift+Tab` to toggle plan/autopilot modes. |
+| **Local tool discovery (user-side)** | `/skills`, `/plugin`, `/mcp` | The human listing or managing skills, plugins, and MCP servers from the prompt via the in-terminal dashboard. `/extensions manage` / `/extensions mode` also exist, but cover CLI extensions specifically and require `/experimental on` first — the three dashboards above are the primary path for everyday skill/plugin/MCP discovery. |
 | **LSP-backed code intelligence** | Automatic — no slash command | Copilot CLI transparently prefers a configured language server over text search for go-to-definition, find references, rename, and call hierarchy. See [Lab 15 — LSP & Code Intelligence](../labs/lab15.md). |
 <!-- @end-include docs/_partials/currency.md -->
 
@@ -64,9 +74,21 @@ Key characteristics:
 | **Context** | Reads your `copilot-instructions.md` and repository code for context |
 | **Static analysis** | Integrates CodeQL, ESLint, and PMD for high-signal findings |
 | **Plans** | Available on Copilot Pro, Pro+, Business, and Enterprise |
-| **Platforms** | GitHub.com, VS Code, Visual Studio, JetBrains, Xcode |
+| **Platforms** | GitHub.com, GitHub CLI, GitHub Mobile, VS Code, Visual Studio, JetBrains IDEs, Xcode, and **Azure DevOps (public preview)** |
 
 > 💡 **Why built-in?** Copilot Code Review is the easiest path to AI-powered reviews. It already knows your repository's custom instructions, understands full project context, and requires zero workflow configuration.
+
+### Review effort, cost, and unlicensed access
+
+Three details that don't come up until you're running this at enterprise scale:
+
+| Detail | Current state |
+|--------|----------------|
+| **Review effort** | Choose **Lite** (~$0.05–$1 in AI credits per review) or **Balanced** (~$0.25–$5) — repository and organization admins can set the default effort level for automatic reviews |
+| **Unlicensed members** | Copilot Business/Enterprise orgs can let members **without a Copilot license** request reviews on GitHub.com, gated behind two policies: enable **"AI credits paid usage"** first, then **"Allow members without a Copilot license to use Copilot code review in GitHub.com"** |
+| **Cloud agent handoff** | Code Review can pass a suggestion straight to the **Copilot Cloud Agent**, which opens a follow-up PR with the fix already applied (public preview) — the two halves of this lab are converging into one loop |
+
+> 💡 **Why this matters for the enterprise story:** the unlicensed-member policy lets a reviewer without their own Copilot seat still benefit from AI review on your team's PRs — useful for contractors or cross-team reviewers your org doesn't want to fully license.
 
 ## 9.2 Configure Automatic Reviews
 
@@ -91,9 +113,9 @@ You can configure Copilot to automatically review every pull request using **rep
 
 Organization owners can enable automatic reviews across **all repositories** from the organization's Copilot policy settings. This is ideal for teams who want consistent AI review without per-repo setup.
 
-## 9.3 Meet the Copilot Coding Agent
+## 9.3 Meet the Copilot Cloud Agent
 
-The **Copilot Coding Agent** is a platform-level feature that turns GitHub Issues into pull requests. You describe what you want in an issue, assign Copilot, and the agent:
+The **Copilot Cloud Agent** is a platform-level feature that turns GitHub Issues into pull requests. You describe what you want in an issue, assign Copilot, and the agent:
 
 1. **Creates a branch** from your default branch
 2. **Reads your codebase** — including `copilot-instructions.md`, `AGENTS.md`, and all your custom instructions
@@ -111,21 +133,23 @@ Key characteristics:
 | **Iteration** | Responds to PR review comments — push back and it will revise |
 | **Plans** | Available on Copilot Pro+, Business, and Enterprise |
 
-> 💡 **Why the Coding Agent?** It bridges the gap between "I know what I want" and "here's the code." Combined with Code Review, you get a full loop: describe → implement → review — without writing code yourself.
+> 💡 **Why the Cloud Agent?** It bridges the gap between "I know what I want" and "here's the code." Combined with Code Review, you get a full loop: describe → implement → review — without writing code yourself.
 
-### Enable the Coding Agent
+### Enable the Cloud Agent
 
 🌐 **On GitHub:**
 
 1. Go to your repository → **Settings** → **Copilot** → **Cloud agent**
+
 2. Ensure the coding agent is **enabled**
+
 3. If you're in an organization, the org owner may need to enable it from **Organization settings** → **Copilot** → **Policies**
 
-> 💡 **Firewall rules:** If your organization uses a GitHub App allowlist or IP restrictions, ensure the Copilot Coding Agent's GitHub App is permitted. See [GitHub's documentation](https://docs.github.com/en/copilot/using-github-copilot/using-copilot-coding-agent) for details.
+> 💡 **Firewall rules:** If your organization uses a GitHub App allowlist or IP restrictions, ensure the Copilot Cloud Agent's GitHub App is permitted. See [Managing access to GitHub Copilot cloud agent](https://docs.github.com/en/copilot/concepts/enterprise/cloud-agent-access) for details.
 
 ## 9.4 Create a GitHub Issue
 
-Instead of making changes locally, let's describe the feature we want in a GitHub Issue and let the Coding Agent implement it.
+Instead of making changes locally, let's describe the feature we want in a GitHub Issue and let the Cloud Agent implement it.
 
 🌐 **On GitHub** (or use the CLI):
 
@@ -176,9 +200,9 @@ gh issue create `
   --body $body
 ```
 
-> 💡 **Issue quality matters.** The more specific your issue description, the better the Coding Agent's implementation. Include requirements, file paths, and context — just like you would for a human developer.
+> 💡 **Issue quality matters.** The more specific your issue description, the better the Cloud Agent's implementation. Include requirements, file paths, and context — just like you would for a human developer.
 
-## 9.5 Assign the Coding Agent
+## 9.5 Assign the Cloud Agent
 
 Now assign Copilot to the issue and watch it work.
 
@@ -205,7 +229,7 @@ gh issue edit <ISSUE_NUMBER> --add-assignee '@copilot'
 
 ### What happens next
 
-The Coding Agent will:
+The Cloud Agent will:
 
 1. **Start a session** — you'll see a status indicator on the issue showing Copilot is working
 2. **Read your codebase** — it examines the project structure, existing models, and your custom instructions
@@ -215,7 +239,7 @@ The Coding Agent will:
 
 This typically takes **2–5 minutes**.
 
-> 💡 **Watch it work.** While the Coding Agent runs, you can see its progress on the issue page. It posts status updates as it reads code, plans changes, and implements the solution.
+> 💡 **Watch it work.** While the Cloud Agent runs, you can see its progress on the issue page. It posts status updates as it reads code, plans changes, and implements the solution.
 
 🌐 **On GitHub:**
 
@@ -223,18 +247,18 @@ This typically takes **2–5 minutes**.
 2. Once the PR is created, you'll see a link on the issue
 3. Click through to the PR — if you configured the ruleset in 9.2, **Code Review has already started automatically**
 
-> 💡 **Two agents, one flow.** The Coding Agent opened the PR, which triggered the Code Review ruleset. You didn't write code, you didn't push, you didn't manually request a review — the platform handled everything.
+> 💡 **Two agents, one flow.** The Cloud Agent opened the PR, which triggered the Code Review ruleset. You didn't write code, you didn't push, you didn't manually request a review — the platform handled everything.
 
 ## 9.6 Review the Automated Feedback
 
 Your PR now has two types of AI activity:
-- The **Coding Agent** created the PR with its implementation
+- The **Cloud Agent** created the PR with its implementation
 - **Code Review** automatically reviewed those changes
 
 🌐 **On GitHub:**
 
 1. Go to your PR — you'll see **Copilot** listed under Reviewers
-2. Examine the code changes the Coding Agent made in the **Files changed** tab
+2. Examine the code changes the Cloud Agent made in the **Files changed** tab
 3. Read the Code Review comments posted on the changed files:
 
 | Feedback type | What You'll See |
@@ -250,7 +274,7 @@ Your PR now has two types of AI activity:
 
 ## 9.7 Iterate Based on Feedback
 
-Here's where it gets powerful: you can ask the Coding Agent to address the Code Review feedback — creating a fully automated feedback loop.
+Here's where it gets powerful: you can ask the Cloud Agent to address the Code Review feedback — creating a fully automated feedback loop.
 
 🌐 **On GitHub:**
 
@@ -263,10 +287,10 @@ Here's where it gets powerful: you can ask the Coding Agent to address the Code 
 - Add XML documentation if missing
 ```
 
-3. The Coding Agent will push additional commits to the PR addressing the feedback
+3. The Cloud Agent will push additional commits to the PR addressing the feedback
 4. If "Review new pushes" is enabled, Code Review will automatically re-review the new commits
 
-> 💡 **The feedback loop:** Issue → Coding Agent → PR → Code Review → feedback comment → Coding Agent iterates → Code Review re-reviews. Humans stay in the loop as reviewers and decision-makers, while AI handles the implementation cycles.
+> 💡 **The feedback loop:** Issue → Cloud Agent → PR → Code Review → feedback comment → Cloud Agent iterates → Code Review re-reviews. Humans stay in the loop as reviewers and decision-makers, while AI handles the implementation cycles.
 
 Alternatively, you can apply suggestions directly:
 
@@ -283,7 +307,7 @@ git push
 
 ## 9.8 How Custom Instructions Enhance Both Agents
 
-Both the Coding Agent and Code Review automatically read your `copilot-instructions.md` — the same file we explored in Lab 02.
+Both the Cloud Agent and Code Review automatically read your `copilot-instructions.md` — the same file we explored in Lab 02.
 
 🖥️ **In your terminal:**
 
@@ -307,10 +331,10 @@ Because our repository has custom instructions covering:
 
 | Agent | How Instructions Help |
 |-------|-----------------------|
-| **Coding Agent** | Implements code that follows your conventions from the start |
+| **Cloud Agent** | Implements code that follows your conventions from the start |
 | **Code Review** | Checks changes against your project-specific rules, not just generic best practices |
 
-> 💡 **This is the power of the configuration ecosystem.** The instructions you wrote in Lab 02 automatically improve the quality of the Coding Agent's implementations, Code Review's feedback, local agent responses, and completions — everywhere.
+> 💡 **This is the power of the configuration ecosystem.** The instructions you wrote in Lab 02 automatically improve the quality of the Cloud Agent's implementations, Code Review's feedback, local agent responses, and completions — everywhere.
 
 ## 9.9 The Agentic Chain
 
@@ -318,7 +342,7 @@ Step back and look at what just happened:
 
 ```
 ┌──────────────┐     ┌──────────────────┐     ┌───────────────┐     ┌──────────────┐
-│  You write   │ ──► │  Coding Agent    │ ──► │  Code Review  │ ──► │  You review  │
+│  You write   │ ──► │  Cloud Agent     │ ──► │  Code Review  │ ──► │  You review  │
 │  an Issue    │     │  implements +    │     │  checks the   │     │  and merge   │
 │              │     │  opens a PR      │     │  PR changes   │     │              │
 └──────────────┘     └──────────────────┘     └───────────────┘     └──────────────┘
@@ -327,18 +351,18 @@ Step back and look at what just happened:
 **Three platform features, zero local tooling:**
 
 1. **GitHub Issues** — you describe the work
-2. **Copilot Coding Agent** — AI implements it
+2. **Copilot Cloud Agent** — AI implements it
 3. **Copilot Code Review** — AI reviews it
 
 The human stays in control: you write the requirements, you review the output, you decide to merge. The AI handles the implementation and first-pass review.
 
-> 💡 **Connect the labs.** Remember Lab 08? The gh-aw workflow generated a PRD from a feature branch. Imagine the full chain: PRD generation (Lab 08) → issue creation → Coding Agent implements → Code Review validates. Each piece is a building block you can compose into your own workflow.
+> 💡 **Connect the labs.** Remember Lab 08? The gh-aw workflow generated a PRD from a feature branch. Imagine the full chain: PRD generation (Lab 08) → issue creation → Cloud Agent implements → Code Review validates. Each piece is a building block you can compose into your own workflow.
 
 ### Compare: Traditional vs Agentic Development
 
 | Aspect | Traditional Workflow | Agentic Workflow (this lab) |
 |--------|---------------------|-----------------------------|
-| **Implementation** | Developer writes code locally | Coding Agent writes code from issue description |
+| **Implementation** | Developer writes code locally | Cloud Agent writes code from issue description |
 | **Code review** | Human reviewer (hours/days) | AI review in minutes + human final review |
 | **Feedback loop** | Push → wait → fix → push | Comment `@copilot` → agent iterates → auto re-review |
 | **Context** | Reviewer reads PR diff | AI reads full project + custom instructions |
@@ -379,12 +403,12 @@ See the [reference solution](../solutions/lab09-gh-aw-review/code-review.md) for
 
 | Concept | Details |
 |---------|---------|
-| **Copilot Coding Agent** | Turns GitHub Issues into pull requests with working code |
+| **Copilot Cloud Agent** | Turns GitHub Issues into pull requests with working code |
 | **Copilot Code Review** | Built-in AI reviewer for pull requests |
-| **The agentic chain** | Issue → Coding Agent → PR → Code Review → human merge |
+| **The agentic chain** | Issue → Cloud Agent → PR → Code Review → human merge |
 | **Custom instructions** | Both agents read `copilot-instructions.md` and `AGENTS.md` |
 | **Iteration** | Comment `@copilot` on PRs to request changes; Code Review auto-re-reviews on push |
-| **Coding Agent setup** | Enable in repo settings → Copilot → Coding agent |
+| **Cloud Agent setup** | Enable in repo settings → Copilot → Cloud agent |
 | **Code Review setup** | Repository rulesets or manual `@copilot` reviewer assignment |
 | **gh-aw alternative** | For custom review checklists, labeled outputs, and advanced control |
 

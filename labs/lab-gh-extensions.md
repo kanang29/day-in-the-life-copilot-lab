@@ -1,6 +1,8 @@
 ---
 title: "Building a GitHub CLI Extension that Calls an LLM"
 lab_number: gh-extensions
+tier: advanced
+surface: cli
 pace:
   presenter_minutes: 12
   self_paced_minutes: 30
@@ -8,6 +10,13 @@ registry: docs/_meta/registry.yaml
 ---
 
 # Lab — Building a GitHub CLI Extension that Calls an LLM
+
+> **Two ways to work with this lab**
+> - **In Copilot CLI:** use the terminal commands below to build and run the
+>   GitHub CLI extension.
+> - **In VS Code:** edit the extension source in the Explorer or an editor,
+>   then run `gh clab` from the integrated terminal. The extension runs
+>   through GitHub CLI, not Copilot Chat.
 
 > ⏱️ Presenter pace: 12 minutes | Self-paced: 30 minutes
 
@@ -47,7 +56,7 @@ Reference solution: [`solutions/lab-gh-extensions/gh-clab/`](../solutions/lab-gh
 | **Plan mode vs autopilot mode** | `Shift+Tab` toggles plan mode; autopilot mode is the default | Plan-heavy work (design, decomposition) runs in plan mode; well-scoped execution runs in autopilot mode. |
 | **Mid-session model switch** | `/model <tier-or-id>` | Upshift to `models.premium` (per [`registry.yaml`](../docs/_meta/registry.yaml)) for hard reasoning; downshift to `models.cheap` for tool-heavy loops. Note: an enterprise's global model-default-availability policy (see [Lab 17](../labs/lab17.md)) may make additional models selectable here even if the registry's curated tiers don't list them. |
 | **Local tool discovery (model-side)** | `extensions_manage` MCP tool, `operation: "list"` / `"inspect"` / `"guide"` / `"scaffold"` | The agent enumerating which agents, skills, hooks, and extensions are contributing to the session before wiring a handoff. Invoke as a tool call (e.g. `extensions_manage({operation: "list"})`), **not** as `/extensions_manage` — there is no such slash command. |
-| **Local tool discovery (user-side)** | `/skills`, `/plugin`, `/mcp` | The human listing or managing skills, plugins, and MCP servers from the prompt via the in-terminal dashboard. These are real built-in slashes; `/extensions manage` and `/extensions mode` are **not** — use `Shift+Tab` to toggle plan/autopilot modes. |
+| **Local tool discovery (user-side)** | `/skills`, `/plugin`, `/mcp` | The human listing or managing skills, plugins, and MCP servers from the prompt via the in-terminal dashboard. `/extensions manage` / `/extensions mode` also exist, but cover CLI extensions specifically and require `/experimental on` first — the three dashboards above are the primary path for everyday skill/plugin/MCP discovery. |
 | **LSP-backed code intelligence** | Automatic — no slash command | Copilot CLI transparently prefers a configured language server over text search for go-to-definition, find references, rename, and call hierarchy. See [Lab 15 — LSP & Code Intelligence](../labs/lab15.md). |
 <!-- @end-include docs/_partials/currency.md -->
 
@@ -277,7 +286,7 @@ conflate these three:
 |--------------------------|----------------------------------------------------------------|--------------------------------------|--------------------------------------------------------------------------------|
 | **`gh extension`** (this lab) | `gh` CLI — `gh extension install/list/upgrade/remove`           | External process, invoked by `gh`    | [docs.github.com/en/github-cli/github-cli/using-github-cli-extensions](https://docs.github.com/en/github-cli/github-cli/using-github-cli-extensions) |
 | **Copilot CLI extensions** | Copilot CLI runtime via `extensions_manage` / `extensions_reload` | *Inside* the Copilot CLI agent process | [`labs/lab-copilot-cli-extensions.md`](lab-copilot-cli-extensions.md) (workshop lab) |
-| **`gh-aw`** (Agentic Workflows) | Installed as a `gh` extension (`gh extension install githubnext/gh-aw`) but a separate product | Compiles markdown → GitHub Actions YAML that runs in CI | Repo only — **no canonical `docs.github.com` page.** Source: <https://github.com/githubnext/gh-aw> |
+| **`gh-aw`** (Agentic Workflows) | Installed as a `gh` extension (`gh extension install github/gh-aw`) but a separate product | Compiles markdown → GitHub Actions YAML that runs in CI | Not on `docs.github.com` — canonical docs are a dedicated site: <https://github.github.com/gh-aw/>. Source: <https://github.com/github/gh-aw> (moved from the `githubnext` incubation org; the old `githubnext/gh-aw` slug now redirects here) |
 
 Key takeaways:
 
@@ -286,9 +295,9 @@ Key takeaways:
   the Copilot agent. Different runtime, different authoring model. Treat them
   as siblings, not variants.
 - `gh-aw` uses `gh extension` only as a *delivery mechanism*. It is orthogonal
-  to Copilot CLI and has no documented integration with `~/.copilot/*`. Because
-  `gh-aw` docs live outside `docs.github.com`, treat any `gh-aw` claim in a
-  workshop as "verify against the repo README."
+  to Copilot CLI and has no documented integration with `~/.copilot/*`. Its
+  docs live on `github.github.com/gh-aw/`, not `docs.github.com` — don't
+  conflate "has a canonical docs site" with "is a `docs.github.com` feature."
 
 ## References
 
@@ -296,7 +305,8 @@ Key takeaways:
 - Creating GitHub CLI extensions — <https://docs.github.com/en/github-cli/github-cli/creating-github-cli-extensions>
 - GitHub Models — <https://docs.github.com/en/github-models>
 - `gh-models` source — <https://github.com/github/gh-models>
-- `gh-aw` source — <https://github.com/githubnext/gh-aw>
+- `gh-aw` docs — <https://github.github.com/gh-aw/>
+- `gh-aw` source — <https://github.com/github/gh-aw> — pin installs to [`gh_aw_schema_version`](../docs/_meta/registry.yaml): `gh extension install github/gh-aw --pin v<version>`
 
 ## Cleanup
 

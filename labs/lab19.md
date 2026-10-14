@@ -1,6 +1,8 @@
 ---
 title: "Self-Improving Agents & Skills (gh-aw Template)"
 lab_number: 19
+tier: advanced
+surface: github
 pace:
   presenter_minutes: 7
   self_paced_minutes: 25
@@ -8,6 +10,13 @@ registry: docs/_meta/registry.yaml
 ---
 
 # 19 — Self-Improving Agents & Skills (gh-aw Template)
+
+> **Two ways to work through this lab**
+> - **In VS Code:** edit the workflow, agent, and skill files locally; use
+>   GitHub.com to trigger and inspect the hosted workflow.
+> - **In Copilot CLI:** use the included terminal commands for local compile,
+>   validation, and dry-run steps. The real scheduled workflow runs in
+>   GitHub Actions.
 
 This lab is explicitly a **community/DIY pattern**, not an official GitHub
 Copilot feature. You'll wire up `.github/workflows/self-improving-agents.md`

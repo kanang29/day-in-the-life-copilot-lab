@@ -1,6 +1,8 @@
 ---
 title: "Enterprise Token Optimization & Reporting"
 lab_number: 20
+tier: advanced
+surface: github
 pace:
   presenter_minutes: 6
   self_paced_minutes: 25
@@ -8,6 +10,14 @@ registry: docs/_meta/registry.yaml
 ---
 
 # 20 — Enterprise Token Optimization & Reporting
+
+> **Two ways to work through this lab**
+> - **In VS Code:** review local policy and documentation examples; the
+>   organization usage reports and governance settings are accessed in
+>   GitHub.com.
+> - **In Copilot CLI:** CLI users are covered as the audience of the policy,
+>   but the organization-level reporting and governance steps have no CLI
+>   equivalent; complete them in GitHub.com.
 
 [`docs/token-and-model-guide.md`](../docs/token-and-model-guide.md) taught
 individual-scale token discipline: model tiers, batching, context hygiene,
@@ -65,9 +75,10 @@ At enterprise scale, three things break that assumption:
 At the enterprise/org level, token/usage visibility is a governance
 concern, not a per-developer curiosity:
 
-- **Audit logs (Lab 17 §17.3)** give you *policy and session-lifecycle*
-  events — that an `agent_session.task` ran, what config it touched — but
-  explicitly **not** token/cost figures or conversation content.
+- **Audit logs (Lab 17 §17.3)** give you *policy and session-level*
+  events — the `agent_session_id` an event came from, what config it
+  touched — but explicitly **not** token/cost figures or conversation
+  content.
 - **Copilot usage metrics/billing views** (enterprise/org settings) are
   the actual source for aggregate seat usage and premium-request
   consumption — check your enterprise's Copilot usage dashboard, which is

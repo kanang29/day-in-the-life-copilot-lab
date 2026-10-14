@@ -1,6 +1,8 @@
 ---
 title: "Creating a .NET Development Agent"
 lab_number: 3
+tier: beginner
+surface: vscode
 pace:
   presenter_minutes: 4
   self_paced_minutes: 15
@@ -8,6 +10,13 @@ registry: docs/_meta/registry.yaml
 ---
 
 # 3 — Creating a .NET Development Agent
+
+> **Two ways to follow this lab**
+> - **In VS Code:** create the agent file, configure its tools, and select it
+>   from the Copilot Chat agent picker.
+> - **In Copilot CLI:** use the same `.agent.md` file from a CLI session in
+>   the repository; configure CLI tool access using the CLI-specific notes
+>   below rather than VS Code's tool configuration.
 
 In this lab you will create a custom agent specialized for .NET development with ContosoUniversity.
 
@@ -80,77 +89,56 @@ Both appendices walk through:
 >
 > After creating (or editing) the agent file:
 >
-> 1. Exit your current Copilot CLI session: type `exit` (or press <kbd>Ctrl</kbd>+<kbd>D</kbd>).
-> 2. Restart it: `copilot`.
-> 3. In VS Code, run **Developer: Reload Window** from the Command Palette (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd>) so the extension re-reads `.github/agents/`.
+> 1. **In VS Code:** run **Developer: Reload Window** from the Command Palette (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd>) so the extension re-reads `.github/agents/` and the new agent shows up in the agent picker.
+> 2. **Using the Copilot CLI too?** Exit the session (type `exit` or press <kbd>Ctrl</kbd>+<kbd>D</kbd>) and restart it with `copilot`.
 
-> 💡 **Verify the agent loads:** After restarting, try `@<track>-dev What files are in this project?`. If the agent responds, it's working. If you still get "unknown agent", confirm the filename ends in `.agent.md` (not `.md`) and lives under `.github/agents/`.
+> 💡 **Verify the agent loads:** After reloading, open the agent picker at the bottom of the Chat view — `<track>-dev` should now be listed. Select it and ask `What files are in this project?`. If the agent responds, it's working. If it's missing from the picker, confirm the filename ends in `.agent.md` (not `.md`) and lives under `.github/agents/`.
 
 ## 3.3 Configure Tools and MCP Servers
 
 The agent we created uses basic tools. Let's understand how to add MCP server access.
 
-> 📚 **This section is a preview.** [Lab 05](lab05.md) is the canonical MCP configuration lab — it covers per-server scoping, credential handling, and the centralized `mcp-configs/` source of truth. The snippet below shows just enough to wire an MCP server into an agent's frontmatter; defer the full setup walkthrough to lab 05.
+> 📚 **This section is a preview.** [Lab 05](lab05.md) is the canonical MCP configuration lab — it covers per-server scoping, credential handling, and the centralized `mcp-configs/` source of truth. The snippet below shows just enough to wire an MCP server into an agent, deferring the full setup walkthrough to Lab 05.
 
-🖥️ **In your terminal (From the repository root):**
+💬 **In VS Code:**
 
-1. View the current MCP configuration:
+1. View the current MCP configuration — ask Copilot Chat, or open `.vscode/mcp.json` directly in the editor.
 
-**WSL/Bash:**
-```bash
-cat ~/.copilot/mcp-config.json
-```
-
-**PowerShell:**
-```powershell
-Get-Content ~/.copilot/mcp-config.json
-```
-
-2. Agents can reference MCP servers by adding them to the frontmatter. For example, to give the agent access to Context7 for .NET documentation lookups:
+2. Open `.github/agents/dotnet-dev.agent.md`, then click the **Configure Tools...** button in the editor toolbar. This opens a dialog listing built-in tools **and** tools from any configured MCP server (e.g. `context7`'s `resolve-library-id` and `query-docs`). Select the Context7 tools and click **OK** — VS Code adds them to the agent's `tools:` list for you:
 
 ```yaml
 ---
 name: "dotnet-dev"
 description: "..."
-tools: ["read", "edit", "execute", "search","context7/*"]
-mcp-servers: ["context7"]
+tools: ["read", "edit", "execute", "search", "context7/*"]
 ---
 ```
 
+> ⚠️ **`mcp-servers` is a cloud/CLI-only field.** The reference docs for
+> custom agents are explicit: `mcp-servers` is "not used in VS Code and
+> other IDE custom agents." For GitHub.com-hosted Copilot cloud agent and
+> Copilot CLI, the equivalent frontmatter is:
+> ```yaml
+> mcp-servers: ["context7"]
+> ```
+> In VS Code, granting MCP access is just an entry in `tools:` (via
+> **Configure Tools...**, as above) — there's no separate field to add.
 
+3. The agent can now use tools from the `context7` MCP server (e.g., `resolve-library-id` and `query-docs`).
 
-3. The `mcp-servers` field references servers defined in `~/.copilot/mcp-config.json`. The agent can then use tools from those servers (e.g., `resolve-library-id` and `query-docs` from Context7).
-
-> 💡 **Note**: MCP server access is optional. The base tools (`read`, `edit`, `execute`, `search`) are sufficient for most development tasks. Add MCP servers when the agent needs specific capabilities like documentation lookup or knowledge persistence.Cross check if the MCP server Context7 is running.
+> 💡 **Note**: MCP server access is optional. The base tools (`read`, `edit`, `execute`, `search`) are sufficient for most development tasks. Add MCP servers when the agent needs specific capabilities like documentation lookup or knowledge persistence. Cross-check that the `context7` MCP server is running if the agent can't find its tools.
 
 ## 3.4 Test the Agent
 
 Let's test our new agent by asking it to analyze the ContosoUniversity codebase.
 
-🖥️ **In your terminal (From the repository root):**
+💬 **In VS Code's Copilot Chat:**
 
-1. Non-interactive smoke test — verify the agent loaded and responds without entering the REPL:
+1. Open the Chat view, switch to **Agent mode**, and select **`dotnet-dev`** from the agent picker. If it's missing, you skipped the 🔄 restart in §3.2 — reload the window.
 
-**WSL/Bash:**
-```bash
-copilot --prompt "@dotnet-dev List the files under dotnet/ContosoUniversity.Core/Models/ and name the entities." --allow-all-tools
+2. Ask:
 ```
-
-**PowerShell:**
-```powershell
-copilot --prompt '@dotnet-dev List the files under dotnet/ContosoUniversity.Core/Models/ and name the entities.' --allow-all-tools
-```
-
-If you see *"unknown agent"*, you skipped the 🔄 restart in §3.2 — exit and re-run `copilot`.
-
-2. For an interactive session, start the REPL and invoke the agent:
-
-```bash
-copilot
-```
-
-```
-@dotnet-dev Analyze the dotnet/ContosoUniversity.Core project. What models exist and what are their relationships?
+Analyze the dotnet/ContosoUniversity.Core project. What models exist and what are their relationships?
 ```
 
 3. The agent should:
@@ -160,7 +148,7 @@ copilot
 
 4. Try a development task:
 ```
-@dotnet-dev What would I need to change to add a search feature to the Students controller?
+What would I need to change to add a search feature to the Students controller?
 ```
 
 The agent should reference the repository pattern, async patterns, and controller conventions from its system prompt.
@@ -177,10 +165,10 @@ After this lab you should understand:
 | Concept | Details |
 |---------|---------|
 | **Agent file location** | `.github/agents/{name}.agent.md` |
-| **YAML frontmatter** | `name`, `description`, `tools`, optional `mcp-servers` |
+| **YAML frontmatter** | `name`, `description`, `tools`, optional `mcp-servers` (cloud/CLI only — see §3.3) |
 | **Tools** | `read`, `edit`, `execute`, `search`, `agent`, `web` |
 | **System prompt** | Markdown body defines agent personality and instructions |
-| **Invocation** | `@agent-name` in Copilot Chat or CLI |
+| **Invocation** | Agent picker in VS Code's Chat view, or `@agent-name` on GitHub.com/Copilot CLI |
 
 **Best practices for agent design:**
 - Give the agent a clear, focused domain (not "general purpose")
@@ -198,6 +186,6 @@ See [`solutions/lab03-dotnet-dev-agent/dotnet-dev.agent.md`](../solutions/lab03-
 
 </details>
 
-> This agent is now available for orchestration in Lab 07, where you'll coordinate multiple agents working together.
+> This agent is now available for orchestration in Lab 07, where you'll coordinate multiple agents working together. For a production-hardening pass that locks this kind of agent down to an explicit tool allow-list and backs it with a `preToolUse` hook (Lab 06), see [`lab-hardening.md`](lab-hardening.md).
 
 **Next:** [Lab 04 — Skills & Prompts](lab04.md)

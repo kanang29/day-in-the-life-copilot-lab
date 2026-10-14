@@ -1,6 +1,8 @@
 ---
 title: "Hooks"
 lab_number: 6
+tier: advanced
+surface: cli
 pace:
   presenter_minutes: 3
   self_paced_minutes: 10
@@ -9,12 +11,24 @@ registry: docs/_meta/registry.yaml
 
 # 6 — Hooks
 
+> **Two ways to work with this lab**
+> - **In Copilot CLI:** create, configure, and run the hooks using the CLI
+>   steps below.
+> - **In VS Code:** use the editor to author and inspect the hook files, then
+>   run and verify them with Copilot CLI. Hooks are not a supported VS Code
+>   execution path in this lab.
+
 In this lab you will explore the hook system and create a new hook for .NET build verification.
+This is the hands-on counterpart to the tool-gating guardrail you'll harden in
+[`lab-hardening.md`](lab-hardening.md), which pairs a `preToolUse` hook with the
+custom agent from [Lab 03](lab03.md) for defense in depth.
 
 > ⏱️ Presenter pace: 3 minutes | Self-paced: 10 minutes
 
 References:
-- [Copilot hooks](https://docs.github.com/en/copilot/using-github-copilot/using-hooks)
+- [About hooks for GitHub Copilot](https://docs.github.com/en/copilot/concepts/agents/hooks)
+- [Using hooks with GitHub Copilot CLI](https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/use-hooks) — includes the real troubleshooting table used in §6.4 below
+- [GitHub Copilot hooks reference](https://docs.github.com/en/copilot/reference/hooks-reference)
 
 > 🧭 **Track appendices** — the post-tool-use build hook recipe per stack lives in
 > [`labs/appendices/dotnet/lab06.md`](appendices/dotnet/lab06.md) and
@@ -44,7 +58,7 @@ References:
 | **Plan mode vs autopilot mode** | `Shift+Tab` toggles plan mode; autopilot mode is the default | Plan-heavy work (design, decomposition) runs in plan mode; well-scoped execution runs in autopilot mode. |
 | **Mid-session model switch** | `/model <tier-or-id>` | Upshift to `models.premium` (per [`registry.yaml`](../docs/_meta/registry.yaml)) for hard reasoning; downshift to `models.cheap` for tool-heavy loops. Note: an enterprise's global model-default-availability policy (see [Lab 17](../labs/lab17.md)) may make additional models selectable here even if the registry's curated tiers don't list them. |
 | **Local tool discovery (model-side)** | `extensions_manage` MCP tool, `operation: "list"` / `"inspect"` / `"guide"` / `"scaffold"` | The agent enumerating which agents, skills, hooks, and extensions are contributing to the session before wiring a handoff. Invoke as a tool call (e.g. `extensions_manage({operation: "list"})`), **not** as `/extensions_manage` — there is no such slash command. |
-| **Local tool discovery (user-side)** | `/skills`, `/plugin`, `/mcp` | The human listing or managing skills, plugins, and MCP servers from the prompt via the in-terminal dashboard. These are real built-in slashes; `/extensions manage` and `/extensions mode` are **not** — use `Shift+Tab` to toggle plan/autopilot modes. |
+| **Local tool discovery (user-side)** | `/skills`, `/plugin`, `/mcp` | The human listing or managing skills, plugins, and MCP servers from the prompt via the in-terminal dashboard. `/extensions manage` / `/extensions mode` also exist, but cover CLI extensions specifically and require `/experimental on` first — the three dashboards above are the primary path for everyday skill/plugin/MCP discovery. |
 | **LSP-backed code intelligence** | Automatic — no slash command | Copilot CLI transparently prefers a configured language server over text search for go-to-definition, find references, rename, and call hierarchy. See [Lab 15 — LSP & Code Intelligence](../labs/lab15.md). |
 <!-- @end-include docs/_partials/currency.md -->
 
@@ -66,15 +80,19 @@ cat .github/hooks/default.json
 Get-Content .github/hooks/default.json
 ```
 
-2. The configuration defines hooks for these lifecycle events:
+2. This repo's `default.json` configures hooks for four of the available
+   lifecycle events. The hook system supports more than these (including
+   `sessionStart`, `sessionEnd`, `agentStop`, and `subagentStop` — see the
+   [hooks reference](https://docs.github.com/en/copilot/reference/hooks-reference)
+   for the complete, current list); the ones below are simply the ones
+   this repo currently wires up:
 
-| Event | When It Fires |
-|-------|--------------|
-| `sessionStart` | When a Copilot session begins |
-| `userPromptSubmitted` | After the user sends a message |
-| `preToolUse` | Before Copilot executes a tool (edit, execute, etc.) |
-| `postToolUse` | After Copilot executes a tool |
-| `errorOccurred` | When an error happens |
+| Event | When It Fires | In `default.json`? |
+|-------|--------------|---------------------|
+| `userPromptSubmitted` | After the user sends a message | Yes — 1 hook |
+| `preToolUse` | Before Copilot executes a tool (edit, execute, etc.) | Yes — 3 hooks |
+| `postToolUse` | After Copilot executes a tool | Yes — 2 hooks |
+| `errorOccurred` | When an error happens | Yes — 1 hook |
 
 3. Each hook entry has:
 ```json
@@ -378,7 +396,17 @@ echo '{"toolName":"Bash","toolArgs":{"command":"ls"},"cwd":"."}' \
 
 > 💡 **Expected output:** You should see `✅ Build succeeded` in the Copilot output after editing a .cs file. If you see `⚠️ BUILD FAILED`, check the build errors. If you see nothing, verify permissions: `ls -la scripts/hooks/post-tool-use-dotnet-build.sh`.
 
-> 💡 **Verifying hooks in VS Code:** To confirm whether a hook fired and see its output, open the **Output** panel (`Cmd+Shift+U` / `Ctrl+Shift+U`), then select **"GitHub Copilot Chat Hooks"** from the dropdown menu. This shows execution logs for all hooks, including exit codes and any stdout/stderr output.
+> ⚠️ **Hooks run in the CLI terminal itself, not VS Code.** Hooks are
+> supported only for Copilot CLI and Copilot cloud agent — there is no VS
+> Code hooks surface or output channel, so the hook's own `echo`/`Write-Host`
+> lines appear inline in the same terminal session you're already watching,
+> right after the tool call that triggered them. If a hook seems silent,
+> work through the real troubleshooting checklist instead of looking for a
+> GUI panel: confirm the file is under `.github/hooks/` (or
+> `~/.copilot/hooks/` for a user-level hook), validate the JSON
+> (`jq . .github/hooks/default.json`), confirm `"version": 1` is present,
+> and confirm the script is executable (`chmod +x`) with a proper shebang.
+> Source: [Using hooks with GitHub Copilot CLI § Troubleshooting](https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/use-hooks#troubleshooting).
 
 ## 6.5 Final
 
@@ -389,21 +417,21 @@ echo '{"toolName":"Bash","toolArgs":{"command":"ls"},"cwd":"."}' \
 |---------|---------|
 | **Config file** | `.github/hooks/default.json` |
 | **Script location** | `scripts/hooks/` (bash + PowerShell) |
-| **Lifecycle events** | `sessionStart`, `userPromptSubmitted`, `preToolUse`, `postToolUse`, `errorOccurred` |
+| **Lifecycle events used here** | `userPromptSubmitted`, `preToolUse`, `postToolUse`, `errorOccurred` (the full event list is larger — see §6.2.1) |
 | **Blocking** | Pre-hooks block by `exit 0` + stdout JSON `{"permissionDecision":"deny",…}`. Non-zero exits are silently ignored. Post-hooks report only. |
 | **IPC** | Event payload arrives as **JSON on stdin**. Only `COPILOT_PROJECT_DIR` and `CLAUDE_PROJECT_DIR` env vars are set; `TOOL_NAME`/`FILE_PATH` are **not** exported. Parse stdin with `jq` (bash) or `ConvertFrom-Json` (PowerShell). |
 
 **Hooks in this repository:**
 
-| Hook | Type | Purpose |
-|------|------|---------|
-| secret-scan | preToolUse | Block commits with hardcoded secrets |
-| doc-blocker | preToolUse | Prevent unnecessary documentation files |
-| long-running | preToolUse | Warn about long-running commands |
-| format | postToolUse | Auto-format files after edit |
-| typecheck | postToolUse | TypeScript type check after edit |
-| console-warn | postToolUse | Warn about console.log statements |
-| dotnet-build | postToolUse | Verify .NET build after C# edit (you created this!) |
+| Hook | Type | Purpose | Registered in `default.json`? |
+|------|------|---------|--------------------------------|
+| secret-scan | preToolUse | Block commits with hardcoded secrets | Yes |
+| doc-blocker | preToolUse | Prevent unnecessary documentation files | Yes |
+| long-running | preToolUse | Warn about long-running commands | Yes |
+| format | postToolUse | Auto-format files after edit | Yes |
+| typecheck | postToolUse | TypeScript type check after edit | Script exists in `scripts/hooks/` but is not wired into `default.json` yet |
+| console-warn | postToolUse | Warn about console.log statements | Yes |
+| dotnet-build | postToolUse | Verify .NET build after C# edit (you created this!) | Yes, once you complete §6.3 |
 
 **Best practices:**
 - Always provide both bash and PowerShell scripts
@@ -420,6 +448,11 @@ echo '{"toolName":"Bash","toolArgs":{"command":"ls"},"cwd":"."}' \
 See [`solutions/lab06-hooks/post-tool-use-dotnet-build.sh`](../solutions/lab06-hooks/post-tool-use-dotnet-build.sh)
 
 </details>
+
+> This `postToolUse` hook reports on a build after the fact. For a
+> `preToolUse` hook that can **deny** a tool call outright — paired with the
+> custom agent from Lab 03 as a belt-and-braces guardrail — see
+> [`lab-hardening.md`](lab-hardening.md).
 
 **Next:** [Lab 07 — Multi-Agent Orchestration](lab07.md)
 

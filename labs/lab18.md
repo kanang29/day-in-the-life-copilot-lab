@@ -1,6 +1,8 @@
 ---
 title: "Spec-Driven Design, Stacked PRs & Code Review in the Loop"
 lab_number: 18
+tier: advanced
+surface: github
 pace:
   presenter_minutes: 8
   self_paced_minutes: 30
@@ -8,6 +10,13 @@ registry: docs/_meta/registry.yaml
 ---
 
 # 18 — Spec-Driven Design, Stacked PRs & Code Review in the Loop
+
+> **Two ways to work through this lab**
+> - **In VS Code:** write and revise the spec and code locally; use GitHub.com
+>   for pull-request reviews and cloud-agent actions.
+> - **In Copilot CLI:** use the terminal for local spec, Git, and `gh` steps
+>   where shown; review and collaboration actions still take place on
+>   GitHub.com.
 
 This lab closes the modernization arc: you'll write a **spec** (not a
 vague issue), turn it into a gh-aw-driven PRD (extending Lab 08), then —
@@ -27,10 +36,10 @@ every layer before the next one is built on top of it.
 
 References:
 - [GitHub Spec Kit](https://github.com/github/spec-kit) — official spec-driven development toolkit
-- [About Copilot Coding Agent](https://docs.github.com/en/copilot/using-github-copilot/using-copilot-coding-agent)
+- [GitHub Copilot on GitHub.com](https://docs.github.com/en/copilot/concepts/copilot-surfaces/copilot-on-github) — Copilot cloud agent overview (renamed from "Copilot coding agent")
 - [About Copilot Code Review](https://docs.github.com/en/copilot/concepts/agents/code-review)
 - [Lab 08 — GitHub Agentic Workflows: PRD Generation](lab08.md)
-- [Lab 09 — Copilot Coding Agent & Code Review](lab09.md)
+- [Lab 09 — Copilot Cloud Agent & Code Review](lab09.md)
 - [`docs/_meta/registry.yaml`](../docs/_meta/registry.yaml) — `gh_aw_schema_version`
 
 ## 18.0 Copilot CLI currency (2026 refresh)

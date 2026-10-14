@@ -7,6 +7,11 @@ parent_lab: lab-gh-extensions.md
 
 # .NET Appendix — `gh clab` on the .NET track
 
+> **In Copilot CLI:** use the terminal steps below to build and run `gh clab`.
+> **In VS Code:** edit the extension source in the editor, then run `gh clab`
+> from the integrated terminal; the extension is a GitHub CLI command, not a
+> Copilot Chat feature.
+
 This appendix is the stack-specific completion path for
 [`labs/lab-gh-extensions.md`](../../lab-gh-extensions.md). Pair with the Node
 variant: [`labs/appendices/node/lab-gh-extensions.md`](../node/lab-gh-extensions.md).

@@ -1,6 +1,8 @@
 ---
 title: "LSP & Code Intelligence in Copilot CLI"
 lab_number: 15
+tier: advanced
+surface: cli
 pace:
   presenter_minutes: 5
   self_paced_minutes: 20
@@ -8,6 +10,13 @@ registry: docs/_meta/registry.yaml
 ---
 
 # 15 — LSP & Code Intelligence in Copilot CLI
+
+> **Two ways to work with this lab**
+> - **In Copilot CLI:** follow the steps below to inspect and use CLI
+>   LSP-backed code intelligence.
+> - **In VS Code:** use the editor's own language features for navigation;
+>   they are separate from the Copilot CLI LSP integration taught here. Use
+>   the VS Code integrated terminal to run the CLI-specific exercises.
 
 In this lab you will learn how Copilot CLI uses **Language Server Protocol
 (LSP) servers** to get precise, compiler-grade understanding of your code —
@@ -52,7 +61,7 @@ References:
 | **Plan mode vs autopilot mode** | `Shift+Tab` toggles plan mode; autopilot mode is the default | Plan-heavy work (design, decomposition) runs in plan mode; well-scoped execution runs in autopilot mode. |
 | **Mid-session model switch** | `/model <tier-or-id>` | Upshift to `models.premium` (per [`registry.yaml`](../docs/_meta/registry.yaml)) for hard reasoning; downshift to `models.cheap` for tool-heavy loops. Note: an enterprise's global model-default-availability policy (see [Lab 17](../labs/lab17.md)) may make additional models selectable here even if the registry's curated tiers don't list them. |
 | **Local tool discovery (model-side)** | `extensions_manage` MCP tool, `operation: "list"` / `"inspect"` / `"guide"` / `"scaffold"` | The agent enumerating which agents, skills, hooks, and extensions are contributing to the session before wiring a handoff. Invoke as a tool call (e.g. `extensions_manage({operation: "list"})`), **not** as `/extensions_manage` — there is no such slash command. |
-| **Local tool discovery (user-side)** | `/skills`, `/plugin`, `/mcp` | The human listing or managing skills, plugins, and MCP servers from the prompt via the in-terminal dashboard. These are real built-in slashes; `/extensions manage` and `/extensions mode` are **not** — use `Shift+Tab` to toggle plan/autopilot modes. |
+| **Local tool discovery (user-side)** | `/skills`, `/plugin`, `/mcp` | The human listing or managing skills, plugins, and MCP servers from the prompt via the in-terminal dashboard. `/extensions manage` / `/extensions mode` also exist, but cover CLI extensions specifically and require `/experimental on` first — the three dashboards above are the primary path for everyday skill/plugin/MCP discovery. |
 | **LSP-backed code intelligence** | Automatic — no slash command | Copilot CLI transparently prefers a configured language server over text search for go-to-definition, find references, rename, and call hierarchy. This lab is where you configure and observe it. |
 <!-- @end-include docs/_partials/currency.md -->
 

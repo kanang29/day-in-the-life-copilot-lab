@@ -141,7 +141,7 @@ grep -n "frontmatter" labs/lab08.md | head
 ```
 
 Live on stage: open
-<https://github.github.io/gh-aw/reference/frontmatter/> in a browser,
+<https://github.github.com/gh-aw/reference/frontmatter/> in a browser,
 search for `safe-outputs`, point at the `create-pull-request`
 section, confirm `max:` is a first-class field.
 
