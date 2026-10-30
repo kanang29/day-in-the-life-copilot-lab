@@ -6,6 +6,12 @@ track: node
 
 # Lab 04 — Node track appendix: `node-testing` skill + `@create-node-test` prompt
 
+> **In VS Code:** create and test the Node skill and `.prompt.md` file in
+> Copilot Chat.
+> **In Copilot CLI:** create and test the skill in a CLI session. The
+> `.prompt.md` prompt-file feature is VS Code-only; enter its prompt text
+> directly in the CLI instead.
+
 This appendix gives you the Node.js variants of the skill and prompt template created in [`labs/lab04.md`](../../lab04.md).
 
 > ⚠️ **Note (2026-04-24):** Per [docs.github.com](https://docs.github.com/en/copilot/tutorials/customization-library/prompt-files/your-first-prompt-file), prompt files (`.prompt.md`) are an **IDE-only** Copilot feature; the `@create-node-test` invocation below works in Copilot Chat (VS Code / Visual Studio / JetBrains), not in Copilot CLI. The skill portion of this appendix is unaffected — skills run in CLI as written.

@@ -6,6 +6,11 @@ track: node
 
 # Lab 03 — Node track appendix: `node-dev` agent
 
+> **In VS Code:** create and test the Node agent with the Copilot Chat agent
+> picker.
+> **In Copilot CLI:** use the same `.agent.md` file from a CLI session in the
+> repository; configure CLI tool access separately from VS Code.
+
 This appendix gives you the full Node.js variant of the dev agent created in [`labs/lab03.md`](../../lab03.md).
 
 ## A. Create `.github/agents/node-dev.agent.md`

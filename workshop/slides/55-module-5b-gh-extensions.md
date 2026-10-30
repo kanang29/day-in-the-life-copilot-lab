@@ -122,7 +122,7 @@ The word "extension" is overloaded. Do not conflate these surfaces:
 |--------------------------|------------------------------------------|---------------------------------------------------------------------------------------------------|
 | **`gh extension`** (this module) | External process, invoked by `gh`        | [docs.github.com/en/github-cli/github-cli/using-github-cli-extensions](https://docs.github.com/en/github-cli/github-cli/using-github-cli-extensions) |
 | **Copilot CLI extensions** | *Inside* the Copilot CLI agent process   | Module M5c — `labs/lab-copilot-cli-extensions.md`                                                 |
-| **`gh-aw`** (Agentic Workflows) | Installed via `gh extension`; compiles to Actions YAML | Repo only — no canonical docs.github.com page. <https://github.com/githubnext/gh-aw>             |
+| **`gh-aw`** (Agentic Workflows) | Installed via `gh extension`; compiles to Actions YAML | Not on `docs.github.com` — dedicated site: <https://github.github.com/gh-aw/>. Source: <https://github.com/github/gh-aw> (moved from `githubnext/gh-aw`) |
 
 Three surfaces, three runtimes, three authoring models. Teach them side-by-side
 once, then keep them separate for the rest of the workshop.
@@ -138,8 +138,9 @@ once, then keep them separate for the rest of the workshop.
 - **`gh models` not installed.** `gh clab` falls through to OpenAI, then mock.
   No crash — but if you *expect* the primary path, add
   `gh extension install github/gh-models` to your setup step.
-- **Teaching `gh-aw` as a Microsoft-documented feature.** It isn't — the docs
-  live in the repo. Cite the repo, not `docs.github.com`.
+- **Teaching `gh-aw` as a `docs.github.com` feature.** It isn't — its docs
+  live on the dedicated `github.github.com/gh-aw/` site. Cite that site (or
+  the `github/gh-aw` repo), not `docs.github.com`.
 - **Wiring `gh clab` into a Copilot CLI hook and calling it a git hook (or
   vice versa).** They are different surfaces. This lab uses a **git**
   `pre-commit` hook; Copilot CLI hooks are covered in Lab 06 and M5c.

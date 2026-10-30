@@ -1,4 +1,21 @@
+---
+title: "Hands-on Lab Setup"
+lab_number: setup
+tier: beginner
+surface: vscode
+pace:
+  presenter_minutes: 2
+  self_paced_minutes: 5
+registry: docs/_meta/registry.yaml
+---
+
 # Hands-on Lab Setup
+
+> **Two ways to work through the labs**
+> - **In VS Code:** use the editor and Copilot Chat instructions in each lab.
+> - **In Copilot CLI:** use the terminal instructions in each lab. When a lab
+>   teaches a VS Code- or GitHub.com-only feature, it says so and identifies
+>   the closest CLI-supported step.
 
 > **Setup has moved!** All setup instructions are now in the [README](../README.md).
 >

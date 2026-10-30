@@ -7,6 +7,10 @@ parent_lab: lab05.md
 
 # .NET Appendix — Lab 05
 
+> **In VS Code:** follow the MCP setup steps with `.vscode/mcp.json`.
+> **In Copilot CLI:** configure the CLI's separate MCP config using the CLI
+> notes in the main lab; the two clients do not share a config file.
+
 This appendix lists MCP servers that are most useful for the **.NET track** of [Lab 05 — MCP Server Configuration](../../lab05.md).
 
 > Pair with: [`labs/appendices/node/lab05.md`](../node/lab05.md) for the Node-track equivalent.
@@ -22,10 +26,10 @@ This appendix lists MCP servers that are most useful for the **.NET track** of [
 
 ## Verify MCP servers see the dotnet/ paths
 
-After moving the projects, your agent's `.NET search` calls should target `dotnet/ContosoUniversity.*` paths. A quick smoke test inside Copilot CLI:
+After moving the projects, your agent's `.NET search` calls should target `dotnet/ContosoUniversity.*` paths. A quick smoke test — ask the `dotnet-dev` agent (via VS Code's agent picker, or `@dotnet-dev` in Copilot CLI):
 
 ```
-@dotnet-dev Use Context7 to look up the EF Core 8 IRepository pattern and confirm we apply it correctly in dotnet/ContosoUniversity.Infrastructure/Data/Repository.cs.
+Use Context7 to look up the EF Core 8 IRepository pattern and confirm we apply it correctly in dotnet/ContosoUniversity.Infrastructure/Data/Repository.cs.
 ```
 
 The agent should:

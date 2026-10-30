@@ -1,6 +1,8 @@
 ---
 title: "Hardening Skills, Agents, and MCP for Deterministic Production Use"
 lab_number: hardening
+tier: advanced
+surface: cli
 pace:
   presenter_minutes: 5
   self_paced_minutes: 20
@@ -9,14 +11,27 @@ registry: docs/_meta/registry.yaml
 
 # Lab — Hardening Skills, Agents, and MCP for Deterministic Production Use
 
-> ⚠️ **Read this first — `preToolUse` is deny-only.**
-> `preToolUse` only acts on `deny`. `allow` and `ask` outputs are accepted by
-> the runtime today but are **NOT** honored. Design hooks as
-> deny-on-violation, not allow-list-via-output. In other words: **absence of
-> deny is allow.** Source:
-> [Hooks configuration](https://docs.github.com/en/copilot/reference/hooks-configuration).
+> **Two ways to work with this lab**
+> - **In Copilot CLI:** configure and verify the CLI hooks and tool
+>   restrictions using the steps below.
+> - **In VS Code:** edit the shared agent and hook files in the editor. The
+>   hook enforcement path taught here is CLI-specific, so verify it by
+>   running Copilot CLI.
 
-> ⏱️ Presenter pace: 5 minutes | Self-paced: 20 minutes — the deny-only
+> ⚠️ **Read this first — this lab's hooks only ever emit `deny`, by design.**
+> `preToolUse`'s `permissionDecision` is a real three-way switch —
+> `"allow"`, `"deny"`, and `"ask"` all genuinely control whether the tool
+> executes. But a hardening hook that explicitly emits `"allow"`
+> unconditionally force-approves that call, bypassing whatever
+> trust/confirmation settings the user already has — the opposite of a
+> guardrail. So every hook in this lab emits `deny` for disallowed tools and
+> stays **silent** (no output) for everything else, leaving the normal
+> permission flow in charge. In other words: **the hook can only subtract
+> trust, never grant it.** Source:
+> [GitHub Copilot hooks reference](https://docs.github.com/en/copilot/reference/hooks-reference)
+> (`preToolUse` decision control).
+
+> ⏱️ Presenter pace: 5 minutes | Self-paced: 20 minutes — the subtract-only
 > callout above is the single highest-leverage takeaway of this lab; every
 > guardrail we build below is designed around it.
 
@@ -93,7 +108,7 @@ Reference solution: [`solutions/lab-hardening/`](../solutions/lab-hardening/READ
 | **Plan mode vs autopilot mode** | `Shift+Tab` toggles plan mode; autopilot mode is the default | Plan-heavy work (design, decomposition) runs in plan mode; well-scoped execution runs in autopilot mode. |
 | **Mid-session model switch** | `/model <tier-or-id>` | Upshift to `models.premium` (per [`registry.yaml`](../docs/_meta/registry.yaml)) for hard reasoning; downshift to `models.cheap` for tool-heavy loops. Note: an enterprise's global model-default-availability policy (see [Lab 17](../labs/lab17.md)) may make additional models selectable here even if the registry's curated tiers don't list them. |
 | **Local tool discovery (model-side)** | `extensions_manage` MCP tool, `operation: "list"` / `"inspect"` / `"guide"` / `"scaffold"` | The agent enumerating which agents, skills, hooks, and extensions are contributing to the session before wiring a handoff. Invoke as a tool call (e.g. `extensions_manage({operation: "list"})`), **not** as `/extensions_manage` — there is no such slash command. |
-| **Local tool discovery (user-side)** | `/skills`, `/plugin`, `/mcp` | The human listing or managing skills, plugins, and MCP servers from the prompt via the in-terminal dashboard. These are real built-in slashes; `/extensions manage` and `/extensions mode` are **not** — use `Shift+Tab` to toggle plan/autopilot modes. |
+| **Local tool discovery (user-side)** | `/skills`, `/plugin`, `/mcp` | The human listing or managing skills, plugins, and MCP servers from the prompt via the in-terminal dashboard. `/extensions manage` / `/extensions mode` also exist, but cover CLI extensions specifically and require `/experimental on` first — the three dashboards above are the primary path for everyday skill/plugin/MCP discovery. |
 | **LSP-backed code intelligence** | Automatic — no slash command | Copilot CLI transparently prefers a configured language server over text search for go-to-definition, find references, rename, and call hierarchy. See [Lab 15 — LSP & Code Intelligence](../labs/lab15.md). |
 <!-- @end-include docs/_partials/currency.md -->
 
@@ -103,7 +118,10 @@ The built-in `code-reviewer` subagent is broad by design. In production, a
 reviewer that can `shell` or `edit` is a supply-chain risk. We will ship a
 locked-down replacement named **`tight-reviewer`** (different name so it
 cannot collide with the built-in) that can only read the working tree and
-search Microsoft Learn.
+search Microsoft Learn — the same `name`/`description`/`tools` frontmatter
+grammar you first used for the `dotnet-dev` agent in [Lab 03](lab03.md),
+now deliberately locked down to a minimal allow-list instead of a broad
+`tools:` grant.
 
 Custom-agent frontmatter grammar is documented on
 [Custom agents configuration](https://docs.github.com/en/copilot/reference/custom-agents-configuration)
@@ -169,7 +187,10 @@ Agent-level `tools:` is a *client-side* allow-list. That is one of the two
 gates in the two-layer tool-gating model (config reference §6). A `preToolUse`
 hook is a second, runtime gate — and because hooks run in every session
 regardless of which agent is active, a hook catches the case where
-`tools:` on the frontmatter is mistyped, deleted, or overridden.
+`tools:` on the frontmatter is mistyped, deleted, or overridden. [Lab
+06](lab06.md) builds a `postToolUse` hook that *reports* on a build after
+the fact; this one is a `preToolUse` hook that can **deny** the call
+outright before it runs.
 
 🖥️ **In your terminal:**
 
@@ -191,8 +212,8 @@ regardless of which agent is active, a hook catches the case where
 
 2. Inspect the hook. Three properties matter:
 
-   - It is a `preToolUse` hook (the only event whose output is honored —
-     see the callout at the top of this lab).
+   - It is a `preToolUse` hook, whose stdout JSON genuinely controls whether
+     the tool executes — see the callout at the top of this lab.
    - Its bash and PowerShell branches both read the event JSON from stdin,
      parse `toolName`, and emit **only** `{"permissionDecision":"deny","permissionDecisionReason":"…"}`
      when the tool is not in the allow-list.
@@ -207,8 +228,11 @@ regardless of which agent is active, a hook catches the case where
      other MCP server — produces a deny.
 
    > ⚠️ The JSON file has a `_comment` field at the top that explicitly
-   > documents *why* no `allow` or `ask` branches exist: the runtime ignores
-   > them. This is a defense-in-depth design, not an omission.
+   > documents *why* no `allow` branch exists: `allow` is real and would
+   > unconditionally force-approve the call, bypassing the user's own
+   > trust/confirmation settings — the opposite of what a hardening hook
+   > should do. Staying silent is strictly safer than emitting `allow`. This
+   > is a defense-in-depth design, not an omission.
 
    > 🧩 **Two namespaces: frontmatter names vs runtime tool names.** The agent
    > `tools:` allow-list in §1 and this hook's allow-list look like they should
@@ -226,9 +250,11 @@ regardless of which agent is active, a hook catches the case where
    > intact; only the spelling changes per layer. **Takeaway:** when you author
    > a hook allow-list, list runtime tool names, not frontmatter categories.
 
-3. **Absence of deny is allow.** If the hook exits with no output, the tool
-   call proceeds. That is by design — the hook is a filter, not a
-   permission oracle.
+3. **Silence hands control back to the normal permission flow.** If the hook
+   exits with no output, the tool call proceeds exactly as it would without
+   the hook — no extra trust granted, none withheld. That is by design — the
+   hook is a filter that can only deny, never a permission oracle that
+   grants.
 
 ## 3 — Verify end-to-end
 
@@ -299,9 +325,11 @@ With the agent and hook both in place, confirm defense-in-depth is working.
 ## References
 
 - Custom agents configuration — <https://docs.github.com/en/copilot/reference/custom-agents-configuration>
-- Hooks configuration — <https://docs.github.com/en/copilot/reference/hooks-configuration>
-- About hooks — <https://docs.github.com/en/copilot/concepts/agents/cloud-agent/about-hooks>
+- GitHub Copilot hooks reference — <https://docs.github.com/en/copilot/reference/hooks-reference>
+- About hooks for GitHub Copilot — <https://docs.github.com/en/copilot/concepts/agents/hooks>
 - Adding MCP servers — <https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/add-mcp-servers>
+- [Lab 03 — Custom Agents](lab03.md) — the `dotnet-dev` agent this lab's `tight-reviewer` frontmatter pattern builds on
+- [Lab 06 — Hooks](lab06.md) — the `postToolUse` build-verification hook this lab's `preToolUse` deny-gate complements
 
 ## Cleanup
 

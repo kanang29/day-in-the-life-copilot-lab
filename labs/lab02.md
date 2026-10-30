@@ -1,6 +1,8 @@
 ---
 title: "Custom Instructions & AGENTS.md"
 lab_number: 2
+tier: beginner
+surface: vscode
 pace:
   presenter_minutes: 4
   self_paced_minutes: 15
@@ -8,6 +10,13 @@ registry: docs/_meta/registry.yaml
 ---
 
 # 2 — Custom Instructions & AGENTS.md
+
+> **Two ways to follow this lab**
+> - **In VS Code:** edit the instruction files in the Explorer and test them
+>   in Copilot Chat as described below.
+> - **In Copilot CLI:** edit the same repository instruction files, start
+>   Copilot CLI from the repository root, and test the instructions in a
+>   session for that workspace.
 
 In this lab you will modify custom instructions and AGENTS.md to customize Copilot behavior.
 
@@ -49,7 +58,7 @@ The repository-wide instructions file is **always loaded** for every Copilot int
 - Course IDs are department-assigned integers (not auto-generated). Validate they are in the range 1000-9999.
 ```
 
-3. Test the change in Copilot CLI:
+3. Test the change by asking Copilot:
 ```
 What patterns should I follow when creating a new controller in ContosoUniversity?
 ```
@@ -65,8 +74,8 @@ Copilot should reference your new conventions (async actions, repository pattern
 > So after **any** edit in this lab (and labs 3–7):
 >
 > 1. Exit your current Copilot CLI session: type `exit` (or press <kbd>Ctrl</kbd>+<kbd>D</kbd>).
-> 2. Restart it: `copilot`.
-> 3. In VS Code, run **Developer: Reload Window** from the Command Palette (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd>) so the extension re-reads `.github/`.
+> 1. **In VS Code:** run **Developer: Reload Window** from the Command Palette (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd>) so the extension re-reads `.github/`.
+> 2. **Using the Copilot CLI too?** Exit the session (type `exit` or press <kbd>Ctrl</kbd>+<kbd>D</kbd>) and restart it with `copilot`.
 >
 > Skip the restart and you'll be debugging stale config — and blaming Copilot for following yesterday's rules.
 
@@ -156,15 +165,15 @@ Get-Content .github/instructions/razor-views.instructions.md -Head 4
 
 You should see `razor-views.instructions.md` listed and the YAML frontmatter (`description:` + `applyTo: '**/*.cshtml'`) at the top.
 
-**Step 2 — Probe Copilot CLI for the rule:**
+**Step 2 — Probe Copilot for the rule:**
 
-After restarting `copilot`, open any `.cshtml` file in the workspace (e.g., `dotnet/ContosoUniversity.Web/Views/Students/Index.cshtml`) and ask:
+After reloading (see the 🔄 callout above), open any `.cshtml` file in the workspace (e.g., `dotnet/ContosoUniversity.Web/Views/Students/Index.cshtml`) and ask Copilot Chat:
 
 ```
 What pattern should I use for form validation summaries in this view?
 ```
 
-A correctly loaded instruction will surface `asp-validation-summary="ModelOnly"` and Tag Helpers (`asp-for`, `asp-action`) — verbatim from your new file. If Copilot answers generically (or recommends `@Html.` helpers), the instruction did not load: re-check the filename ends in `.instructions.md`, the `applyTo` glob matches, and that you fully restarted the session.
+A correctly loaded instruction will surface `asp-validation-summary="ModelOnly"` and Tag Helpers (`asp-for`, `asp-action`) — verbatim from your new file. If Copilot answers generically (or recommends `@Html.` helpers), the instruction did not load: re-check the filename ends in `.instructions.md`, the `applyTo` glob matches, and that you fully reloaded/restarted the session.
 
 > 💡 **Optional CLI sanity check:** Start with copilot --experimental, then ask the model to call extensions_manage.`extensions_manage operation: list` shows installed CLI extensions (a different subsystem). Instructions files don't appear there — the functional probe above is the authoritative test for instruction loading.
 

@@ -1,6 +1,8 @@
 ---
 title: "Orchestrator + tmux Pattern (Deep-Dive)"
 lab_number: 14
+tier: advanced
+surface: cli
 pace:
   presenter_minutes: 15
   self_paced_minutes: 45
@@ -8,6 +10,13 @@ registry: docs/_meta/registry.yaml
 ---
 
 # 14 — Orchestrator + tmux Pattern (Deep-Dive)
+
+> **Two ways to work with this lab**
+> - **In Copilot CLI:** run the orchestrator and worker panes in tmux as
+>   described below.
+> - **In VS Code:** edit the scripts in the editor and run the same CLI
+>   commands from VS Code's integrated terminal; the tmux orchestration
+>   itself has no native Copilot Chat equivalent.
 
 In Lab 13 you met **A2A / ACP** at the concept level and ran a
 two-agent implementer + critic loop in a single Copilot CLI session.
@@ -25,11 +34,11 @@ without losing the plot.
 >   That's the highest budget in the lab suite because the
 >   orchestrator pane stays alive across many phases.
 > - Cheaper alternative: pin the **orchestrator pane** to
->   `claude-opus-4.6` (it does the heavy judging once per phase)
->   and keep **worker panes** on `auto` so they downshift to
->   `claude-haiku-4.5` / `gpt-5-mini` for the mechanical
->   implement / test phases. Reserve `claude-opus-4.7` for the
->   one-off architecture phase only.
+>   `claude-opus-5` (registry `models.premium`; it does the heavy
+>   judging once per phase) and keep **worker panes** on `auto` so
+>   they downshift to `claude-haiku-4.5` / `gpt-5-mini` for the
+>   mechanical implement / test phases, upshifting a worker pane to
+>   `claude-opus-5` only for the one-off architecture phase.
 > - Compaction trigger: this is the canonical home for the
 >   discipline — every worker pane runs
 >   `scripts/orchestrator/clear-context.sh` after each phase, and
@@ -47,8 +56,8 @@ without losing the plot.
 > users **by default** (`model_default_availability_policy:
 > "default-on-unless-disabled"` in [`docs/_meta/registry.yaml`](../docs/_meta/registry.yaml)).
 > This replaces the old implicit-hold/curated-allowlist behavior. Practical
-> effect for this lab: the model names pinned above (`claude-opus-4.6`,
-> `auto`, `claude-haiku-4.5` / `gpt-5-mini`, `claude-opus-4.7`) are still
+> effect for this lab: the model names pinned above (`claude-opus-5`,
+> `auto`, `claude-haiku-4.5` / `gpt-5-mini`) are still
 > valid choices, but a new model can silently show up as selectable in a
 > worker or orchestrator pane's `/model` picker even though nobody added it
 > to the registry's tiers. Don't assume "if it's not in the registry, it's
@@ -59,9 +68,9 @@ without losing the plot.
 
 > 🪞 **Meta callout — this lab teaches the pattern that built this lab.**
 > The repo you are reading was modernized using exactly the loop below.
-> The hand-off contracts under `.orchestrator/session.md` (see Lab 13
-> §B.2 for the schema) are real artefacts from that build-out — Lab 14
-> is the operational manual for what you've already been seeing.
+> The hand-off contracts under `.copilot/orchestrator-handoffs/` (see
+> Lab 13 §B.2 for the schema) are real artefacts from that build-out —
+> Lab 14 is the operational manual for what you've already been seeing.
 
 References:
 
@@ -306,8 +315,9 @@ In the orchestrator pane, ask Copilot to draft the phase plan:
 > (RED test first). Hand-off back to me when GREEN. Acceptance: new
 > integration test plus existing tests green.
 
-Save the plan to `.copilot/session-state/<id>/plan.md` (the session
-folder Copilot CLI exposes).
+Save the plan to `~/.copilot/session-state/<id>/plan.md` (the
+per-user session folder Copilot CLI exposes — see [Lab 10](lab10.md)
+§10.1a for the full surface).
 
 ### Step 2 — dispatch to dev (orchestrator → worker)
 
@@ -440,7 +450,7 @@ What you should now be able to do:
       `.github/prompts/orchestrator-rubric.prompt.md`.
 - [ ] Drive a phase end-to-end without losing the plan to
       context-window pressure.
-- [ ] Recognise the four stop-and-ask triggers above.
+- [ ] Recognise the five stop-and-ask triggers above.
 
 Cross-references:
 

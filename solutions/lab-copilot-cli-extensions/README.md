@@ -127,4 +127,4 @@ In a `copilot` session, after `extensions_reload({})`:
 
 ## Forward-link
 
-For tool allow-lists that compose with the `preToolUse` deny pattern at the agent and MCP layer, see the upcoming `labs/lab-hardening.md` (delivered by Workstream B of this materials-gap branch).
+For tool allow-lists that compose with the `preToolUse` deny pattern at the agent and MCP layer, see [`labs/lab-hardening.md`](../../labs/lab-hardening.md).

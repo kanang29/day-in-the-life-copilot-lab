@@ -11,9 +11,12 @@ Two files, two gates in the two-layer tool-gating model:
 
 Together they implement the deterministic-control story described in
 [`docs/copilot-config-reference.md` §6](../../docs/copilot-config-reference.md#6-two-layer-tool-gating).
-The hook is deny-only by design — `allow` and `ask` outputs are accepted
-by the runtime today but **not honored**. See the `_comment` at the top of
-`deny-unlisted-tools.json`.
+The hook only ever emits `deny` by design — not because `allow`/`ask`
+are ignored (they are real and genuinely control whether the tool
+executes), but because an explicit `allow` would unconditionally bypass
+the user's own trust/confirmation settings for that call. Staying silent
+for permitted tools lets the normal permission flow decide instead. See
+the `_comment` at the top of `deny-unlisted-tools.json`.
 
 ## Install (project scope)
 
@@ -84,5 +87,5 @@ Copy-Item solutions/lab-hardening/deny-unlisted-tools.json `
 ## Sources
 
 - [Custom agents configuration](https://docs.github.com/en/copilot/reference/custom-agents-configuration)
-- [Hooks configuration](https://docs.github.com/en/copilot/reference/hooks-configuration)
+- [GitHub Copilot hooks reference](https://docs.github.com/en/copilot/reference/hooks-reference)
 - [`docs/copilot-config-reference.md`](../../docs/copilot-config-reference.md) §2 (agents), §4 (hooks), §6 (two-layer gating)

@@ -7,6 +7,12 @@ parent_lab: lab04.md
 
 # .NET Appendix — Lab 04
 
+> **In VS Code:** create and test the .NET skill and `.prompt.md` file in
+> Copilot Chat.
+> **In Copilot CLI:** create and test the skill in a CLI session. The
+> `.prompt.md` prompt-file feature is VS Code-only; enter its prompt text
+> directly in the CLI instead.
+
 This appendix supplies the **.NET-track** content for [Lab 04 — Skills & Prompts](../../lab04.md): the full `dotnet-testing` skill body and the `create-dotnet-test` prompt body. The parent lab covers the conceptual skill/prompt pattern; this file gives you the .NET-flavored payload to paste in.
 
 > Pair with: [`labs/appendices/node/lab04.md`](../node/lab04.md) for the Node-track equivalent.

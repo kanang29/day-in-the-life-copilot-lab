@@ -7,6 +7,11 @@ parent_lab: lab-hardening.md
 
 # Node Appendix — `tight-reviewer` on the Node track
 
+> **In Copilot CLI:** use the CLI steps below to verify the Node reviewer,
+> tool restrictions, and hooks.
+> **In VS Code:** edit the shared agent and hook files in the editor; verify
+> the hook-enforcement steps by running Copilot CLI.
+
 This appendix is the stack-specific completion path for
 [`labs/lab-hardening.md`](../../lab-hardening.md). Pair with the .NET
 variant: [`labs/appendices/dotnet/lab-hardening.md`](../dotnet/lab-hardening.md).

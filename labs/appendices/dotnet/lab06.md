@@ -7,6 +7,11 @@ parent_lab: lab06.md
 
 # .NET Appendix — Lab 06
 
+> **In Copilot CLI:** create and run the .NET build hook using the steps
+> below.
+> **In VS Code:** edit and inspect the hook in the editor, then run and verify
+> it with Copilot CLI; this lab's hook execution path is CLI-specific.
+
 This appendix shows the **.NET-flavored** post-tool-use hook referenced by [Lab 06 — Hooks](../../lab06.md): a hook that runs `dotnet build` after any `.cs` edit so the build never silently breaks.
 
 > Pair with: [`labs/appendices/node/lab06.md`](../node/lab06.md) for the Node-track equivalent.
